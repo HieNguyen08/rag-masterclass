@@ -1,0 +1,24 @@
+# Lab RAG Masterclass — Python >= 3.10 (đã thử với 3.12/3.13)
+# Phiên bản ghim theo PyPI tại thời điểm viết (10/2026).
+#
+# QUAN TRỌNG: cài PyTorch TRƯỚC, đúng bản CUDA cho GPU (xem README.md, mục 2.3),
+# vì pip mặc định có thể kéo bản CPU-only. Dòng torch dưới đây chỉ là ràng buộc tối thiểu.
+torch>=2.4
+
+# --- Retrieval / reranking (lab01-lab03) ---
+rank_bm25==0.2.2
+sentence-transformers==6.1.0          # kéo theo transformers 5.x, huggingface-hub 1.x
+numpy==2.5.3
+
+# --- API (lab04) ---
+fastapi==0.142.2
+uvicorn==0.54.0
+pydantic==2.13.5
+httpx==0.28.1                         # FastAPI TestClient cần httpx
+openai==3.24.0                        # client cho API tương thích OpenAI (Ollama / vLLM)
+
+# --- Không bắt buộc ---
+# matplotlib==3.11.2                  # lab05: vẽ reliability diagram ra PNG
+# underthesea==9.5.0                  # lab01 bài tập mở rộng: tách từ tiếng Việt thật
+#
+# vLLM KHÔNG nằm trong file này: cài riêng trong WSL2/Docker (xem README.md, mục 2.5).

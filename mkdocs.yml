@@ -1,0 +1,124 @@
+site_name: "RAG Masterclass"
+site_description: "LLM & RAG từ nền tảng đến hệ thống production — xoay quanh bài toán AI tư vấn khách hàng qua Zendesk"
+site_author: "HieNguyen08"
+site_url: "https://hienguyen08.github.io/rag-masterclass/"
+repo_url: "https://github.com/HieNguyen08/rag-masterclass"
+repo_name: "HieNguyen08/rag-masterclass"
+edit_uri: "edit/main/docs/"
+copyright: "Tài liệu học tập — RAG Masterclass · 2026"
+
+theme:
+  name: material
+  language: vi
+  font:
+    text: Be Vietnam Pro
+    code: JetBrains Mono
+  icon:
+    logo: material/book-open-page-variant
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Chuyển sang nền tối
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Chuyển sang nền sáng
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search:
+      lang: en
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/HieNguyen08/rag-masterclass
+
+nav:
+  - Trang chủ: index.md
+  - "Phần I · Nền tảng":
+      - "00 · Tổng quan & bài toán": 00-tong-quan-va-bai-toan.md
+      - "01 · Nền tảng LLM": 01-nen-tang-llm.md
+      - "02 · Giới hạn LLM & RAG": 02-gioi-han-llm-va-rag.md
+  - "Phần II · Pipeline RAG":
+      - "03 · Embedding": 03-embedding-va-bieu-dien.md
+      - "04 · Ingestion & chunking": 04-ingestion-va-chunking.md
+      - "05 · Retrieval": 05-retrieval-sparse-dense-hybrid.md
+      - "06 · Query & reranking": 06-query-va-reranking.md
+      - "07 · Generation & guardrails": 07-generation-grounding-guardrails.md
+  - "Phần III · Nâng cao":
+      - "08 · Kiến trúc nâng cao & Agentic RAG": 08-kien-truc-rag-nang-cao.md
+      - "09 · Fine-tuning cho RAG": 09-fine-tuning-cho-rag.md
+      - "10 · Đánh giá, confidence & escalation": 10-danh-gia-rag.md
+  - "Phần IV · Hệ thống":
+      - "11 · Production & quy mô": 11-production-va-quy-mo.md
+      - "12 · Capstone: hệ thống AI CS Zendesk": 12-capstone-thiet-ke-he-thong-zendesk.md
+  - "Thực hành":
+      - labs/index.md
+      - "Lab 01 · BM25, dense, RRF": labs/lab01_bm25_dense_rrf.md
+      - "Lab 02 · Chunking & metric": labs/lab02_chunking_metrics.md
+      - "Lab 03 · Reranker": labs/lab03_reranker.md
+      - "Lab 04 · Mini RAG API": labs/lab04_mini_rag_api.md
+      - "Lab 05 · Đánh giá & escalation": labs/lab05_eval_escalation.md
+      - "Dữ liệu mẫu": labs/data/README_data.md
