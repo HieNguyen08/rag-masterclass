@@ -41,6 +41,14 @@ Cần phân biệt hai loại "recall" sẽ xuất hiện suốt module:
 
 ANN recall 99% vẫn có thể đi cùng relevance recall 60% nếu embedding kém, và ngược lại. Hai loại lỗi phải được đo riêng (công thức Recall@k, MRR, nDCG chi tiết ở Module 10).
 
+<!-- fig:two-recalls -->
+<figure markdown="span">
+  ![Hai loại recall đo hai thứ khác nhau: hàm điểm (relevance recall) và thuật toán tìm kiếm xấp xỉ (ANN recall)](assets/figures/05/two-recalls.light.svg#only-light){ loading=lazy }
+  ![Hai loại recall đo hai thứ khác nhau: hàm điểm (relevance recall) và thuật toán tìm kiếm xấp xỉ (ANN recall)](assets/figures/05/two-recalls.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.1 — Hai loại recall đo hai thứ khác nhau: hàm điểm (relevance recall) và thuật toán tìm kiếm xấp xỉ (ANN recall).</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 1.2 Retrieval là tầng "recall-first"
 
 Pipeline nhiều tầng, chi phí tăng dần, số ứng viên giảm dần:
@@ -69,6 +77,14 @@ Nhìn vào email khách hàng trong case study, truy vấn rơi vào ba nhóm, m
 
 Vì cả ba nhóm đều xuất hiện hằng ngày trong ~1.500 ticket, **hybrid là mặc định hợp lý** cho bài toán này — phần 4 sẽ phân tích điều đó định lượng hơn.
 
+<!-- fig:query-types -->
+<figure markdown="span">
+  ![Ba kiểu truy vấn trong email Zendesk và loại retrieval «ưa» từng kiểu](assets/figures/05/query-types.light.svg#only-light){ loading=lazy }
+  ![Ba kiểu truy vấn trong email Zendesk và loại retrieval «ưa» từng kiểu](assets/figures/05/query-types.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.2 — Ba kiểu truy vấn trong email Zendesk và loại retrieval «ưa» từng kiểu.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Ước lượng quy mô (giả định để học):** ~800 bài Help Center × ~10 chunk; ~300 macro; ~200.000 ticket đã giải quyết → sau lọc và trích Q/A (Module 04) ~1–3 chunk/ticket; cộng tài liệu sản phẩm/API. Tổng: **khoảng 0,3–0,7 triệu vector**. Tải truy vấn: 1.500 ticket × ~3,5 lượt ≈ 5.250 lần retrieval/ngày; kể cả nhân 4 cho multi-query (Module 06) và nhân 3 cho giờ cao điểm thì vẫn **dưới 1 QPS**. Kết luận quan trọng: ở bài toán này, **hạ tầng retrieval không phải nút thắt hiệu năng — chất lượng mới là nút thắt**. Hãy tối ưu cho recall, filter đúng và đa ngôn ngữ.
 
 ---
@@ -85,6 +101,14 @@ Biểu diễn mỗi tài liệu như một vector trên từ vựng $V$ (có th�
 ```
 
 Với truy vấn có $|q|$ term, chỉ cần duyệt $|q|$ posting list. Chi phí xấp xỉ $\sum_{t \in q} \mathrm{df}_t$ thay vì $N$. Các engine hiện đại (Lucene/Elasticsearch, `pg_textsearch`, Tantivy…) còn dùng **WAND / Block-Max WAND**: lưu điểm tối đa có thể của mỗi khối posting để bỏ qua các khối chắc chắn không lọt top-$k$ — đây là lý do BM25 trên hàng chục triệu tài liệu vẫn trả về trong vài mili-giây.
+
+<!-- fig:inverted-index -->
+<figure markdown="span">
+  ![Inverted index: truy vấn chỉ chạm tới posting list của các term mà nó chứa](assets/figures/05/inverted-index.light.svg#only-light){ loading=lazy }
+  ![Inverted index: truy vấn chỉ chạm tới posting list của các term mà nó chứa](assets/figures/05/inverted-index.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.3 — Inverted index: truy vấn chỉ chạm tới posting list của các term mà nó chứa.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 2.2 TF-IDF và vì sao nó chưa đủ
 
@@ -179,6 +203,14 @@ Kho gồm $N = 5$ chunk (độ dài tính bằng số token sau tokenization), $
 
 Thứ hạng: **d2 > d3 > d1**. Quan sát: (i) d1 nhắc "hoàn tiền" 3 lần nhưng thua d2 nhắc mỗi term 1 lần — khớp *nhiều term khác nhau* quan trọng hơn lặp một term, nhờ saturation; (ii) d3 có tf(hóa_đơn)=2 nhưng bị phạt vì dài gấp đôi trung bình.
 
+<!-- fig:bm25-example -->
+<figure markdown="span">
+  ![Điểm BM25 của ví dụ mục 2](assets/figures/05/bm25-example.light.svg#only-light){ loading=lazy }
+  ![Điểm BM25 của ví dụ mục 2](assets/figures/05/bm25-example.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.4 — Điểm BM25 của ví dụ mục 2.4, tách theo đóng góp của từng term.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 2.5 Ý nghĩa của $k_1$ và $b$ — đọc bằng số
 
 **Saturation theo $k_1$** (cố định $|d| = \mathrm{avgdl}$, nên $K = k_1 = 1{,}2$):
@@ -196,6 +228,14 @@ Lần nhắc thứ 2 thêm 37,5%; từ 10 lên 100 chỉ thêm 11%. $k_1$ nhỏ 
 | 0 (không chuẩn hóa) | 1,000 | 1,000 | 1,000 |
 | 0,75 (mặc định) | 1,257 | 1,000 | 0,710 |
 | 1 (chuẩn hóa hoàn toàn) | 1,375 | 1,000 | 0,647 |
+
+<!-- fig:bm25-k1-b -->
+<figure markdown="span">
+  ![Trái: hàm saturation với các giá trị k₁ (điểm xanh là bảng k₁ = 1](assets/figures/05/bm25-k1-b.light.svg#only-light){ loading=lazy }
+  ![Trái: hàm saturation với các giá trị k₁ (điểm xanh là bảng k₁ = 1](assets/figures/05/bm25-k1-b.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.5 — Trái: hàm saturation với các giá trị k₁ (điểm xanh là bảng k₁ = 1.2). Phải: chuẩn hóa độ dài với các giá trị b (điểm xanh là hàng b = 0.75 của bảng).</figcaption>
+</figure>
+<!-- /fig -->
 
 **Khi nào chỉnh khác mặc định — liên hệ Zendesk:**
 
@@ -264,6 +304,14 @@ Tiếng Nhật **không có khoảng trắng** và trộn kanji, hiragana, katak
 
 **Thực hành tốt:** index **hai trường** (morphological cho precision + bigram làm lưới an toàn cho recall); luôn **NFKC** trước ("ＡＰＩ" → "API", katakana half-width → full-width) — email Nhật rất hay lẫn hai dạng.
 
+<!-- fig:tokenization-vi-ja -->
+<figure markdown="span">
+  ![Các chiến lược tokenization cho BM25 với tiếng Việt và tiếng Nhật](assets/figures/05/tokenization-vi-ja.light.svg#only-light){ loading=lazy }
+  ![Các chiến lược tokenization cho BM25 với tiếng Việt và tiếng Nhật](assets/figures/05/tokenization-vi-ja.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.6 — Các chiến lược tokenization cho BM25 với tiếng Việt và tiếng Nhật.</figcaption>
+</figure>
+<!-- /fig -->
+
 Tính đến 10/2026: Qdrant có tokenizer `multilingual` cho full-text index (charabia, dùng vaporetto cho tiếng Nhật); Milvus 2.6 có tokenizer Lindera (IPADIC), ICU và bộ nhận diện ngôn ngữ để tự chọn analyzer. Tài liệu của các hệ này không nêu hỗ trợ tách từ tiếng Việt riêng — với tiếng Việt, tokenization ở tầng ứng dụng vẫn là đường chắc chắn nhất. Với email lẫn ngôn ngữ (tiếng Nhật + log tiếng Anh), luôn giữ một trường fallback (ICU hoặc khoảng trắng + bigram) để không mất mã lỗi ASCII.
 
 ### 2.9 Learned sparse và khi nào BM25 thắng/thua
@@ -297,6 +345,14 @@ Tính $\langle \mathbf{q}, \mathbf{x}_i\rangle$ với mọi $i$, giữ top-$k$ b
 
 Cây k-d/ball tree hiệu quả ở chiều thấp, nhưng ở $D$ hàng trăm khoảng cách giữa các điểm **tập trung** quanh trung bình (tỷ số xa nhất/gần nhất tiến về 1), các mặt cắt không loại được nhánh nào và cây suy biến thành quét toàn bộ. ANN đánh đổi *một chút recall* lấy tốc độ nhanh hơn hàng chục đến hàng trăm lần. Ba họ chính: **phân vùng** (IVF), **nén** (PQ, scalar/binary quantization), **đồ thị** (HNSW, Vamana/DiskANN). Bài tổng quan về thư viện Faiss (Douze et al., 2024) là tài liệu tham khảo tốt cho cả ba họ.
 
+<!-- fig:distance-concentration -->
+<figure markdown="span">
+  ![Lời nguyền số chiều (mô phỏng): tỷ số khoảng cách xa nhất / gần nhất tiến về 1 khi D tăng, nên cây phân hoạch mất tác dụng](assets/figures/05/distance-concentration.light.svg#only-light){ loading=lazy }
+  ![Lời nguyền số chiều (mô phỏng): tỷ số khoảng cách xa nhất / gần nhất tiến về 1 khi D tăng, nên cây phân hoạch mất tác dụng](assets/figures/05/distance-concentration.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.7 — Lời nguyền số chiều (mô phỏng): tỷ số khoảng cách xa nhất / gần nhất tiến về 1 khi D tăng, nên cây phân hoạch mất tác dụng.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 3.4 IVF — Inverted File Index
 
 **Ý tưởng:** k-means chia không gian thành $n_{\text{list}}$ cụm; mỗi vector thuộc cụm có tâm gần nhất (như posting list theo vùng không gian). Khi truy vấn, chỉ quét các vector trong $n_{\text{probe}}$ cụm có tâm gần $\mathbf{q}$ nhất.
@@ -310,6 +366,14 @@ $$
 Cực tiểu theo $n_{\text{list}}$ (đạo hàm bằng 0): $n_{\text{list}}^* = \sqrt{n_{\text{probe}} \cdot N}$. Vì vậy quy tắc kinh nghiệm là $n_{\text{list}}$ cỡ $\sqrt{N}$ đến vài lần $\sqrt{N}$. pgvector khuyến nghị `lists = rows/1000` cho tới 1 triệu dòng, `sqrt(rows)` khi trên 1 triệu, và `probes` khởi điểm khoảng $\sqrt{\text{lists}}$.
 
 **Ví dụ số:** $N = 10^6$, $n_{\text{list}} = 1024$, $n_{\text{probe}} = 16$ → so sánh $1024 + 16 \times 977 \approx 16.650$ vector thay vì $10^6$: ít hơn ~60 lần. Đổi lại, nếu láng giềng thật của $\mathbf{q}$ nằm ở cụm gần thứ 17 → bị bỏ sót. Đây là **lỗi biên** (boundary effect): điểm nằm gần ranh giới Voronoi giữa nhiều cụm.
+
+<!-- fig:ivf -->
+<figure markdown="span">
+  ![Trái: IVF trên dữ liệu 2D mô phỏng — chỉ quét các cụm được probe](assets/figures/05/ivf.light.svg#only-light){ loading=lazy }
+  ![Trái: IVF trên dữ liệu 2D mô phỏng — chỉ quét các cụm được probe](assets/figures/05/ivf.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.8 — Trái: IVF trên dữ liệu 2D mô phỏng — chỉ quét các cụm được probe. Phải: chi phí truy vấn theo n_list, cực tiểu tại √(n_probe·N).</figcaption>
+</figure>
+<!-- /fig -->
 
 **Bộ nhớ:** gần bằng flat + tâm cụm ($n_{\text{list}} \cdot D$) — overhead rất nhỏ, ưu điểm lớn nhất so với HNSW. **Nhược điểm:** phải **train** k-means trên dữ liệu đại diện; phân phối dịch chuyển (sản phẩm mới, ngôn ngữ mới) làm cụm lệch → recall giảm âm thầm (pgvector khuyên chỉ tạo IVFFlat *sau khi* bảng đã có dữ liệu); cụm không cân bằng làm latency dao động; recall thấp hơn HNSW ở cùng latency khi dữ liệu nằm trong RAM. **Dùng khi:** bộ nhớ là ràng buộc chính, kết hợp PQ (IVF-PQ) cho hàng trăm triệu vector, hoặc trên GPU.
 
@@ -348,6 +412,14 @@ $$
 
 Giá trị lệch nhưng **thứ tự được bảo toàn** — đó là điều retrieval cần. Để sửa đảo thứ tự giữa các ứng viên sát nhau, dùng **rescoring**: lấy top-$4k$ theo PQ rồi tính lại bằng vector gốc.
 
+<!-- fig:pq-adc -->
+<figure markdown="span">
+  ![Product Quantization và ADC; bảng tra T₁, T₂ và hai khoảng cách lấy đúng từ ví dụ số tính tay](assets/figures/05/pq-adc.light.svg#only-light){ loading=lazy }
+  ![Product Quantization và ADC; bảng tra T₁, T₂ và hai khoảng cách lấy đúng từ ví dụ số tính tay](assets/figures/05/pq-adc.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.9 — Product Quantization và ADC; bảng tra T₁, T₂ và hai khoảng cách lấy đúng từ ví dụ số tính tay.</figcaption>
+</figure>
+<!-- /fig -->
+
 PQ tốt nhất khi các đoạn con gần độc lập và phương sai phân bố đều, nên thường áp một phép **xoay** trực giao trước (OPQ học phép xoay này). RaBitQ (Gao & Long, 2024) dùng phép xoay ngẫu nhiên và mã khoảng 1 bit/chiều với **cận sai số lý thuyết**; tính đến 10/2026 đã có trong Faiss và Milvus 2.6 (IVF_RABITQ).
 
 | Phương pháp ($D = 1024$) | Byte/vector | Nén | Ghi chú |
@@ -369,6 +441,14 @@ $$
 $$
 
 nên $P(\ell \ge L) = M^{-L}$. Với $N = 10^6$, $M = 16$: tầng 0 có $10^6$ điểm, tầng 1 ~62.500, tầng 2 ~3.900, tầng 3 ~244, tầng 4 ~15, tầng 5 ~1 → khoảng $\log_{16} 10^6 \approx 5$ tầng. Tầng trên thưa nên cạnh tự nhiên dài.
+
+<!-- fig:hnsw -->
+<figure markdown="span">
+  ![Trái: sơ đồ HNSW trên dữ liệu mô phỏng — tìm tham lam ở tầng thưa, điểm dừng làm điểm vào tầng dưới](assets/figures/05/hnsw.light.svg#only-light){ loading=lazy }
+  ![Trái: sơ đồ HNSW trên dữ liệu mô phỏng — tìm tham lam ở tầng thưa, điểm dừng làm điểm vào tầng dưới](assets/figures/05/hnsw.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.10 — Trái: sơ đồ HNSW trên dữ liệu mô phỏng — tìm tham lam ở tầng thưa, điểm dừng làm điểm vào tầng dưới. Phải: số điểm kỳ vọng ở mỗi tầng với N = 10⁶, M = 16.</figcaption>
+</figure>
+<!-- /fig -->
 
 ```mermaid
 flowchart TB
@@ -425,6 +505,14 @@ $M = 16$ → ~132 byte/điểm (cộng overhead cài đặt, ước lượng ×1
 
 Kết quả: tỷ vector trên một máy, latency vài ms. Filtered-DiskANN (Gollapudi et al., WWW 2023) đưa nhãn filter vào cấu trúc đồ thị; Milvus và nhiều hệ khác có index kiểu DiskANN; Qdrant 1.16 có chế độ inline storage cho HNSW trên đĩa theo tinh thần tương tự.
 
+<!-- fig:diskann -->
+<figure markdown="span">
+  ![DiskANN: vector nén trong RAM để định hướng, vector đầy đủ và danh sách láng giềng nằm cạnh nhau trên SSD](assets/figures/05/diskann.light.svg#only-light){ loading=lazy }
+  ![DiskANN: vector nén trong RAM để định hướng, vector đầy đủ và danh sách láng giềng nằm cạnh nhau trên SSD](assets/figures/05/diskann.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.11 — DiskANN: vector nén trong RAM để định hướng, vector đầy đủ và danh sách láng giềng nằm cạnh nhau trên SSD.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Liên hệ Zendesk:** với < 1 triệu vector, DiskANN là quá mức cần thiết.
 
 ### 3.8 Ước lượng bộ nhớ cho 1 triệu vector — bài tập thiết kế
@@ -447,6 +535,14 @@ $$
 $$
 
 với $\gamma \approx 1{,}1\text{–}1{,}5$ là hệ số overhead cài đặt (ước lượng).
+
+<!-- fig:memory-1m -->
+<figure markdown="span">
+  ![Bảng ước lượng bộ nhớ mục 3](assets/figures/05/memory-1m.light.svg#only-light){ loading=lazy }
+  ![Bảng ước lượng bộ nhớ mục 3](assets/figures/05/memory-1m.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.12 — Bảng ước lượng bộ nhớ mục 3.8 dưới dạng cột chồng.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Khuyến nghị cho Zendesk (0,3–0,7 triệu vector):** 1024-d **fp16, hoặc int8 + rescoring**, HNSW $M = 16$. Tổng RAM dưới 3 GB — một máy chủ nhỏ thừa sức; hãy ưu tiên **dư địa cho re-index blue/green** (cần gấp đôi tài nguyên trong lúc chuyển đổi, xem Module 11) hơn là ép bộ nhớ.
 
@@ -474,6 +570,14 @@ với $\gamma \approx 1{,}1\text{–}1{,}5$ là hệ số overhead cài đặt (
 ### 4.1 Vì sao kết hợp được lợi
 
 BM25 và dense mắc lỗi ở **những chỗ khác nhau** (mục 1.3). Gọi $r_S$, $r_D$ là xác suất tài liệu đúng nằm trong top-$k$ của sparse và dense. Nếu lỗi độc lập, xác suất nó nằm trong *hợp* hai danh sách là $1 - (1-r_S)(1-r_D)$: với $r_S = 0{,}70$, $r_D = 0{,}80$ là $0{,}94$. Thực tế lỗi tương quan dương (câu khó thì cả hai cùng trượt) nên mức tăng nhỏ hơn, nhưng hiếm khi bằng 0. Câu hỏi còn lại là **xếp hạng hợp nhất**: theo **thứ hạng** (RRF) hay theo **điểm** (convex combination).
+
+<!-- fig:hybrid-union -->
+<figure markdown="span">
+  ![Trái: lợi ích của hợp hai danh sách khi lỗi độc lập](assets/figures/05/hybrid-union.light.svg#only-light){ loading=lazy }
+  ![Trái: lợi ích của hợp hai danh sách khi lỗi độc lập](assets/figures/05/hybrid-union.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.13 — Trái: lợi ích của hợp hai danh sách khi lỗi độc lập. Phải: khi hai biến «trượt» tương quan dương ρ, lợi ích giảm dần (mô hình Bernoulli có tương quan).</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 4.2 Reciprocal Rank Fusion (RRF)
 
@@ -511,6 +615,14 @@ Cảnh báo thực tế (tính đến 10/2026): Elasticsearch (retriever `rrf`) 
 
 A và C (có mặt ở cả hai) bỏ xa phần còn lại; D và F hòa nên cần quy tắc phá hòa ổn định (ví dụ theo `doc_id`).
 
+<!-- fig:rrf-k -->
+<figure markdown="span">
+  ![Trái: trọng số 1/(k + rank) theo k](assets/figures/05/rrf-k.light.svg#only-light){ loading=lazy }
+  ![Trái: trọng số 1/(k + rank) theo k](assets/figures/05/rrf-k.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.14 — Trái: trọng số 1/(k + rank) theo k. Phải: điểm RRF của ví dụ mục 4.2, tách theo nguồn đóng góp.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 4.3 Convex combination với chuẩn hóa điểm
 
 $$
@@ -532,6 +644,14 @@ với $\tilde{s}$ là điểm đã chuẩn hóa; tài liệu vắng mặt ở m�
 | 0,8 | C (0,82) > A (0,73) > E (0,33) > B (0,13) |
 
 Khác RRF, convex **dùng được độ lớn chênh lệch điểm** (A khớp mã lỗi hiếm nên BM25 bỏ xa C); cái giá là phải tune $\alpha$.
+
+<!-- fig:convex-alpha -->
+<figure markdown="span">
+  ![Điểm hybrid của từng tài liệu trong ví dụ mục 4](assets/figures/05/convex-alpha.light.svg#only-light){ loading=lazy }
+  ![Điểm hybrid của từng tài liệu trong ví dụ mục 4](assets/figures/05/convex-alpha.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.15 — Điểm hybrid của từng tài liệu trong ví dụ mục 4.3 khi α thay đổi; ba đường chấm là ba hàng của bảng.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 4.4 Khi nào cái nào thắng?
 
@@ -642,6 +762,14 @@ Mỗi truy vấn Zendesk đều kèm điều kiện `tenant_id`, `visibility`, `
 
 Với $s = 0{,}01$, ~72% nút không có láng giềng hợp lệ — đồ thị con tan rã, beam search kẹt, recall sụp. Nếu cho đi qua nút không hợp lệ thì phải duyệt cỡ $1/s$ lần nhiều nút hơn.
 
+<!-- fig:filter-selectivity -->
+<figure markdown="span">
+  ![Trái: post-filter cần k′ ≈ k/s ứng viên](assets/figures/05/filter-selectivity.light.svg#only-light){ loading=lazy }
+  ![Trái: post-filter cần k′ ≈ k/s ứng viên](assets/figures/05/filter-selectivity.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.16 — Trái: post-filter cần k′ ≈ k/s ứng viên. Phải: xác suất một nút HNSW mất hết láng giềng hợp lệ, (1 − s)^M₀.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 5.3 Giải pháp trong thực tế (tính đến 10/2026)
 
 - **Query planner theo cardinality** (Qdrant và nhiều hệ khác): ước lượng $sN$ từ payload index; nhỏ → pre-filter + exact, lớn → HNSW có filter. Vì vậy phải **index mọi trường dùng để filter**.
@@ -697,6 +825,14 @@ Tiêu chí theo thứ tự: hybrid gốc; filter đúng ở selectivity thấp; 
 | Vật lý | collection/DB riêng | cô lập mạnh nhất, dễ audit | chi phí tăng theo số tenant |
 
 Thực tế hay dùng **lai**: tenant nhỏ ở chung, tenant lớn tách riêng (Qdrant 1.16 gọi là "tiered multitenancy").
+
+<!-- fig:tenant-isolation -->
+<figure markdown="span">
+  ![Ba mức cô lập multi-tenant; mỗi màu là dữ liệu của một tenant](assets/figures/05/tenant-isolation.light.svg#only-light){ loading=lazy }
+  ![Ba mức cô lập multi-tenant; mỗi màu là dữ liệu của một tenant](assets/figures/05/tenant-isolation.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 5.17 — Ba mức cô lập multi-tenant; mỗi màu là dữ liệu của một tenant.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Nguyên tắc bắt buộc:**
 

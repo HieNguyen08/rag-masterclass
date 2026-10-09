@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="630.72pt" height="231.236129pt" viewBox="0 0 630.72 231.236129" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 231.236129 
+L 630.72 231.236129 
+L 630.72 0 
+L 0 0 
+L 0 231.236129 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 155.566452 190.52129 
+C 182.052542 190.52129 207.457396 182.629014 226.18589 168.582643 
+C 244.914384 154.536273 255.437419 135.482632 255.437419 115.618065 
+C 255.437419 95.753497 244.914384 76.699856 226.18589 62.653486 
+C 207.457396 48.607115 182.052542 40.714839 155.566452 40.714839 
+C 129.080361 40.714839 103.675507 48.607115 84.947013 62.653486 
+C 66.218519 76.699856 55.695484 95.753497 55.695484 115.618065 
+C 55.695484 135.482632 66.218519 154.536273 84.947013 168.582643 
+C 103.675507 182.629014 129.080361 190.52129 155.566452 190.52129 
+z
+" clip-path="url(#p0b78d2944d)" style="fill: #008300; opacity: 0.12"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 155.566452 190.52129 
+C 182.052542 190.52129 207.457396 182.629014 226.18589 168.582643 
+C 244.914384 154.536273 255.437419 135.482632 255.437419 115.618065 
+C 255.437419 95.753497 244.914384 76.699856 226.18589 62.653486 
+C 207.457396 48.607115 182.052542 40.714839 155.566452 40.714839 
+C 129.080361 40.714839 103.675507 48.607115 84.947013 62.653486 
+C 66.218519 76.699856 55.695484 95.753497 55.695484 115.618065 
+C 55.695484 135.482632 66.218519 154.536273 84.947013 168.582643 
+C 103.675507 182.629014 129.080361 190.52129 155.566452 190.52129 
+L 155.566452 190.52129 
+z
+" clip-path="url(#p0b78d2944d)" style="fill: none; stroke: #008300; stroke-width: 1.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 265.424516 190.52129 
+C 291.910606 190.52129 317.315461 182.629014 336.043955 168.582643 
+C 354.772449 154.536273 365.295484 135.482632 365.295484 115.618065 
+C 365.295484 95.753497 354.772449 76.699856 336.043955 62.653486 
+C 317.315461 48.607115 291.910606 40.714839 265.424516 40.714839 
+C 238.938426 40.714839 213.533572 48.607115 194.805078 62.653486 
+C 176.076584 76.699856 165.553548 95.753497 165.553548 115.618065 
+C 165.553548 135.482632 176.076584 154.536273 194.805078 168.582643 
+C 213.533572 182.629014 238.938426 190.52129 265.424516 190.52129 
+z
+" clip-path="url(#p0b78d2944d)" style="fill: #3987e5; opacity: 0.12"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 265.424516 190.52129 
+C 291.910606 190.52129 317.315461 182.629014 336.043955 168.582643 
+C 354.772449 154.536273 365.295484 135.482632 365.295484 115.618065 
+C 365.295484 95.753497 354.772449 76.699856 336.043955 62.653486 
+C 317.315461 48.607115 291.910606 40.714839 265.424516 40.714839 
+C 238.938426 40.714839 213.533572 48.607115 194.805078 62.653486 
+C 176.076584 76.699856 165.553548 95.753497 165.553548 115.618065 
+C 165.553548 135.482632 176.076584 154.536273 194.805078 168.582643 
+C 213.533572 182.629014 238.938426 190.52129 265.424516 190.52129 
+L 265.424516 190.52129 
+z
+" clip-path="url(#p0b78d2944d)" style="fill: none; stroke: #3987e5; stroke-width: 1.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 295.385806 180.534194 
+C 315.250374 180.534194 334.304015 174.746524 348.350385 164.445852 
+C 362.396756 154.145181 370.289032 140.172511 370.289032 125.605161 
+C 370.289032 111.037812 362.396756 97.065142 348.350385 86.76447 
+C 334.304015 76.463798 315.250374 70.676129 295.385806 70.676129 
+C 275.521239 70.676129 256.467598 76.463798 242.421228 86.76447 
+C 228.374857 97.065142 220.482581 111.037812 220.482581 125.605161 
+C 220.482581 140.172511 228.374857 154.145181 242.421228 164.445852 
+C 256.467598 174.746524 275.521239 180.534194 295.385806 180.534194 
+L 295.385806 180.534194 
+z
+" clip-path="url(#p0b78d2944d)" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #d95926; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(44.930865 19.813336)">liên quan thật</text>
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(47.491115 30.727742)">(nhãn người)</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(266.488375 17.668561)">top-k chính xác theo s</text>
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(287.625562 28.230968)">(brute force)</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #d95926" x="385.269677" y="198.011613" transform="rotate(-0 385.269677 198.011613)">top-k của index ANN</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 9.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="425.218065" y="45.708387" transform="rotate(-0 425.218065 45.708387)">Relevance recall@k</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="425.218065" y="68.179355" transform="rotate(-0 425.218065 68.179355)">= |liên quan ∩ top-k| / |liên quan|</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="425.218065" y="88.153548" transform="rotate(-0 425.218065 88.153548)">→ đo hàm điểm s (embedding, BM25)</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 9.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="425.218065" y="130.59871" transform="rotate(-0 425.218065 130.59871)">ANN recall@k</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="425.218065" y="153.069677" transform="rotate(-0 425.218065 153.069677)">= |top-k ANN ∩ top-k chính xác| / k</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="425.218065" y="173.043871" transform="rotate(-0 425.218065 173.043871)">→ đo thuật toán tìm argmax</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="15.747097" y="217.985806" transform="rotate(-0 15.747097 217.985806)">Hai lỗi độc lập nhau: ANN recall 99% vẫn đi cùng relevance recall 60% nếu embedding kém.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p0b78d2944d">
+   <rect x="5.76" y="5.76" width="619.2" height="219.716129"/>
+  </clipPath>
+ </defs>
+</svg>
