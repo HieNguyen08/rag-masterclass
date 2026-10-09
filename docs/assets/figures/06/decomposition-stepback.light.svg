@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="645.12pt" height="246.565161pt" viewBox="0 0 645.12 246.565161" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 246.565161 
+L 645.12 246.565161 
+L 645.12 0 
+L 0 0 
+L 0 246.565161 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 22.110968 107.953548 
+L 163.138065 107.953548 
+Q 169.269677 107.953548 169.269677 101.821935 
+L 169.269677 52.769032 
+Q 169.269677 46.637419 163.138065 46.637419 
+L 22.110968 46.637419 
+Q 15.979355 46.637419 15.979355 52.769032 
+L 15.979355 101.821935 
+Q 15.979355 107.953548 22.110968 107.953548 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #f4f3ef; stroke: #c9c8c2; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 206.059355 72.185806 
+L 316.428387 72.185806 
+Q 322.56 72.185806 322.56 66.054194 
+L 322.56 37.44 
+Q 322.56 31.308387 316.428387 31.308387 
+L 206.059355 31.308387 
+Q 199.927742 31.308387 199.927742 37.44 
+L 199.927742 66.054194 
+Q 199.927742 72.185806 206.059355 72.185806 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #e5effa; stroke: #2a78d6; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 171.824516 77.295484 
+Q 184.59871 64.52129 196.187049 52.932951 
+" clip-path="url(#p1229db68bd)" style="fill: none; stroke: #52514e; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 191.09588 54.630007 
+L 196.187049 52.932951 
+L 194.489993 58.02412 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #52514e; stroke: #52514e; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 206.059355 123.282581 
+L 316.428387 123.282581 
+Q 322.56 123.282581 322.56 117.150968 
+L 322.56 88.536774 
+Q 322.56 82.405161 316.428387 82.405161 
+L 206.059355 82.405161 
+Q 199.927742 82.405161 199.927742 88.536774 
+L 199.927742 117.150968 
+Q 199.927742 123.282581 206.059355 123.282581 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #e5effa; stroke: #2a78d6; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 171.824516 77.295484 
+Q 184.59871 90.069677 196.187049 101.658017 
+" clip-path="url(#p1229db68bd)" style="fill: none; stroke: #52514e; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 194.489993 96.566848 
+L 196.187049 101.658017 
+L 191.09588 99.960961 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #52514e; stroke: #52514e; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 369.569032 97.734194 
+L 623.009032 97.734194 
+Q 629.140645 97.734194 629.140645 91.602581 
+L 629.140645 57.87871 
+Q 629.140645 51.747097 623.009032 51.747097 
+L 369.569032 51.747097 
+Q 363.437419 51.747097 363.437419 57.87871 
+L 363.437419 91.602581 
+Q 363.437419 97.734194 369.569032 97.734194 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #fdede7; stroke: #eb6834; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 369.569032 179.489032 
+L 623.009032 179.489032 
+Q 629.140645 179.489032 629.140645 173.357419 
+L 629.140645 139.633548 
+Q 629.140645 133.501935 623.009032 133.501935 
+L 369.569032 133.501935 
+Q 363.437419 133.501935 363.437419 139.633548 
+L 363.437419 173.357419 
+Q 363.437419 179.489032 369.569032 179.489032 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #e0f0e0; stroke: #008300; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 496.289032 100.289032 
+Q 496.289032 115.618065 496.289032 129.158242 
+" clip-path="url(#p1229db68bd)" style="fill: none; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 498.689032 124.358242 
+L 496.289032 129.158242 
+L 493.889032 124.358242 
+z
+" clip-path="url(#p1229db68bd)" style="fill: #52514e; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 342.99871 225.476129 
+L 342.99871 10.869677 
+" clip-path="url(#p1229db68bd)" style="fill: none; stroke: #e4e3df; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 9.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="15.979355" y="21.089032" transform="rotate(-0 15.979355 21.089032)">Decomposition song song</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 7.9px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(40.482665 69.733703)">Business có SSO Azure AD</text>
+    <text style="font-size: 7.9px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(40.372188 79.63339)">không, và nâng Enterprise</text>
+    <text style="font-size: 7.9px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(43.464915 90.308265)">giữa kỳ thì SSO có ngay?</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(233.409449 49.180409)">Gói nào hỗ trợ</text>
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(229.345527 59.544659)">SSO / Azure AD?</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(207.179512 99.896933)">Nâng gói giữa kỳ: tính năng</text>
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(213.989887 110.514074)">mới có hiệu lực khi nào?</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #52514e" x="15.979355" y="148.830968" transform="rotate(-0 15.979355 148.830968)">→ retrieval song song rồi hợp nhất</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 9.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="363.437419" y="21.089032" transform="rotate(-0 363.437419 21.089032)">Step-back</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(413.262157 72.056895)">Cụ thể: «Tại sao tài khoản của tôi bị khóa</text>
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(411.386532 82.75752)">sau khi đổi email?» → khớp ticket tương tự</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(406.220282 153.712359)">Tổng quát: «Chính sách bảo mật khi thay đổi</text>
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(402.430282 164.262984)">email đăng nhập là gì?» → khớp bài chính sách</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #52514e" x="506.508387" y="118.172903" transform="rotate(-0 506.508387 118.172903)">lùi một bước</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 8.3px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #52514e" x="363.437419" y="215.256774" transform="rotate(-0 363.437419 215.256774)">q = μ_khái niệm + δ_chi tiết; câu step-back ≈ μ_khái niệm</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p1229db68bd">
+   <rect x="5.76" y="5.76" width="633.6" height="235.045161"/>
+  </clipPath>
+ </defs>
+</svg>

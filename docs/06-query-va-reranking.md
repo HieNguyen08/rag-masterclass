@@ -67,6 +67,14 @@ Nếu đưa nguyên văn email làm một truy vấn, embedding sẽ là "trung 
 
 Toán của vấn đề "trung bình hai chủ đề": giả sử embedding của email xấp xỉ $\mathbf{q} \approx \frac{\mathbf{a} + \mathbf{b}}{\|\mathbf{a} + \mathbf{b}\|}$ với $\mathbf{a}, \mathbf{b}$ là hướng của hai chủ đề, chuẩn hóa, gần trực giao ($\mathbf{a}^\top\mathbf{b} \approx 0$). Khi đó $\|\mathbf{a} + \mathbf{b}\| = \sqrt{2}$ và với tài liệu $\mathbf{d}_a$ nằm đúng hướng $\mathbf{a}$: $\mathrm{sim}(\mathbf{q}, \mathbf{d}_a) \approx 1/\sqrt{2} \approx 0{,}71$ thay vì ~1. Tệ hơn, một tài liệu "chung chung" nằm giữa hai hướng (ví dụ bài "Tổng quan về hóa đơn và tích hợp") lại có $\mathrm{sim} \approx 1$ — nó thắng cả hai tài liệu đúng. Với ba chủ đề, con số rơi xuống $1/\sqrt{3} \approx 0{,}58$. Tách câu hỏi không chỉ là "cho gọn" mà là **điều kiện cần** để dense retrieval hoạt động.
 
+<!-- fig:topic-averaging -->
+<figure markdown="span">
+  ![Trái: email gộp hai chủ đề trực giao nằm giữa hai tài liệu đúng, nên một bài «tổng quan» chung chung lại gần nó nhất](assets/figures/06/topic-averaging.light.svg#only-light){ loading=lazy }
+  ![Trái: email gộp hai chủ đề trực giao nằm giữa hai tài liệu đúng, nên một bài «tổng quan» chung chung lại gần nó nhất](assets/figures/06/topic-averaging.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.1 — Trái: email gộp hai chủ đề trực giao nằm giữa hai tài liệu đúng, nên một bài «tổng quan» chung chung lại gần nó nhất. Phải: cosine tới tài liệu đúng giảm theo 1/√m.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 2.2 Trích xuất có cấu trúc bằng LLM
 
 Cách thực tế nhất: một lời gọi LLM nhỏ, nhiệt độ 0, xuất **JSON theo schema** (structured output — cơ chế constrained decoding ở Module 07). Schema gợi ý:
@@ -116,6 +124,14 @@ Prompt hệ thống cần nói rõ: chỉ trích xuất, **không trả lời**;
 
 Đầu ra này phục vụ **ba** mục đích cùng lúc: truy vấn cho retrieval (mỗi `sub_question` một lượt, cộng `identifiers` làm truy vấn BM25 nguyên văn), tín hiệu cho routing (mục 7) và tín hiệu cho quyết định escalate (Module 10). Một lời gọi, nhiều công dụng — đó là lý do bước này gần như luôn đáng làm.
 
+<!-- fig:email-analysis -->
+<figure markdown="span">
+  ![Một lời gọi LLM biến email ở mục 2](assets/figures/06/email-analysis.light.svg#only-light){ loading=lazy }
+  ![Một lời gọi LLM biến email ở mục 2](assets/figures/06/email-analysis.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.2 — Một lời gọi LLM biến email ở mục 2.1 thành truy vấn con, định danh cho BM25 và các tín hiệu routing/escalate.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trade-off.** Thêm một lời gọi LLM (với model nhỏ tự host qua vLLM: vài trăm ms đến ~2 s; với API: tương tự cộng mạng). Rủi ro: LLM bỏ sót câu hỏi hoặc "sáng tạo" câu hỏi khách không hỏi. Giảm thiểu: luôn chạy thêm một truy vấn từ **email đã làm sạch nguyên văn** song song với các truy vấn con (lưới an toàn cho recall), và đo trên golden set tỷ lệ email mà mọi câu hỏi được trích đủ.
 
 **Khi nào KHÔNG cần:** truy vấn đã ngắn, một ý (ví dụ ô tìm kiếm trong Help Center). Với email CS, mình gần như luôn bật.
@@ -133,6 +149,14 @@ Ticket trung bình có 3–4 lượt trao đổi. Lượt thứ ba của khách 
 ### 3.2 Kỹ thuật
 
 **Condensation:** cho LLM lịch sử hội thoại $H = (m_1, \dots, m_t)$ và tin nhắn mới $m_{t+1}$, sinh truy vấn độc lập $\tilde{q} = \mathrm{LLM}(H, m_{t+1})$ chứa đủ thực thể: "Lỗi mới sau khi làm bước 2 (tạo lại API token) trong hướng dẫn khắc phục ERR_SYNC_409 khi đồng bộ MISA". Về hình thức, ta muốn $\tilde{q}$ sao cho $p(\text{tài liệu đúng} \mid \tilde{q}) \approx p(\text{tài liệu đúng} \mid H, m_{t+1})$ — nén thông tin liên quan của lịch sử vào một câu.
+
+<!-- fig:condensation -->
+<figure markdown="span">
+  ![Viết lại tin nhắn không tự đứng được thành truy vấn độc lập, đủ thực thể](assets/figures/06/condensation.light.svg#only-light){ loading=lazy }
+  ![Viết lại tin nhắn không tự đứng được thành truy vấn độc lập, đủ thực thể](assets/figures/06/condensation.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.3 — Viết lại tin nhắn không tự đứng được thành truy vấn độc lập, đủ thực thể.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Rewrite-Retrieve-Read** (Ma et al., 2023, arXiv 2305.14283) đặt bước viết lại thành một khâu riêng, thậm chí huấn luyện một rewriter nhỏ bằng tín hiệu thưởng từ chất lượng câu trả lời cuối. Ý tưởng then chốt áp dụng được ngay: **truy vấn tối ưu cho retriever khác câu hỏi tự nhiên của người dùng**, và nên có một bước chuyên trách việc chuyển đổi đó.
 
@@ -177,6 +201,14 @@ P(\text{lọt}) = (1 - \rho)\Big[1 - (1 - r')^n\Big]
 $$
 
 với $r'$ là recall trên phần "không khó". Nếu $\rho = 0{,}25$, $r' = 0{,}8$: $n = 1$ cho $0{,}60$; $n = 3$ cho $0{,}744$; $n = \infty$ cũng chỉ $0{,}75$. **Phần lớn lợi ích đến từ 2–3 truy vấn đầu**; thêm nữa chỉ tốn tiền. Phần "khó" cần kỹ thuật khác (HyDE, dịch thuật ngữ, step-back, hoặc đơn giản là kho tri thức thiếu bài).
+
+<!-- fig:multiquery-recall -->
+<figure markdown="span">
+  ![Recall của multi-query theo số diễn đạt lại: mô hình độc lập so với mô hình có phần «khó» ρ = 0](assets/figures/06/multiquery-recall.light.svg#only-light){ loading=lazy }
+  ![Recall của multi-query theo số diễn đạt lại: mô hình độc lập so với mô hình có phần «khó» ρ = 0](assets/figures/06/multiquery-recall.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.4 — Recall của multi-query theo số diễn đạt lại: mô hình độc lập so với mô hình có phần «khó» ρ = 0.25 (bão hòa ở 0.75).</figcaption>
+</figure>
+<!-- /fig -->
 
 Về precision: hợp nhiều danh sách cũng kéo theo nhiều nhiễu hơn. RRF giúp vì tài liệu xuất hiện ở *nhiều* danh sách được cộng điểm (đồng thuận), còn nhiễu riêng của một diễn đạt thường chỉ xuất hiện một lần. Sau đó reranker (mục 8) lọc tiếp.
 
@@ -249,6 +281,14 @@ trong đó $\boldsymbol{\mu}_z$ là "hướng chủ đề" $z$ (ví dụ hoàn t
 
 Cosine: $\mathrm{sim}(\mathbf{q}, \mathbf{d}_1) = 0{,}51 \times 0{,}6 = 0{,}30$; $\mathrm{sim}(\mathbf{q}, \mathbf{d}_2) = 0{,}86 \times 0{,}87 = 0{,}75$ → **truy vấn gốc chọn sai** vì khớp phong cách thay vì chủ đề. Với HyDE: $\mathrm{sim}(\mathbf{g}, \mathbf{d}_1) \approx 0{,}997$, $\mathrm{sim}(\mathbf{g}, \mathbf{d}_2) \approx 0{,}03$ → chọn đúng. Trộn $\hat{\mathbf{v}} = \mathrm{normalize}(\mathbf{q} + \mathbf{g})$: $0{,}81$ vs $0{,}48$ — vẫn đúng, và giữ một phần "neo" vào ý định gốc của khách. Ví dụ phóng đại có chủ đích, nhưng hiện tượng "khớp phong cách" là có thật: trong kho Zendesk, câu hỏi của khách rất dễ khớp với **ticket lịch sử khác chủ đề nhưng cùng giọng văn**, thay vì bài Help Center đúng.
 
+<!-- fig:hyde -->
+<figure markdown="span">
+  ![Trái: phép chiếu minh họa của ví dụ 4 chiều — truy vấn khớp «phong cách câu hỏi», tài liệu giả định khớp «phong cách tài liệu»](assets/figures/06/hyde.light.svg#only-light){ loading=lazy }
+  ![Trái: phép chiếu minh họa của ví dụ 4 chiều — truy vấn khớp «phong cách câu hỏi», tài liệu giả định khớp «phong cách tài liệu»](assets/figures/06/hyde.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.5 — Trái: phép chiếu minh họa của ví dụ 4 chiều — truy vấn khớp «phong cách câu hỏi», tài liệu giả định khớp «phong cách tài liệu». Phải: các cosine tính trong mục 5.2.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 5.3 Query2doc — biến thể cho sparse
 
 Query2doc (Wang, Yang, Wei; arXiv 2303.07678, EMNLP 2023) sinh pseudo-document bằng LLM rồi **nối** với truy vấn. Với BM25, truy vấn gốc được lặp lại vài lần trước khi nối để không bị pseudo-document dài "nhấn chìm" (trọng số term của truy vấn gốc vẫn chiếm ưu thế); với dense thì nối một lần. Lợi ích cho BM25: pseudo-document mang theo thuật ngữ chính thức ("prorated", "pro-rata", "hoàn tiền theo tỷ lệ") mà khách không dùng — một dạng query expansion.
@@ -282,6 +322,14 @@ Step-back (Zheng et al., arXiv 2310.06117) yêu cầu LLM trước tiên **lùi 
 
 Trực giác bằng toán: câu cụ thể có embedding $\mathbf{q} = \boldsymbol{\mu}_{\text{khái niệm}} + \boldsymbol{\delta}_{\text{chi tiết}}$; khi $\boldsymbol{\delta}_{\text{chi tiết}}$ lớn (nhiều chi tiết riêng của khách), nó kéo truy vấn ra xa bài tổng quát. Câu step-back xấp xỉ $\boldsymbol{\mu}_{\text{khái niệm}}$ — "chiếu" truy vấn về tâm của chủ đề.
 
+<!-- fig:decomposition-stepback -->
+<figure markdown="span">
+  ![Decomposition tách một câu ghép thành các câu con độc lập; step-back thêm một câu tổng quát để khớp bài chính sách nền](assets/figures/06/decomposition-stepback.light.svg#only-light){ loading=lazy }
+  ![Decomposition tách một câu ghép thành các câu con độc lập; step-back thêm một câu tổng quát để khớp bài chính sách nền](assets/figures/06/decomposition-stepback.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.6 — Decomposition tách một câu ghép thành các câu con độc lập; step-back thêm một câu tổng quát để khớp bài chính sách nền.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 6.3 Liên hệ Zendesk
 
 | Kỹ thuật | Dùng khi | Ví dụ ticket |
@@ -313,6 +361,14 @@ Kho tri thức gồm nhiều nguồn khác nhau về độ tin cậy và mục �
 | `account` (dữ liệu riêng của khách) | Không phải retrieval — cần gọi API nội bộ | Agent + tool (Module 08); hoặc escalate |
 
 **Routing mềm vs cứng.** Routing cứng (chỉ tìm trong một nguồn) rẻ và sạch nhưng nếu phân loại sai thì recall về 0. Gọi $a$ là độ chính xác của router, $r_{\text{in}}$ là recall khi route đúng, $r_{\text{all}}$ là recall khi tìm trên tất cả nguồn. Recall kỳ vọng của routing cứng là $a \cdot r_{\text{in}}$ (giả định route sai thì trượt hẳn). Với $a = 0{,}9$, $r_{\text{in}} = 0{,}9$: $0{,}81$ — có thể **thua** $r_{\text{all}} = 0{,}85$ dù mỗi nguồn riêng tốt hơn. Vì vậy:
+
+<!-- fig:routing-hard-soft -->
+<figure markdown="span">
+  ![Recall kỳ vọng của routing cứng a·rin so với tìm trên mọi nguồn; với rin = 0](assets/figures/06/routing-hard-soft.light.svg#only-light){ loading=lazy }
+  ![Recall kỳ vọng của routing cứng a·rin so với tìm trên mọi nguồn; với rin = 0](assets/figures/06/routing-hard-soft.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.7 — Recall kỳ vọng của routing cứng a·r_in so với tìm trên mọi nguồn; với r_in = 0.9, router phải đúng trên ~94% mới hòa vốn.</figcaption>
+</figure>
+<!-- /fig -->
 
 - Dùng **routing mềm**: tìm trên tất cả nguồn được phép, nhưng nhân trọng số theo nguồn (weighted RRF) hoặc boost ở tầng rerank.
 - Routing cứng **chỉ** khi xác suất của router cao (ví dụ $\ge 0{,}9$ đã hiệu chuẩn — Module 10), còn lại rơi về routing mềm.
@@ -351,6 +407,14 @@ $$
 với $P_{\text{non-emb}}$ là số tham số không tính bảng embedding (bảng embedding chỉ là tra cứu, gần như không tốn FLOPs). Hạng tử $L^2$ (attention) đáng kể khi $L$ lớn — lý do cắt chunk về ~512 token cho reranker.
 
 **Ví dụ số (ước lượng).** `bge-reranker-v2-m3` có ~0,57B tham số; phần lớn là bảng embedding cho từ vựng đa ngữ cỡ 250k token × 1024 chiều ≈ 0,26B, nên $P_{\text{non-emb}} \approx 0{,}3$B. Rerank $k = 50$ chunk, $L \approx 400$: $50 \times 2 \times 0{,}3 \cdot 10^9 \times 400 \approx 1{,}2 \cdot 10^{13}$ FLOPs = 12 TFLOP. Giả định GPU đạt hiệu dụng ~30 TFLOPS fp16 (ước lượng cho GPU datacenter tầm trung; GPU laptop như RTX 4050 thấp hơn) → **~0,4 s**; trên CPU nhiều lõi: vài giây đến hàng chục giây. Từ đây rút ra hai đòn bẩy: giảm $k$ (50 → 30 tiết kiệm 40%), và giảm $L$ (rerank trên chunk con thay vì chunk cha dài).
+
+<!-- fig:rerank-cascade -->
+<figure markdown="span">
+  ![Trái: kiến trúc nhiều tầng của mục 1](assets/figures/06/rerank-cascade.light.svg#only-light){ loading=lazy }
+  ![Trái: kiến trúc nhiều tầng của mục 1](assets/figures/06/rerank-cascade.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.8 — Trái: kiến trúc nhiều tầng của mục 1. Phải: thời gian rerank ước lượng theo công thức FLOPs của mục 8.2 (bỏ qua hạng tử L²).</figcaption>
+</figure>
+<!-- /fig -->
 
 **Ngân sách VRAM trên 6 GB:** ~0,57B tham số fp16 ≈ 1,1 GB trọng số; activation cho batch 16–32 cặp × 512 token vẫn vừa. Đây là reranker phù hợp cho lab cá nhân.
 
@@ -400,6 +464,14 @@ Với $k = 100$, $w = 20$, $s = 10$: 9 lời gọi, mỗi lời gọi ~20 đoạ
 | Pairwise all-pairs | $k(k-1)$ | so sánh tương đối, chính xác | quá đắt khi $k$ lớn |
 | Pairwise sorting | $O(k \log k)$ hoặc $O(Kk)$ | rẻ hơn nhiều | vẫn tuần tự, latency cao |
 | Listwise sliding window | $\lceil (k-w)/s \rceil + 1$ | xét tương quan cả nhóm | output hoán vị có thể lỗi định dạng; nhạy thứ tự đầu vào |
+
+<!-- fig:llm-rerank-calls -->
+<figure markdown="span">
+  ![Số lời gọi LLM theo số ứng viên cho từng cách dùng LLM làm reranker (trục log)](assets/figures/06/llm-rerank-calls.light.svg#only-light){ loading=lazy }
+  ![Số lời gọi LLM theo số ứng viên cho từng cách dùng LLM làm reranker (trục log)](assets/figures/06/llm-rerank-calls.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.9 — Số lời gọi LLM theo số ứng viên cho từng cách dùng LLM làm reranker (trục log).</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 8.6 Reranker "LLM-based" chuyên dụng — điểm giao giữa hai thế giới
 
@@ -499,6 +571,14 @@ Câu hỏi: "Tài khoản bị khóa sau khi đổi email, làm sao mở lại?"
 
 **$\lambda = 0{,}5$:** d1 → d5 (0,200 vs d4 0,150) → d4. Kết quả d1, d5, d4: đa dạng nhất nhưng đã bỏ ticket thứ hai xác nhận cách làm, và đưa macro ít liên quan (0,55) vào sớm.
 
+<!-- fig:mmr-example -->
+<figure markdown="span">
+  ![Ví dụ MMR mục 9](assets/figures/06/mmr-example.light.svg#only-light){ loading=lazy }
+  ![Ví dụ MMR mục 9](assets/figures/06/mmr-example.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.10 — Ví dụ MMR mục 9.3: ma trận tương tự giữa năm ứng viên và ba tài liệu được chọn đầu tiên với từng λ.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 9.4 Chọn $\lambda$ và liên hệ Zendesk
 
 - Mặc định thực tế: $\lambda \in [0{,}6;\ 0{,}8]$. Dưới 0,5 thường đưa tài liệu kém liên quan vào.
@@ -537,6 +617,14 @@ $$
 
 Token dễ đoán (xác suất cao, $I$ thấp) mang ít thông tin mới → có thể bỏ. Gộp theo đơn vị (cụm từ, câu), tính tổng $I$, bỏ các đơn vị có $I$ dưới phân vị $p$. Trực giác: "của", "là", "theo như" bị bỏ; "ERR_SYNC_409", "14 ngày" được giữ.
 
+<!-- fig:selective-context -->
+<figure markdown="span">
+  ![Selective Context giữ token có self-information cao; số liệu giả định chỉ để minh họa cơ chế và rủi ro «xé» văn bản](assets/figures/06/selective-context.light.svg#only-light){ loading=lazy }
+  ![Selective Context giữ token có self-information cao; số liệu giả định chỉ để minh họa cơ chế và rủi ro «xé» văn bản](assets/figures/06/selective-context.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.11 — Selective Context giữ token có self-information cao; số liệu giả định chỉ để minh họa cơ chế và rủi ro «xé» văn bản.</figcaption>
+</figure>
+<!-- /fig -->
+
 **LongLLMLingua** (Jiang et al., arXiv 2310.06839) làm cho ý tưởng này **phụ thuộc câu hỏi**: thay vì perplexity thuần, dùng perplexity có điều kiện theo câu hỏi để đo mức liên quan của từng đoạn và từng token; nén thô (bỏ cả đoạn) rồi nén mịn (bỏ token), phân bổ tỷ lệ nén động theo mức liên quan, và **sắp xếp lại tài liệu** để đoạn quan trọng nằm ở đầu. **LLMLingua-2** (Pan et al., arXiv 2403.12968) đổi sang **phân loại token** (giữ/bỏ) bằng một encoder cỡ BERT, huấn luyện trên dữ liệu chưng cất từ LLM lớn — nhanh hơn nhiều và không phụ thuộc vào LM nhân quả. Thư viện `llmlingua` (PyPI) cài đặt cả họ này.
 
 **Trade-off khi áp vào CS:**
@@ -557,6 +645,14 @@ Sau khi chọn $k$ đoạn, thứ tự trong prompt ảnh hưởng đến chất
 - **"Hai đầu"**: đặt đoạn tốt nhất ở đầu, đoạn tốt thứ hai ở cuối, các đoạn yếu ở giữa — khai thác hình chữ U của "lost in the middle". Ví dụ 5 đoạn xếp hạng 1..5 → thứ tự $[1, 3, 5, 4, 2]$.
 
 Với context ngắn (≤ 8 đoạn, < 4k token), khác biệt thường nhỏ; thứ tự còn bị chi phối bởi yêu cầu nghiệp vụ (nhóm theo câu hỏi con, chính sách chính thức trước ticket tham khảo). Chi tiết định dạng context có ID nguồn ở Module 07.
+
+<!-- fig:context-ordering -->
+<figure markdown="span">
+  ![Hai cách sắp xếp năm đoạn đã xếp hạng (màu đậm = điểm cao)](assets/figures/06/context-ordering.light.svg#only-light){ loading=lazy }
+  ![Hai cách sắp xếp năm đoạn đã xếp hạng (màu đậm = điểm cao)](assets/figures/06/context-ordering.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.12 — Hai cách sắp xếp năm đoạn đã xếp hạng (màu đậm = điểm cao).</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 10.5 Code: nén extractive dựa trên reranker
 
@@ -606,6 +702,14 @@ Giả định: LLM nhỏ–vừa tự host qua vLLM hoặc API tương đương;
 | HyDE (nếu bật, có điều kiện) | +1–3 s | chỉ khi retrieval "không tự tin" |
 | LLM rerank listwise (nếu bật) | +2–10 s | thường không đáng với Zendesk |
 | **Tổng tiền xử lý trước generation** | **~1–4 s** (không HyDE/LLM rerank) | generation và verify: Module 07, 11 |
+
+<!-- fig:latency-budget -->
+<figure markdown="span">
+  ![Bảng ngân sách latency mục 11](assets/figures/06/latency-budget.light.svg#only-light){ loading=lazy }
+  ![Bảng ngân sách latency mục 11](assets/figures/06/latency-budget.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 6.13 — Bảng ngân sách latency mục 11.2 trên trục log; hai bước xám chỉ bật có điều kiện.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 11.3 Nguyên tắc cắt giảm
 
