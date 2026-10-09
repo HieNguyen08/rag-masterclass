@@ -100,6 +100,14 @@ Khách hay gửi ảnh chụp màn hình lỗi; tài liệu sản phẩm thườ
 
 > **Liên hệ Zendesk.** Thứ tự ưu tiên thẩm quyền mình khuyên dùng khi các nguồn mâu thuẫn: chính sách chính thức > tài liệu sản phẩm/API > Help Center > macro > Q/A trích từ ticket. Ghi thứ hạng này vào metadata `authority_tier` ngay lúc ingest; tầng generation (Module 07) dùng nó để giải quyết mâu thuẫn.
 
+<!-- fig:authority-tiers -->
+<figure markdown="span">
+  ![Thang thẩm quyền của các nguồn (authoritytier): nguồn càng nhiều về khối lượng thì càng thấp về thẩm quyền](assets/figures/04/authority-tiers.light.svg#only-light){ loading=lazy }
+  ![Thang thẩm quyền của các nguồn (authoritytier): nguồn càng nhiều về khối lượng thì càng thấp về thẩm quyền](assets/figures/04/authority-tiers.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.1 — Thang thẩm quyền của các nguồn (authority_tier): nguồn càng nhiều về khối lượng thì càng thấp về thẩm quyền.</figcaption>
+</figure>
+<!-- /fig -->
+
 ---
 
 ## 3. Làm sạch và chuẩn hóa văn bản
@@ -134,6 +142,14 @@ def hc_html_to_markdown(html: str) -> str:
 - **NFD** (phân rã — decomposed): 3 code point: `e` (U+0065) + dấu nặng (U+0323) + dấu mũ (U+0302).
 
 "Tiếng Việt" có 10 code point ở NFC, 14 ở NFD. Hiển thị giống hệt nhưng `==` sai, hash khác, token khác → BM25 không khớp, embedding lệch, dedup thất bại. Văn bản từ macOS, một số bộ gõ hoặc PDF hay ở dạng NFD.
+
+<!-- fig:unicode-forms -->
+<figure markdown="span">
+  ![Trái: cùng một chữ «ệ» ở dạng NFC và NFD](assets/figures/04/unicode-forms.light.svg#only-light){ loading=lazy }
+  ![Trái: cùng một chữ «ệ» ở dạng NFC và NFD](assets/figures/04/unicode-forms.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.2 — Trái: cùng một chữ «ệ» ở dạng NFC và NFD. Phải: NFKC gộp các biến thể trình bày — hữu ích cho tiếng Nhật, nhưng cẩn thận với mã lỗi và ký hiệu.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Định nghĩa (Unicode UAX #15).**
 
@@ -201,6 +217,14 @@ CONFIDENTIAL: This email and any attachments are intended solely for...
 ```
 
 Chỉ dòng đầu tiên là *nội dung mới*. Nếu embed nguyên comment, vector bị kéo về phía câu trả lời cũ của agent (trong phần trích dẫn), chữ ký và disclaimer. Hệ quả: truy hồi kém, và tệ hơn — trùng lặp lớn giữa các comment, chữ ký trở thành hub (Module 03, mục 6.2), PII (số điện thoại) lan khắp index.
+
+<!-- fig:email-anatomy -->
+<figure markdown="span">
+  ![Giải phẫu comment email ở ví dụ mục 4](assets/figures/04/email-anatomy.light.svg#only-light){ loading=lazy }
+  ![Giải phẫu comment email ở ví dụ mục 4](assets/figures/04/email-anatomy.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.3 — Giải phẫu comment email ở ví dụ mục 4.1: chỉ một dòng là nội dung mới, phần còn lại phải cắt trước khi embed.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 4.2 Tách quoted reply
 
@@ -296,6 +320,14 @@ $$
 - $B$ = "tôi không đăng nhập được vào hệ thống" → {tôi không, không đăng, đăng nhập, nhập được, được vào, vào hệ, hệ thống} (7 phần tử).
 - $|A\cap B| = 5$, $|A\cup B| = 9$ → $J = 5/9 \approx 0.556$.
 
+<!-- fig:jaccard-shingles -->
+<figure markdown="span">
+  ![Tập shingle 2 từ của hai câu ở ví dụ mục 5](assets/figures/04/jaccard-shingles.light.svg#only-light){ loading=lazy }
+  ![Tập shingle 2 từ của hai câu ở ví dụ mục 5](assets/figures/04/jaccard-shingles.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.4 — Tập shingle 2 từ của hai câu ở ví dụ mục 5.2 và độ tương đồng Jaccard.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 5.3 MinHash: ước lượng Jaccard bằng một chữ ký ngắn
 
 **Ý tưởng (Broder, 1997).** Lấy một hoán vị ngẫu nhiên $\pi$ của không gian shingle. Định nghĩa $h_\pi(A) = \min_{x\in A}\pi(x)$ — phần tử "nhỏ nhất" của $A$ theo thứ tự ngẫu nhiên.
@@ -313,6 +345,14 @@ $$
 Mỗi số hạng là biến Bernoulli với tham số $J$, nên $\mathbb{E}[\hat J] = J$ và $\mathrm{Var}(\hat J) = \frac{J(1-J)}{k}$.
 
 **Ví dụ số.** Với $J=0.7$: $k=64$ → độ lệch chuẩn $\sqrt{0.21/64}\approx 0.057$; $k=128$ → $0.041$; $k=256$ → $0.029$. Nghĩa là với $k=128$, ước lượng thường nằm trong khoảng $0.7\pm 0.08$ (khoảng 2 độ lệch chuẩn). Đủ để phân biệt "gần trùng" (0.8+) với "cùng chủ đề" (0.3–0.5), nhưng không đủ để đặt ngưỡng tinh ở 0.70 so với 0.75.
+
+<!-- fig:minhash-variance -->
+<figure markdown="span">
+  ![Trái: độ lệch chuẩn của ước lượng MinHash giảm theo 1/√k](assets/figures/04/minhash-variance.light.svg#only-light){ loading=lazy }
+  ![Trái: độ lệch chuẩn của ước lượng MinHash giảm theo 1/√k](assets/figures/04/minhash-variance.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.5 — Trái: độ lệch chuẩn của ước lượng MinHash giảm theo 1/√k. Phải: với k = 128, phân phối Ĵ (mô phỏng) của các cặp J = 0.5, 0.7, 0.85 tách nhau rõ, nhưng vẫn chồng lấn ở mức sai khác 0.05.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 5.4 LSH banding: tìm ứng viên mà không so mọi cặp
 
@@ -337,6 +377,14 @@ $$
 Cách tính một ô, $(16,8)$ tại $s=0.8$: $0.8^8 = 0.168$; $1-0.168=0.832$; $0.832^{16}\approx 0.053$; $P = 0.947$.
 
 **Đọc bảng:** để bắt cặp $J\ge 0.8$ mà ít ứng viên ở $J\approx 0.5$, chọn $(16, 8)$: bắt 95% cặp $J=0.8$, chỉ 6% cặp $J=0.5$ thành ứng viên. Muốn ít bỏ sót hơn, tăng $b$ (dịch ngưỡng sang trái) — đổi lại nhiều ứng viên hơn. `datasketch` (`MinHashLSH(threshold=..., num_perm=...)`) tự chọn $(b,r)$ theo ngưỡng.
+
+<!-- fig:lsh-s-curve -->
+<figure markdown="span">
+  ![Xác suất thành ứng viên 1 − (1 − sʳ)ᵇ cho ba cách chia băng của bảng mục 5](assets/figures/04/lsh-s-curve.light.svg#only-light){ loading=lazy }
+  ![Xác suất thành ứng viên 1 − (1 − sʳ)ᵇ cho ba cách chia băng của bảng mục 5](assets/figures/04/lsh-s-curve.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.6 — Xác suất thành ứng viên 1 − (1 − sʳ)ᵇ cho ba cách chia băng của bảng mục 5.4; đường chấm là ngưỡng s* ≈ (1/b)^(1/r).</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 5.5 SimHash (so sánh ngắn)
 
@@ -393,6 +441,14 @@ Nguyên tắc mình khuyên:
 
 Khung pháp lý và chính sách lưu trữ: Module 11.
 
+<!-- fig:pii-redaction -->
+<figure markdown="span">
+  ![Che PII bằng placeholder có kiểu và nhất quán trong tài liệu; chuỗi số không qua kiểm tra Luhn được giữ nguyên](assets/figures/04/pii-redaction.light.svg#only-light){ loading=lazy }
+  ![Che PII bằng placeholder có kiểu và nhất quán trong tài liệu; chuỗi số không qua kiểm tra Luhn được giữ nguyên](assets/figures/04/pii-redaction.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.7 — Che PII bằng placeholder có kiểu và nhất quán trong tài liệu; chuỗi số không qua kiểm tra Luhn được giữ nguyên.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 6.2 Kỹ thuật phát hiện
 
 | Loại PII | Kỹ thuật | Ghi chú cho Việt/Nhật |
@@ -411,6 +467,14 @@ Khung pháp lý và chính sách lưu trữ: Module 11.
 - Tổng: $3 + 2 + 7 + 7 + 9 + 6 + 7 + 4 + 9 + 9 + 7 = 70$. Chia hết cho 10 → hợp lệ.
 
 Chuỗi số ngẫu nhiên chỉ có xác suất 1/10 qua Luhn → loại ~90% mã đơn hàng bị nhận nhầm.
+
+<!-- fig:luhn-check -->
+<figure markdown="span">
+  ![Tính tay kiểm tra Luhn cho số 79927398713: các chữ số ở vị trí chẵn (cam) được nhân đôi và trừ 9 nếu lớn hơn 9](assets/figures/04/luhn-check.light.svg#only-light){ loading=lazy }
+  ![Tính tay kiểm tra Luhn cho số 79927398713: các chữ số ở vị trí chẵn (cam) được nhân đôi và trừ 9 nếu lớn hơn 9](assets/figures/04/luhn-check.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.8 — Tính tay kiểm tra Luhn cho số 79927398713: các chữ số ở vị trí chẵn (cam) được nhân đôi và trừ 9 nếu lớn hơn 9.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Presidio** (mã nguồn mở) gồm *Analyzer* (regex, NER, luật, checksum, ngữ cảnh) và *Anonymizer*; cắm được model NER riêng cho Việt/Nhật. Chính tài liệu dự án lưu ý không bảo đảm bắt mọi PII — cần thêm kiểm tra đầu ra (Module 07).
 
@@ -491,6 +555,14 @@ $$
 
 với $q_{\text{csat}}\in\{1 \text{ (good)}, 0.5 \text{ (không đánh giá)}, 0 \text{ (bad)}\}$, $\Delta t$ là số ngày từ khi giải quyết, $T$ là "thời gian sống" đặc trưng (ví dụ 365 ngày — chọn theo nhịp phát hành sản phẩm). Ví dụ: ticket CSAT tốt cách đây 30 ngày: $w = e^{-30/365}\approx 0.92$; CSAT tốt cách đây 400 ngày: $w\approx 0.33$; không đánh giá, 30 ngày: $w\approx 0.46$. Release note nói tính năng đã đổi thì đặt $w=0$ cho các Q/A liên quan, bất kể tuổi.
 
+<!-- fig:ticket-weight-decay -->
+<figure markdown="span">
+  ![Trọng số w = qcsat · exp(−Δt/T) với T = 365 ngày và ba ví dụ của mục 7](assets/figures/04/ticket-weight-decay.light.svg#only-light){ loading=lazy }
+  ![Trọng số w = qcsat · exp(−Δt/T) với T = 365 ngày và ba ví dụ của mục 7](assets/figures/04/ticket-weight-decay.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.9 — Trọng số w = q_csat · exp(−Δt/T) với T = 365 ngày và ba ví dụ của mục 7.2.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trích xuất Q/A bằng LLM (schema đầu ra):**
 
 ```json
@@ -562,6 +634,14 @@ Cách tính hàng $s=400$: $P=(400-60)/(400-40)=340/360\approx 0.94$; $m=2$ → 
 
 **Đọc bảng:** không có kích thước tối ưu tuyệt đối; điểm ngọt thường quanh **một đơn vị ngữ nghĩa** ($s\approx u$). Chunk quá nhỏ có cosine "đẹp" nhưng mất ngữ cảnh ("Bấm nút này để xuất" — nút nào, sản phẩm nào?) — vấn đề mà heading path, parent-child và Contextual Retrieval giải quyết (mục 8.4–8.8). Mô hình còn gợi ý: **cắt theo ranh giới chủ đề** (heading) loại bỏ được cả (a) lẫn (b) mà không cần tăng overlap.
 
+<!-- fig:chunk-size-model -->
+<figure markdown="span">
+  ![Bốn hiệu ứng của mô hình định lượng mục 8](assets/figures/04/chunk-size-model.light.svg#only-light){ loading=lazy }
+  ![Bốn hiệu ứng của mô hình định lượng mục 8](assets/figures/04/chunk-size-model.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.10 — Bốn hiệu ứng của mô hình định lượng mục 8.2 vẽ liên tục theo s; các điểm là những hàng của bảng ví dụ.</figcaption>
+</figure>
+<!-- /fig -->
+
 Thực nghiệm khớp trực giác: báo cáo của Chroma (Smith & Troynikov, 7/2024) đo ở mức token và thấy chunk ~200 token không overlap thường tốt hơn 800 token overlap 400.
 
 ### 8.3 Fixed-size + overlap và recursive splitting
@@ -571,6 +651,14 @@ Thực nghiệm khớp trực giác: báo cáo của Chroma (Smith & Troynikov, 
 **Recursive splitting:** thử tách bằng dấu phân cách "thô" nhất trước, chỉ xuống cấp mịn hơn khi một mảnh vẫn quá lớn: `\n## ` → `\n### ` → đoạn trống `\n\n` → xuống dòng → dấu kết câu (`. ` `? ` `! ` và `。` `？` `！` cho tiếng Nhật) → khoảng trắng. Sau đó gộp các mảnh nhỏ liền kề cho tới gần $s$. Đây là baseline mình khuyên dùng đầu tiên cho mọi văn bản không có cấu trúc rõ.
 
 **Ví dụ số (số chunk):** bài dài $L = 2.600$ token, $s=400$, $o=80$ → bước $g=320$, số chunk $=\lceil (L-o)/g\rceil = \lceil 2520/320\rceil = 8$, tổng token lưu $8\times400=3.200$ (thừa 23%).
+
+<!-- fig:fixed-overlap -->
+<figure markdown="span">
+  ![Fixed-size + overlap trên tài liệu 2](assets/figures/04/fixed-overlap.light.svg#only-light){ loading=lazy }
+  ![Fixed-size + overlap trên tài liệu 2](assets/figures/04/fixed-overlap.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.11 — Fixed-size + overlap trên tài liệu 2.600 token: 8 cửa sổ, phần cam là token bị lưu lặp.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Khi nào không dùng:** tài liệu có heading tốt (dùng mục 8.4); bảng giá (giữ nguyên bảng).
 
@@ -584,6 +672,14 @@ Nếu nút Export bị mờ, kiểm tra quyền "Billing admin" của tài kho�
 ```
 
 Quy tắc: không cắt giữa bảng, khối code, danh sách bước; mục quá dài thì recursive split bên trong và lặp heading path; mục quá ngắn thì gộp; heading path vừa prepend để embed vừa lưu metadata cho citation.
+
+<!-- fig:heading-aware -->
+<figure markdown="span">
+  ![Chunking theo heading: mỗi mục H2 thành một chunk, mang heading path làm ngữ cảnh](assets/figures/04/heading-aware.light.svg#only-light){ loading=lazy }
+  ![Chunking theo heading: mỗi mục H2 thành một chunk, mang heading path làm ngữ cảnh](assets/figures/04/heading-aware.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.12 — Chunking theo heading: mỗi mục H2 thành một chunk, mang heading path làm ngữ cảnh.</figcaption>
+</figure>
+<!-- /fig -->
 
 ```python
 # Chunker theo heading cho Markdown (đã chuyển từ HTML ở mục 3.1)
@@ -632,6 +728,14 @@ def chunk_markdown(md: str, title: str, max_tok=400, min_tok=60):
 
 **Ví dụ số.** 8 câu, cosine giữa các cặp liền kề: $(0.82, 0.78, 0.41, 0.80, 0.76, 0.35, 0.84)$ → $\delta = (0.18, 0.22, 0.59, 0.20, 0.24, 0.65, 0.16)$. Phân vị 80 của $\delta$ ≈ 0.52 → cắt sau câu 3 và câu 6 → ba chunk: câu 1–3, câu 4–6, câu 7–8.
 
+<!-- fig:semantic-chunking -->
+<figure markdown="span">
+  ![Semantic chunking trên ví dụ 8 câu: cắt tại các ranh giới có δ vượt phân vị 80](assets/figures/04/semantic-chunking.light.svg#only-light){ loading=lazy }
+  ![Semantic chunking trên ví dụ 8 câu: cắt tại các ranh giới có δ vượt phân vị 80](assets/figures/04/semantic-chunking.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.13 — Semantic chunking trên ví dụ 8 câu: cắt tại các ranh giới có δ vượt phân vị 80.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trade-off.** Embed từng câu (tốn nhiều lần), ngưỡng nhạy với model/ngôn ngữ (anisotropy — Module 03), câu ngắn có embedding nhiễu. Qu, Tu & Bao (2024) kết luận lợi ích không nhất quán, không bù chi phí so với chunk cố định; Chroma (2024) lại thấy một biến thể phân cụm cho precision/IoU tốt nhất trong thí nghiệm của họ. Quan điểm của mình: **với bài HC có heading, chunking theo cấu trúc gần như luôn đủ; semantic chunking chỉ đáng thử cho văn bản dài không cấu trúc** (biên bản, transcript cuộc gọi, PDF scan) — và phải đo.
 
 ### 8.6 Parent–child (small-to-big) và sentence window
@@ -641,6 +745,14 @@ def chunk_markdown(md: str, title: str, max_tok=400, min_tok=60):
 **Ý tưởng:** tách hai vai trò. **Index các đơn vị nhỏ** (child: câu, đoạn, hoặc chunk 100–200 token), **trả về đơn vị lớn chứa nó** (parent: cả mục H2, hoặc cả bài HC ngắn) cho LLM. *Sentence window* là trường hợp riêng: index từng câu, trả về câu đó ± $w$ câu xung quanh.
 
 Hình thức hóa: với các child $c$ thuộc parent $P$, điểm của parent có thể lấy là $\mathrm{score}(P) = \max_{c\in P} \mathrm{score}(c)$ (hoặc tổng của top vài child). Khi nhiều child cùng parent lọt top-$k$, gộp lại thành một parent để không lặp context.
+
+<!-- fig:parent-child -->
+<figure markdown="span">
+  ![Small-to-big: chấm điểm trên child, trả về parent; điểm parent là max điểm child (số minh họa)](assets/figures/04/parent-child.light.svg#only-light){ loading=lazy }
+  ![Small-to-big: chấm điểm trên child, trả về parent; điểm parent là max điểm child (số minh họa)](assets/figures/04/parent-child.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.14 — Small-to-big: chấm điểm trên child, trả về parent; điểm parent là max điểm child (số minh họa).</figcaption>
+</figure>
+<!-- /fig -->
 
 **Trade-off:** context gửi LLM lớn hơn (tốn token); parent quá lớn lại quay về vấn đề "lost in the middle". Khi nào không dùng: tài liệu vốn đã ngắn và tự đủ nghĩa (macro, Q/A từ ticket) — chunk chính là parent.
 
@@ -658,6 +770,14 @@ $$
 
 So với cách thường $\mathbf{e}_j = \mathrm{pool}\big(\mathrm{Enc}(x_{a_j:b_j})\big)$, khác biệt duy nhất là thứ tự "encode rồi cắt" thay vì "cắt rồi encode". Không cần LLM, không tăng số vector, chi phí xấp xỉ một lượt encode tài liệu.
 
+<!-- fig:late-chunking -->
+<figure markdown="span">
+  ![Cắt rồi encode so với late chunking: ở late chunking, vector token đã «thấy» cả tài liệu trước khi bị chia đoạn](assets/figures/04/late-chunking.light.svg#only-light){ loading=lazy }
+  ![Cắt rồi encode so với late chunking: ở late chunking, vector token đã «thấy» cả tài liệu trước khi bị chia đoạn](assets/figures/04/late-chunking.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.15 — Cắt rồi encode so với late chunking: ở late chunking, vector token đã «thấy» cả tài liệu trước khi bị chia đoạn.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Điều kiện và giới hạn:** cần model ngữ cảnh dài và pooling dạng mean (bài báo thử trên các model như jina-embeddings-v2/v3). Với model dùng last-token pooling (Qwen3-Embedding, Harrier), mean-pool trên một đoạn token không phải là cách model được huấn luyện → phải đo trước khi dùng. Tài liệu dài hơn ngữ cảnh model thì phải chia cửa sổ (có overlap).
 
 ### 8.8 Contextual Retrieval (Anthropic, 2024)
@@ -667,6 +787,14 @@ So với cách thường $\mathbf{e}_j = \mathrm{pool}\big(\mathrm{Enc}(x_{a_j:b
 **Ý tưởng.** Anthropic công bố ngày 19/9/2024: với mỗi chunk, dùng một LLM đọc *toàn bộ tài liệu* và viết một đoạn ngữ cảnh ngắn (thường 50–100 token) giải thích chunk này nằm ở đâu và nói về gì; **ghép đoạn ngữ cảnh vào đầu chunk** trước khi tạo cả embedding ("contextual embeddings") lẫn chỉ mục BM25 ("contextual BM25").
 
 **Kết quả họ báo cáo** (trên các bộ dữ liệu của họ, đo tỷ lệ truy hồi thất bại trong top-20): từ 5.7% xuống 3.7% với contextual embeddings (giảm 35%); xuống 2.9% khi thêm contextual BM25 (giảm 49%); xuống 1.9% khi thêm reranking (giảm 67%). Họ ước tính chi phí tạo ngữ cảnh khoảng 1.02 USD cho mỗi triệu token tài liệu nhờ **prompt caching** (tài liệu được cache một lần, mỗi chunk chỉ trả tiền phần nhỏ thay đổi) — con số theo bảng giá tại thời điểm đó. Họ cũng lưu ý: nếu toàn bộ kho tri thức nhỏ hơn khoảng 200.000 token, có thể đưa thẳng vào prompt thay vì RAG (xem CAG — Module 08).
+
+<!-- fig:contextual-retrieval -->
+<figure markdown="span">
+  ![Trái: chunk được ghép đoạn ngữ cảnh do LLM viết](assets/figures/04/contextual-retrieval.light.svg#only-light){ loading=lazy }
+  ![Trái: chunk được ghép đoạn ngữ cảnh do LLM viết](assets/figures/04/contextual-retrieval.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.16 — Trái: chunk được ghép đoạn ngữ cảnh do LLM viết. Phải: tỷ lệ truy hồi thất bại top-20 theo số liệu Anthropic công bố (9/2024), phần trăm giảm so với baseline.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Prompt (diễn đạt lại, áp cho Zendesk):**
 
@@ -686,6 +814,14 @@ Chỉ trả về các câu đó.
 ### 8.9 Proposition indexing
 
 **Ý tưởng (Chen et al., 2023, "Dense X Retrieval").** Đơn vị truy hồi là **mệnh đề (proposition)**: một phát biểu nguyên tử, tự đủ nghĩa, chứa đúng một sự kiện. Dùng LLM (họ huấn luyện một "Propositionizer") viết lại đoạn văn thành danh sách mệnh đề, thay đại từ bằng danh từ đầy đủ. Ví dụ, đoạn "Tính năng này chỉ có ở gói Pro. Nó cho phép xuất tối đa 500 hóa đơn mỗi lần." thành: "Tính năng xuất hóa đơn hàng loạt chỉ có ở gói Pro." và "Tính năng xuất hóa đơn hàng loạt cho phép xuất tối đa 500 hóa đơn mỗi lần." Bài báo cho thấy index theo mệnh đề vượt index theo passage trong các thử nghiệm truy hồi và QA của họ.
+
+<!-- fig:proposition -->
+<figure markdown="span">
+  ![Proposition indexing trên ví dụ của mục 8](assets/figures/04/proposition.light.svg#only-light){ loading=lazy }
+  ![Proposition indexing trên ví dụ của mục 8](assets/figures/04/proposition.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.17 — Proposition indexing trên ví dụ của mục 8.9: đoạn văn thành các mệnh đề tự đủ nghĩa.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Trade-off:** số vector tăng nhiều lần, chi phí LLM khi ingest, rủi ro LLM viết sai khi tách; thường kết hợp với small-to-big (index mệnh đề, trả về đoạn gốc). Hợp nhất với **chính sách và điều khoản** — nơi từng sự kiện riêng lẻ ("hoàn tiền trong 14 ngày") cần được tìm chính xác.
 
@@ -758,6 +894,14 @@ sequenceDiagram
 
 **Diff theo hash chunk.** Bài 20 chunk sửa một đoạn thì đừng embed lại cả 20: so `content_hash` từng chunk mới với tập hash cũ của `doc_id`, chỉ embed hash mới, xóa hash không còn. Với Contextual Retrieval, tái tạo ngữ cảnh cho cả tài liệu (rẻ nhờ caching) nhưng chỉ embed lại chunk có văn bản cuối thay đổi.
 
+<!-- fig:hash-diff -->
+<figure markdown="span">
+  ![Cập nhật tăng dần theo contenthash: chỉ chunk có hash mới được embed lại](assets/figures/04/hash-diff.light.svg#only-light){ loading=lazy }
+  ![Cập nhật tăng dần theo contenthash: chỉ chunk có hash mới được embed lại](assets/figures/04/hash-diff.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.18 — Cập nhật tăng dần theo content_hash: chỉ chunk có hash mới được embed lại.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Idempotency:** job theo khóa `(source_type, source_id, updated_at)`; chạy lại không tạo chunk trùng. Queue, retry, rate limit: Module 11.
 
 ### 9.3 Versioning
@@ -778,6 +922,14 @@ Khi khách yêu cầu xóa dữ liệu, hoặc ticket bị xóa trong Zendesk (x
 6. Backup: theo chính sách lưu trữ (thường hết hạn tự nhiên sau N ngày).
 
 Cần: **bảng lineage**; **tombstone** (`deleted=true`, loại khỏi truy vấn ngay, xóa vật lý sau — HNSW thường xóa kiểu này, Module 05); **job kiểm tra** định kỳ không còn chunk trỏ tới nguồn đã xóa.
+
+<!-- fig:deletion-lineage -->
+<figure markdown="span">
+  ![Một yêu cầu xóa lan tới mọi dạng dẫn xuất; bảng lineage là thứ cho biết phải xóa những gì](assets/figures/04/deletion-lineage.light.svg#only-light){ loading=lazy }
+  ![Một yêu cầu xóa lan tới mọi dạng dẫn xuất; bảng lineage là thứ cho biết phải xóa những gì](assets/figures/04/deletion-lineage.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 4.19 — Một yêu cầu xóa lan tới mọi dạng dẫn xuất; bảng lineage là thứ cho biết phải xóa những gì.</figcaption>
+</figure>
+<!-- /fig -->
 
 > **Liên hệ Zendesk.** Vì kho tri thức dùng chung đã che PII ở mục 6, yêu cầu xóa của một khách chủ yếu tác động tới raw, các dẫn xuất qua lineage và log — không phải "tìm tên khách trong 300.000 chunk". — phần thưởng của việc che PII sớm.
 
