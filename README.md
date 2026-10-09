@@ -4,7 +4,7 @@
 
 Website: https://hienguyen08.github.io/rag-masterclass/
 
-Giáo trình tiếng Việt ~8–9 giờ học: 15 module lý thuyết (toán + trực giác + ví dụ số + liên hệ thực tế) và 9 lab thực hành.
+Giáo trình tiếng Việt ~11 giờ học phần lõi và ~2,5 giờ phần mở rộng: 15 module lý thuyết (toán + trực giác + ví dụ số + liên hệ thực tế) và 9 lab thực hành.
 
 | Phần | Module |
 |---|---|

@@ -1,7 +1,7 @@
 # STYLE GUIDE — RAG Masterclass (dành cho người viết module)
 
 Khóa học: **"LLM & RAG từ nền tảng đến hệ thống production — xoay quanh bài toán AI tư vấn khách hàng qua Zendesk"**.
-Tổng thời lượng mục tiêu: ~8–9 giờ học (đọc + nghĩ + làm bài). Mỗi module là một "buổi giảng" 35–55 phút.
+Tổng thời lượng: ~11 giờ cho phần lõi (Module 00–12, Lab 01–05) và ~2,5 giờ cho phần mở rộng (Module 13–14, Lab 06–09); mục tiêu ban đầu là ~8–9 giờ. Mỗi module là một "buổi giảng" 35–55 phút.
 
 ## 1. Người học
 - Hiếu, sinh viên năm cuối Khoa học Máy tính (HCMUT), đã làm đồ án tốt nghiệp NLU/NER/RAG tự host (không dùng API LLM bên thứ ba), từng làm Rails full-stack.

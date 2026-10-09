@@ -7,7 +7,7 @@
 - Hiểu bài toán thực tế mà toàn bộ khóa học xoay quanh: **AI trả lời email khách hàng qua Zendesk và biết lúc nào phải gọi người**.
 - Nắm bản đồ kiến thức từ LLM nền tảng → RAG cơ bản → kỹ thuật cải tiến → đánh giá → hệ thống production.
 - Biết module nào trả lời câu hỏi thiết kế nào, để đọc có chủ đích thay vì đọc tuần tự một cách thụ động.
-- Có lịch học ~8–9 giờ và cách tự kiểm tra sau mỗi module.
+- Có lịch học ~11 giờ cho phần lõi (Module 00–12, Lab 01–05), thêm ~2,5 giờ cho phần mở rộng (Module 13–14, Lab 06–09), và cách tự kiểm tra sau mỗi module.
 
 ## 1. Bài toán: một ticket nội bộ rất ngắn, một hệ thống rất dài
 
@@ -92,7 +92,11 @@ flowchart TD
     J --> K
     K --> L[11 Production & quy mô]
     L --> M[12 Capstone: hệ thống AI CS Zendesk]
-    M -.thực hành.-> N[Labs 01–05]
+    M -.thực hành.-> N[Labs 01–09]
+    E --> O[13 RAG đa phương thức]
+    H --> O
+    H --> P[14 RAG trên dữ liệu có cấu trúc]
+    I --> P
 ```
 
 Có thể chia khóa học thành bốn tầng:
@@ -101,10 +105,11 @@ Có thể chia khóa học thành bốn tầng:
 2. **Pipeline RAG cốt lõi (03–07):** biểu diễn → chuẩn bị dữ liệu → tìm kiếm → tinh chỉnh kết quả tìm kiếm → sinh câu trả lời có căn cứ và an toàn.
 3. **Nâng cao (08–10):** kiến trúc nhiều bước/agentic, huấn luyện chuyên biệt, và đo lường để ra quyết định.
 4. **Hệ thống (11–12):** chạy ở quy mô thật, chi phí, bảo mật, và lắp tất cả lại thành bản thiết kế có thể triển khai.
+5. **Chuyên đề mở rộng (13–14):** tri thức không phải văn bản thuần — ảnh chụp màn hình, PDF, bảng — và dữ liệu có cấu trúc trong database/API.
 
 ## 4. Cách học khóa này
 
-### Lịch gợi ý (~8–9 giờ)
+### Lịch gợi ý (~11 giờ phần lõi + ~2,5 giờ phần mở rộng)
 
 | Buổi | Nội dung | Thời lượng |
 |---|---|---|
@@ -115,6 +120,10 @@ Có thể chia khóa học thành bốn tầng:
 | 5 | Module 08, 09 | ~95' |
 | 6 | Module 10 + Lab 02, 05 | ~80' |
 | 7 | Module 11, 12 + Lab 04 | ~135' |
+| 8 *(mở rộng)* | Module 13, 14 + Lab 08 | ~100' |
+| 9 *(mở rộng)* | Lab 06, 07, 09 | ~50' |
+
+Bảy buổi lõi cộng lại khoảng 675 phút (~11 giờ); hai buổi mở rộng thêm ~150 phút. Thời lượng ghi ở mỗi module là thời gian *đọc kỹ*; tự tính lại ví dụ số và làm bài tập thường mất gấp đôi. Nếu thời gian hạn chế, ưu tiên Module 02, 05, 07, 10, 12 và Lab 01, 04, 05.
 
 ### Cách đọc mỗi module
 

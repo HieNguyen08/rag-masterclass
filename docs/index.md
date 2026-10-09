@@ -7,7 +7,7 @@ hide:
 
 **LLM & RAG từ nền tảng đến hệ thống production — xoay quanh một bài toán thật: AI tư vấn khách hàng qua Zendesk.**
 
-Đây là một giáo trình tiếng Việt khoảng **8–9 giờ học**, đi từ toán của Transformer đến bản thiết kế hệ thống có thể triển khai. Mọi khái niệm đều được giải thích theo cùng một nhịp: *vấn đề cần giải quyết → trực giác → toán (có ví dụ số tính tay) → code → trade-off → liên hệ bài toán thực tế*.
+Đây là một giáo trình tiếng Việt khoảng **11 giờ học cho phần lõi** (Module 00–12, Lab 01–05) cộng **~2,5 giờ phần mở rộng** (Module 13–14, Lab 06–09), đi từ toán của Transformer đến bản thiết kế hệ thống có thể triển khai. Mọi khái niệm đều được giải thích theo cùng một nhịp: *vấn đề cần giải quyết → trực giác → toán (có ví dụ số tính tay) → code → trade-off → liên hệ bài toán thực tế*.
 
 <div class="grid cards" markdown>
 
@@ -33,7 +33,7 @@ hide:
 
     ---
 
-    5 lab trên dữ liệu mẫu đa ngôn ngữ: BM25 + dense + RRF, metric retrieval, reranker, mini RAG API bằng FastAPI, đánh giá và hiệu chuẩn escalation. Chạy được trên GPU 6 GB hoặc CPU.
+    9 lab trên dữ liệu mẫu đa ngôn ngữ: BM25 + dense + RRF, metric retrieval, reranker, mini RAG API bằng FastAPI, đánh giá và hiệu chuẩn escalation, agent LangGraph, fine-tune embedding, làm sạch + MinHash + che PII, xử lý query. Chạy được trên GPU 6 GB hoặc CPU.
 
 </div>
 
@@ -82,7 +82,7 @@ flowchart LR
 
 ## Cách học
 
-- **Tuần tự** nếu bạn mới với RAG: 00 → 12, mỗi buổi 1–2 module, làm lab sau Module 07 và 10.
+- **Tuần tự** nếu bạn mới với RAG: 00 → 12, mỗi buổi 1–2 module, làm lab sau Module 07 và 10; rồi 13–14 và Lab 06–09 khi cần.
 - **Theo mục tiêu** nếu đã có nền:
     - Cần dựng hệ thống ngay → 00, 07, 10, 11, 12.
     - Cần cải thiện chất lượng tìm kiếm → 03, 04, 05, 06, 09.
