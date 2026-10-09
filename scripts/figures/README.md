@@ -9,7 +9,7 @@ Mọi hình trong `docs/assets/figures/<module>/` được sinh bằng code tron
 | `insert.py` + `specs/m0X.py` | Chèn khối `<figure>` vào Markdown sau dòng neo, đánh số «Hình X.Y» theo thứ tự xuất hiện |
 
 ```bash
-pip install matplotlib numpy scipy
+pip install matplotlib numpy scipy scikit-learn
 cd scripts/figures
 python ch05.py                 # sinh lại toàn bộ hình Module 05
 python ch05.py ivf hnsw        # chỉ sinh lại vài hình
