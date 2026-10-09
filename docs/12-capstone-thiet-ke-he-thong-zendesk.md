@@ -90,6 +90,14 @@ $$
 
 Tức tương đương ~11 agent-ngày công mỗi ngày (8 giờ/ngày). Đây là ước lượng lạc quan để trình bày tiềm năng; con số thật phải đo bằng A/B (mục 10). So với ~1.450 USD/tháng chi phí LLM, lý do kinh doanh rõ ràng — nên **an toàn và chất lượng** mới là ràng buộc chính, không phải tiền token.
 
+<!-- fig:business-value -->
+<figure markdown="span">
+  ![Ước lượng lạc quan của mục 2 về thời gian agent tiết kiệm được ở giai đoạn 2 (giả định 8 phút/ticket, 25% tự trả lời, 50% có draft giúp tiết kiệm 3 phút)](assets/figures/12/business-value.light.svg#only-light){ loading=lazy }
+  ![Ước lượng lạc quan của mục 2 về thời gian agent tiết kiệm được ở giai đoạn 2 (giả định 8 phút/ticket, 25% tự trả lời, 50% có draft giúp tiết kiệm 3 phút)](assets/figures/12/business-value.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 12.1 — Ước lượng lạc quan của mục 2 về thời gian agent tiết kiệm được ở giai đoạn 2 (giả định 8 phút/ticket, 25% tự trả lời, 50% có draft giúp tiết kiệm 3 phút).</figcaption>
+</figure>
+<!-- /fig -->
+
 ---
 
 ## 3. Zendesk API dùng trong hệ thống
@@ -757,6 +765,14 @@ $$
 
 Ngưỡng này chỉ có nghĩa khi $\hat p$ được hiệu chuẩn tốt (ECE thấp). Trong thực tế ta còn chọn ngưỡng **theo intent** vì $C_w$ khác nhau: hướng dẫn thao tác (`how_to`) sai thì hậu quả nhẹ ($C_w$ nhỏ → ngưỡng thấp hơn), còn `account_access` sai có thể gây sự cố bảo mật ($C_w$ lớn → ngưỡng cao hơn hoặc cấm tự gửi).
 
+<!-- fig:cost-threshold -->
+<figure markdown="span">
+  ![Ngưỡng gửi theo chi phí của mục 8](assets/figures/12/cost-threshold.light.svg#only-light){ loading=lazy }
+  ![Ngưỡng gửi theo chi phí của mục 8](assets/figures/12/cost-threshold.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 12.2 — Ngưỡng gửi theo chi phí của mục 8.2: khi chi phí của một câu trả lời sai tăng, ngưỡng tiến về 1; hai đường ứng với hai mức chi phí chuyển người (giả định).</figcaption>
+</figure>
+<!-- /fig -->
+
 Kiểm tra bằng risk–coverage trên golden set phân tầng: với ngưỡng $\tau$, coverage = tỷ lệ ticket được SEND, risk = tỷ lệ sai trong số đã SEND. Chính sách đặt **ràng buộc cứng về risk** (ví dụ ≤ 2% trên khoảng tin cậy trên 95%) và tối đa coverage dưới ràng buộc đó. Nếu $\tau^*$ theo chi phí cho risk vượt ràng buộc, lấy ngưỡng chặt hơn.
 
 ### 8.3. Hàm quyết định (policy gate)
@@ -847,11 +863,27 @@ Chính sách này nên được **version hóa** (lưu `policy_version` vào m�
 | **2b. Mở rộng** | Thêm intent/ngôn ngữ (tiếng Nhật) theo từng cái, mỗi cái qua tiêu chí riêng | Từng intent | Như 2a, tính riêng cho intent/ngôn ngữ mới |
 | **3. Agentic có tool** (tùy chọn) | Tool đọc trạng thái tài khoản/đơn hàng qua API nội bộ (chỉ đọc) | Intent điều tra tài khoản | Đánh giá riêng cho tool use; quyền chỉ đọc; audit đầy đủ |
 
+<!-- fig:rollout-gates -->
+<figure markdown="span">
+  ![Các giai đoạn rollout và tiêu chí chuyển giai đoạn theo bảng mục 10](assets/figures/12/rollout-gates.light.svg#only-light){ loading=lazy }
+  ![Các giai đoạn rollout và tiêu chí chuyển giai đoạn theo bảng mục 10](assets/figures/12/rollout-gates.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 12.3 — Các giai đoạn rollout và tiêu chí chuyển giai đoạn theo bảng mục 10.</figcaption>
+</figure>
+<!-- /fig -->
+
 Nguyên tắc rollout:
 
 - **Mỗi lần chỉ thay đổi một biến** (intent, ngôn ngữ, model, prompt) để quy kết được nguyên nhân khi số liệu xấu đi.
 - **Kill switch** một cú bấm (feature flag) và **rollback tiêu chí tự động**: nếu risk đo trên mẫu review hằng ngày vượt 2× ngưỡng, hoặc CSAT tuần giảm > 0,3, hệ thống tự lui về giai đoạn trước.
 - **Kích thước mẫu**: để ước lượng risk 2% với sai số ±1% (CI 95%) cần cỡ $n \approx \frac{1{,}96^2 \times 0{,}02 \times 0{,}98}{0{,}01^2} \approx 753$ câu trả lời đã gửi được review — tức với 10% lưu lượng (~40 lượt SEND/ngày, giả định) mất khoảng 3 tuần. Đây là lý do mỗi giai đoạn cần "≥ 2 tuần" và review có lấy mẫu chủ động (Module 10).
+
+<!-- fig:review-sample-size -->
+<figure markdown="span">
+  ![Số câu trả lời đã gửi cần review để ước lượng tỉ lệ sai với sai số mong muốn (xấp xỉ chuẩn, CI 95%)](assets/figures/12/review-sample-size.light.svg#only-light){ loading=lazy }
+  ![Số câu trả lời đã gửi cần review để ước lượng tỉ lệ sai với sai số mong muốn (xấp xỉ chuẩn, CI 95%)](assets/figures/12/review-sample-size.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 12.4 — Số câu trả lời đã gửi cần review để ước lượng tỉ lệ sai với sai số mong muốn (xấp xỉ chuẩn, CI 95%).</figcaption>
+</figure>
+<!-- /fig -->
 
 ---
 
@@ -868,6 +900,14 @@ Nguyên tắc rollout:
 | Pháp lý (chuyển dữ liệu xuyên biên giới) | Phụ thuộc kiến trúc | Cao | Data inventory, che PII ở gateway, hồ sơ đánh giá, self-host phần nhạy cảm |
 | Nhà cung cấp LLM đổi giá/deprecate/outage | Trung bình | Trung bình | Gateway trừu tượng; model dự phòng; eval regression trước khi đổi |
 | Chấp nhận của team CS thấp | Trung bình | Cao | Đưa CS vào thiết kế từ tuần 1; bắt đầu bằng draft; KPI chung |
+
+<!-- fig:risk-matrix -->
+<figure markdown="span">
+  ![Bảng rủi ro của mục 11 sắp theo khả năng và tác động](assets/figures/12/risk-matrix.light.svg#only-light){ loading=lazy }
+  ![Bảng rủi ro của mục 11 sắp theo khả năng và tác động](assets/figures/12/risk-matrix.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 12.5 — Bảng rủi ro của mục 11 sắp theo khả năng và tác động.</figcaption>
+</figure>
+<!-- /fig -->
 
 ---
 

@@ -86,6 +86,14 @@ $$
 
 Một tháng 30 ngày: ~1,17 tỷ token vào và ~76,5 triệu token ra. Tỷ lệ vào/ra ≈ 15:1 — điển hình cho RAG: **chi phí bị chi phối bởi input**, nên tối ưu input (ít chunk hơn, caching) đáng giá hơn tối ưu output.
 
+<!-- fig:tokens-per-step -->
+<figure markdown="span">
+  ![Token vào/ra của từng bước trong một lượt chạy theo bảng giả định của mục 1](assets/figures/11/tokens-per-step.light.svg#only-light){ loading=lazy }
+  ![Token vào/ra của từng bước trong một lượt chạy theo bảng giả định của mục 1](assets/figures/11/tokens-per-step.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.1 — Token vào/ra của từng bước trong một lượt chạy theo bảng giả định của mục 1.3.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 1.4. Chi phí theo ba phương án (giá tra cứu 06/10/2026)
 
 Giá tham khảo từ trang giá chính thức (USD / 1 triệu token, tier tiêu chuẩn):
@@ -143,6 +151,14 @@ $$
 
 Tức là khi lưu lượng vượt ~2,5 lần hiện tại, self-host bắt đầu cạnh tranh về tiền. Nhưng lý do mạnh nhất để self-host thường là **dữ liệu**: gửi email chứa PII sang API nước ngoài kéo theo nghĩa vụ chuyển dữ liệu xuyên biên giới (mục 7). Kiến trúc lai phổ biến: model nhỏ self-host làm phân loại + che PII, chỉ gửi văn bản đã che sang API lớn.
 
+<!-- fig:cost-options -->
+<figure markdown="span">
+  ![Trái: chi phí/tháng của các phương án ở mục 1](assets/figures/11/cost-options.light.svg#only-light){ loading=lazy }
+  ![Trái: chi phí/tháng của các phương án ở mục 1](assets/figures/11/cost-options.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.2 — Trái: chi phí/tháng của các phương án ở mục 1.4–1.5. Phải: điểm hòa vốn giữa API (phương án C) và self-host hai GPU với giá thuê giả định.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 1.6. Phân tích độ nhạy
 
 | Thừa số thay đổi | Ảnh hưởng tới $C_C$ | Bình luận |
@@ -150,6 +166,14 @@ Tức là khi lưu lượng vượt ~2,5 lần hiện tại, self-host bắt đ�
 | $r$ từ 2 → 3 (khách hay trả lời lại) | +50% | Debounce tin nhắn liên tiếp 2–3 phút giúp giảm $r$ |
 | Số chunk 6 → 10 | +~20% | Lý do đầu tư reranker (Module 06) |
 | Tỷ lệ ticket bị lọc trước LLM (spam, auto-reply, "cảm ơn") 15% | −15% | Bộ lọc rule rẻ nhất trong mọi tối ưu |
+
+<!-- fig:cost-sensitivity -->
+<figure markdown="span">
+  ![Phân tích độ nhạy của mục 1](assets/figures/11/cost-sensitivity.light.svg#only-light){ loading=lazy }
+  ![Phân tích độ nhạy của mục 1](assets/figures/11/cost-sensitivity.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.3 — Phân tích độ nhạy của mục 1.6: số lượt chạy mỗi ticket là thừa số ảnh hưởng mạnh nhất.</figcaption>
+</figure>
+<!-- /fig -->
 
 > **Liên hệ Zendesk.** Trong hàng 1.500 ticket/ngày luôn có một phần không cần LLM: email tự động "Out of office", thông báo bounce, khách chỉ trả lời "Thanks!". Zendesk trigger có thể gắn tag (ví dụ `auto_reply`) dựa trên điều kiện tiêu đề/nội dung; worker đọc tag này và bỏ qua. Mỗi ticket bỏ qua tiết kiệm trọn một lượt ~0,016 USD và, quan trọng hơn, tránh AI trả lời một email tự động — vòng lặp hai bot trả lời nhau là sự cố có thật ở nhiều hệ thống.
 
@@ -227,6 +251,14 @@ $$
 
 **Vai trò của GQA** (Ainslie et al., 2023, arXiv:2305.13245). Nếu Qwen3-32B dùng multi-head attention đầy đủ ($n_{\text{kv}} = 64$ thay vì 8), KV cache lớn gấp $64/8 = 8$ lần: ~16,8 GB cho một sequence 8.000 token — một GPU 80 GB chỉ chứa nổi vài request. GQA cho nhiều query head dùng chung một cặp K/V, giảm bộ nhớ KV theo tỷ lệ $n_{\text{heads}}/n_{\text{kv}}$ với mất mát chất lượng nhỏ.
 
+<!-- fig:kv-cache-length -->
+<figure markdown="span">
+  ![Bộ nhớ KV cache theo độ dài sequence cho hai cấu hình Qwen3 (đọc từ config](assets/figures/11/kv-cache-length.light.svg#only-light){ loading=lazy }
+  ![Bộ nhớ KV cache theo độ dài sequence cho hai cấu hình Qwen3 (đọc từ config](assets/figures/11/kv-cache-length.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.4 — Bộ nhớ KV cache theo độ dài sequence cho hai cấu hình Qwen3 (đọc từ config.json) và một cấu hình giả định không dùng GQA.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 2.3. Ví dụ số: một GPU 80 GB chịu được bao nhiêu request đồng thời?
 
 Ngân sách bộ nhớ (vLLM mặc định dùng `--gpu-memory-utilization 0.92`, tức 92% VRAM — kiểm tra lại trong docs phiên bản bạn dùng):
@@ -250,6 +282,14 @@ Qwen3-32B có ~32,8 tỷ tham số. Giả định overhead (activation, CUDA gra
 
 Bài học: **với model 30B+ trên một GPU 80 GB, quantization trọng số gần như bắt buộc** để còn chỗ cho KV cache. Nhu cầu của chúng ta ở giờ đỉnh: định luật Little (mục 3.3) cho ~8 lượt chạy đồng thời, mỗi lượt chỉ một phần thời gian nằm ở bước sinh dài → 17 sequence đồng thời là dư.
 
+<!-- fig:gpu-memory-budget -->
+<figure markdown="span">
+  ![Bảng mục 2](assets/figures/11/gpu-memory-budget.light.svg#only-light){ loading=lazy }
+  ![Bảng mục 2](assets/figures/11/gpu-memory-budget.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.5 — Bảng mục 2.3 dưới dạng ngân sách VRAM: phần còn lại sau trọng số và overhead quyết định số sequence 8k chạy đồng thời.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Ví dụ số 3 — GPU 6 GB của bạn (RTX 4050).** Qwen3-8B INT4: trọng số ~$8{,}2 \times 10^9 \times 0{,}5$ byte ≈ 4,1 GB, cộng overhead ~1 GB, còn ~0,5 GB cho KV → $0{,}5 \times 10^9 / 147.456 \approx 3.400$ token **tổng cho mọi request**. Không đủ cho một prompt RAG 7.000 token → lab 6 GB nên dùng model 1,5B–4B quantized, `--max-model-len` 4.096–8.192 (Bài tập 1).
 
 ### 2.4. PagedAttention: vì sao không cấp phát KV cache liền mạch
@@ -264,6 +304,14 @@ Ví dụ số: 20 sequence, độ dài thực tế trung bình 3.000 token, `max
 - PagedAttention (block 16): $\approx 20 \times (3.000 + 8) = 60.160$ slot → hiệu dụng >99%.
 
 Hệ quả phụ quan trọng: block có thể **chia sẻ** giữa các sequence có cùng prefix (copy-on-write) — nền tảng của prefix caching.
+
+<!-- fig:paged-attention -->
+<figure markdown="span">
+  ![Ví dụ mục 2](assets/figures/11/paged-attention.light.svg#only-light){ loading=lazy }
+  ![Ví dụ mục 2](assets/figures/11/paged-attention.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.6 — Ví dụ mục 2.4: cấp phát liền mạch theo max_seq_len lãng phí gần 2/3 slot; PagedAttention chỉ lãng phí nửa block cuối mỗi sequence.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 2.5. Continuous batching
 
@@ -305,6 +353,14 @@ $$
 $$
 
 Với $\alpha = 0{,}7$, $k = 4$: $\frac{1 - 0{,}7^5}{0{,}3} = \frac{1 - 0{,}168}{0{,}3} \approx 2{,}77$ token/lượt. Nếu chi phí một lượt verify ≈ một bước decode thường (vì decode bị giới hạn băng thông, verify thêm vài token gần như "miễn phí") và chi phí nháp nhỏ, tốc độ decode tăng ~2–2,5 lần.
+
+<!-- fig:speculative-decoding -->
+<figure markdown="span">
+  ![Số token kỳ vọng mỗi lượt verify của speculative decoding theo xác suất chấp nhận α và số token nháp k](assets/figures/11/speculative-decoding.light.svg#only-light){ loading=lazy }
+  ![Số token kỳ vọng mỗi lượt verify của speculative decoding theo xác suất chấp nhận α và số token nháp k](assets/figures/11/speculative-decoding.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.7 — Số token kỳ vọng mỗi lượt verify của speculative decoding theo xác suất chấp nhận α và số token nháp k.</figcaption>
+</figure>
+<!-- /fig -->
 
 vLLM hiện hỗ trợ nhiều phương pháp: n-gram (prompt lookup — tìm token tiếp theo bằng cách khớp n-gram trong chính prompt), EAGLE/EAGLE-3 (Li et al., 2025, arXiv:2503.01840), MTP, draft model riêng, suffix decoding… cấu hình bằng `--speculative-config` dạng JSON.
 
@@ -370,6 +426,14 @@ Nhận xét:
 
 SLO đề xuất: **95% ticket đủ điều kiện có draft/phản hồi trong 2 phút** từ `created_at` tới lúc comment AI được ghi (đủ cho một lần retry và chờ queue khi burst).
 
+<!-- fig:latency-budget -->
+<figure markdown="span">
+  ![Latency budget của mục 3](assets/figures/11/latency-budget.light.svg#only-light){ loading=lazy }
+  ![Latency budget của mục 3](assets/figures/11/latency-budget.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.8 — Latency budget của mục 3.2 (giả định): thanh là p50, vạch là p95 của từng bước.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 3.3. Định luật Little: cần bao nhiêu worker?
 
 Định luật Little cho hệ thống ổn định: số phần tử trung bình trong hệ thống bằng tốc độ đến nhân thời gian lưu trú trung bình:
@@ -385,6 +449,14 @@ L = 0{,}4 \times 20 = 8 \text{ lượt chạy đồng thời}.
 $$
 
 Mỗi worker là một coroutine async (phần lớn thời gian chờ I/O mạng tới LLM/Zendesk), nên **một process với 16–32 slot đồng thời** là đủ; triển khai 2 process trên 2 máy để chịu lỗi. Giữ mức sử dụng $\rho = \lambda/(c\mu)$ khoảng 50% ở đỉnh, vì thời gian chờ tăng rất nhanh khi $\rho \to 1$. Ràng buộc thật sự là rate limit của nhà cung cấp LLM và Zendesk, không phải số worker.
+
+<!-- fig:utilization-wait -->
+<figure markdown="span">
+  ![Minh họa định tính bằng hàng đợi M/M/1: thời gian lưu trú tăng rất nhanh khi mức sử dụng tiến tới 1 — lý do giữ ρ quanh 50% ở giờ đỉnh](assets/figures/11/utilization-wait.light.svg#only-light){ loading=lazy }
+  ![Minh họa định tính bằng hàng đợi M/M/1: thời gian lưu trú tăng rất nhanh khi mức sử dụng tiến tới 1 — lý do giữ ρ quanh 50% ở giờ đỉnh](assets/figures/11/utilization-wait.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.9 — Minh họa định tính bằng hàng đợi M/M/1: thời gian lưu trú tăng rất nhanh khi mức sử dụng tiến tới 1 — lý do giữ ρ quanh 50% ở giờ đỉnh.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 3.4. Rate limit của Zendesk API: tính ngân sách request
 
@@ -415,6 +487,14 @@ $$
 với $n$ là số lần đã thử, $t_0$ là thời gian chờ gốc, $U(a,b)$ là phân phối đều. Jitter ngẫu nhiên tránh hiện tượng **thundering herd**: sau một sự cố, hàng trăm job cùng thử lại đúng một thời điểm và lại làm sập dịch vụ. Nếu server trả `Retry-After`, luôn tôn trọng nó thay cho công thức.
 
 Ví dụ $t_0 = 1$ s: tổng thời gian chờ kỳ vọng qua 5 lần thử là $0{,}5 + 1 + 2 + 4 + 8 = 15{,}5$ s — vẫn trong SLO 2 phút.
+
+<!-- fig:backoff-jitter -->
+<figure markdown="span">
+  ![Exponential backoff với full jitter (t₀ = 1 s): mỗi lần thử chờ ngẫu nhiên trong 0, t₀·2ⁿ, nên các client tản ra thay vì thử lại cùng lúc](assets/figures/11/backoff-jitter.light.svg#only-light){ loading=lazy }
+  ![Exponential backoff với full jitter (t₀ = 1 s): mỗi lần thử chờ ngẫu nhiên trong 0, t₀·2ⁿ, nên các client tản ra thay vì thử lại cùng lúc](assets/figures/11/backoff-jitter.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.10 — Exponential backoff với full jitter (t₀ = 1 s): mỗi lần thử chờ ngẫu nhiên trong [0, t₀·2ⁿ], nên các client tản ra thay vì thử lại cùng lúc.</figcaption>
+</figure>
+<!-- /fig -->
 
 Hết số lần thử → **dead-letter queue (DLQ)** + alert, và **ticket phải được chuyển cho người** (tag `ai_failed`, group CS) — thất bại của AI không được làm ticket "biến mất".
 
@@ -479,6 +559,14 @@ Ví dụ số: giả sử một câu trả lời sai tốn $c_{\text{err}} = 5$ 
 
 Kết luận thực dụng của mình: **không dùng semantic cache cho câu trả lời cuối gửi khách**. Dạng an toàn hơn: cache **kết quả retrieval** cho query trùng sau chuẩn hóa, hoặc FAQ tĩnh thuần túy, vẫn qua verify; khóa cache gồm `tenant`, `locale`, `product`, `plan`.
 
+<!-- fig:semantic-cache -->
+<figure markdown="span">
+  ![Lợi ích ròng của semantic cache theo tỉ lệ trả lời sai khi trúng cache, với tỉ lệ trúng h = 0,3 và ba mức chi phí của một câu trả lời sai](assets/figures/11/semantic-cache.light.svg#only-light){ loading=lazy }
+  ![Lợi ích ròng của semantic cache theo tỉ lệ trả lời sai khi trúng cache, với tỉ lệ trúng h = 0,3 và ba mức chi phí của một câu trả lời sai](assets/figures/11/semantic-cache.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.11 — Lợi ích ròng của semantic cache theo tỉ lệ trả lời sai khi trúng cache, với tỉ lệ trúng h = 0,3 và ba mức chi phí của một câu trả lời sai.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 4.4. Bộ nhớ index: ước lượng
 
 Số chunk: ~158.000, làm tròn **200.000** để có dư địa tăng trưởng. Giả định embedding 1.024 chiều, float32 (4 byte):
@@ -496,6 +584,14 @@ $$
 Cộng payload/metadata (product, version, language, tenant, updated_at, visibility, URL, văn bản chunk ~2 KB): $200.000 \times 2 \text{ KB} \approx 400$ MB (có thể nằm trên đĩa). Tổng **dưới 1,5 GB** — vừa một instance Qdrant hoặc Postgres + pgvector cỡ nhỏ.
 
 Với int8 scalar quantization: vector còn ~205 MB; binary quantization: ~25,6 MB và rescoring bằng vector gốc trên đĩa (Module 03, 05). Ở quy mô 200.000 vector, **không cần sharding** — sharding là lời giải cho bài toán chưa tồn tại. Đây cũng là câu trả lời đúng trong phỏng vấn: nêu con số rồi kết luận "một node + replica đọc là đủ; shard khi vượt ~vài chục triệu vector hoặc khi cô lập tenant đòi hỏi".
+
+<!-- fig:index-memory -->
+<figure markdown="span">
+  ![Ước lượng bộ nhớ index của mục 4](assets/figures/11/index-memory.light.svg#only-light){ loading=lazy }
+  ![Ước lượng bộ nhớ index của mục 4](assets/figures/11/index-memory.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.12 — Ước lượng bộ nhớ index của mục 4.4 cho ba kiểu lưu vector.</figcaption>
+</figure>
+<!-- /fig -->
 
 Nếu cần shard (hàng chục triệu vector, hoặc cô lập theo khu vực như dữ liệu khách Nhật ở vùng Nhật), shard theo **tenant/khu vực** để truy vấn chỉ chạm một shard, thay vì shard theo hash phải scatter-gather.
 
@@ -724,6 +820,14 @@ $$
 
 Đánh đổi: latency tăng cho phần bị leo thang, và **chất lượng phụ thuộc hoàn toàn vào verifier** — chỉ bật sau khi đo risk–coverage (Module 10).
 
+<!-- fig:cascade-cost -->
+<figure markdown="span">
+  ![Chi phí kỳ vọng của cascade theo tỉ lệ q lượt model nhỏ đạt chuẩn (số liệu mục 8](assets/figures/11/cascade-cost.light.svg#only-light){ loading=lazy }
+  ![Chi phí kỳ vọng của cascade theo tỉ lệ q lượt model nhỏ đạt chuẩn (số liệu mục 8](assets/figures/11/cascade-cost.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.13 — Chi phí kỳ vọng của cascade theo tỉ lệ q lượt model nhỏ đạt chuẩn (số liệu mục 8.2).</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 8.3. Thứ tự áp dụng
 
 (1) Lọc ticket không cần AI → (2) routing tĩnh theo bước → (3) prompt/prefix caching → (4) giảm số chunk nhờ rerank → (5) cascade, chỉ khi verifier đã được đo. Batch API cho tác vụ offline làm song song. Semantic cache câu trả lời: không khuyến nghị.
@@ -787,6 +891,14 @@ $$
 | Đổi mật khẩu | 300 | 0,15 | 8 | 360 |
 
 Cụm "đổi mật khẩu" có nhiều ticket nhất nhưng tác động thấp nhất: kho đã có bài, chỉ thỉnh thoảng thiếu. Công thức bỏ qua hai thứ cần cân nhắc bằng tay: rủi ro (cụm liên quan chính sách giá/hoàn tiền cần ưu tiên dù ít ticket) và độ khó viết.
+
+<!-- fig:gap-impact -->
+<figure markdown="span">
+  ![Xếp ưu tiên lỗ hổng kho tri thức theo tác động (ví dụ giả định của mục 9](assets/figures/11/gap-impact.light.svg#only-light){ loading=lazy }
+  ![Xếp ưu tiên lỗ hổng kho tri thức theo tác động (ví dụ giả định của mục 9](assets/figures/11/gap-impact.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 11.14 — Xếp ưu tiên lỗ hổng kho tri thức theo tác động (ví dụ giả định của mục 9.4).</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 9.5 Quy trình hằng tuần
 

@@ -5,7 +5,7 @@ Mọi hình trong `docs/assets/figures/<module>/` được sinh bằng code tron
 | File | Nội dung |
 |---|---|
 | `figkit.py` | Bảng màu, style chung, xuất mỗi hình thành hai bản `.light.svg` / `.dark.svg` |
-| `ch00.py` … `ch13.py` | Hình của từng module (mỗi hàm `@figure("tên")` là một hình) |
+| `ch00.py` … `ch14.py` | Hình của từng module (mỗi hàm `@figure("tên")` là một hình) |
 | `insert.py` + `specs/m0X.py` | Chèn khối `<figure>` vào Markdown sau dòng neo, đánh số «Hình X.Y» theo thứ tự xuất hiện |
 
 ```bash
