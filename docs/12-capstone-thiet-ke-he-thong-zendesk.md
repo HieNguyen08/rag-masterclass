@@ -826,6 +826,7 @@ Chính sách này nên được **version hóa** (lưu `policy_version` vào m�
 - PDF (hóa đơn, hợp đồng) → gần như luôn thuộc intent nhạy cảm → không xử lý sâu, escalate.
 - Giới hạn: kích thước, số trang, loại file; file lạ (zip, exe) → bỏ qua và ghi chú cho agent.
 - Ảnh có thể chứa PII (màn hình danh sách khách hàng của khách): không lưu văn bản OCR quá thời hạn cần thiết.
+- Chỉ mở file có `malware_scan_result = malware_not_found`; luồng đầy đủ (phân loại ảnh, che PII trên ảnh, trích mã lỗi, tín hiệu escalate) ở [Module 13](13-rag-da-phuong-thuc.md), mục 6.
 
 ### 9.3. Đa ngôn ngữ
 

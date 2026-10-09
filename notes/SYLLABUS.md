@@ -17,6 +17,7 @@ Mỗi người viết chỉ đi sâu phần của mình; với chủ đề thu�
 | 10 | 10-danh-gia-rag.md | Đánh giá (offline/online), confidence & escalation | 45' |
 | 11 | 11-production-va-quy-mo.md | Serving, hiệu năng, chi phí, observability, bảo mật ở quy mô | 50' |
 | 12 | 12-capstone-thiet-ke-he-thong-zendesk.md | Capstone: thiết kế end-to-end AI CS Zendesk + system design interview | 55' |
+| 13 | 13-rag-da-phuong-thuc.md | Chuyên đề: RAG đa phương thức (ảnh chụp màn hình, PDF, bảng) | 45' |
 | L  | labs/ | Lab thực hành (GPU 6GB) | ~60' |
 
 ## Chi tiết
@@ -56,6 +57,9 @@ Khi nào fine-tune (embedding, reranker, generator) và khi nào không. Fine-tu
 
 ### 12 — Capstone: thiết kế hệ thống AI CS Zendesk
 Đi theo format system design: làm rõ yêu cầu (functional/non-functional), ước lượng, API Zendesk liên quan (webhook/trigger khi ticket tạo/cập nhật, đọc comments, tạo **internal note** vs **public reply**, cập nhật tags/group/assignee/custom fields, Help Center API, rate limits — kiểm tra docs chính thức), kiến trúc tổng (mermaid), luồng xử lý một ticket từ đầu đến cuối (ingest → phân loại intent/ngôn ngữ/độ nhạy → retrieval → draft → verify → quyết định gửi/draft/escalate → thông báo CS qua Slack/email + internal note tóm tắt cho agent), đồ thị LangGraph chi tiết (state schema, nodes, edges điều kiện, human-in-the-loop interrupt), chính sách escalation (bảng quy tắc + ngưỡng học được), multi-turn (khách trả lời lại), xử lý đính kèm, đa ngôn ngữ, rollout theo giai đoạn và tiêu chí chuyển giai đoạn, rủi ro & giảm thiểu, kế hoạch đánh giá, roadmap 8–10 tuần cho team nhỏ, mô tả tasks "Technical" và "Business" (như trong ticket). Kết thúc bằng bộ câu hỏi phỏng vấn system design về RAG (10–15 câu) có lời giải mẫu.
+
+### 13 — RAG đa phương thức (chuyên đề mở rộng)
+Vì sao parse làm mất thông tin (mô hình xác suất nối tiếp). Ba hướng: chuyển về văn bản (OCR cổ điển, parsing bằng VLM — Docling, PaddleOCR-VL, DeepSeek-OCR; thứ tự đọc; serialize và chunk bảng theo hàng; mô tả ảnh bằng VLM), truy xuất trên ảnh trang (ViT/visual token, CLIP/SigLIP, modality gap, DSE, ColPali — MaxSim trên patch, chi phí lưu trữ đa vector, token pooling, MUVERA, ViDoRe V1–V3), và lai. Generation với ảnh (chi phí token, citation theo trang, lỗi đặc thù của VLM). Luồng xử lý đính kèm Zendesk: `malware_scan_result`, phân loại ảnh, OCR + che PII trên ảnh, trích mã lỗi, prompt injection qua ảnh, tín hiệu escalate. Đánh giá: CER/WER (dấu tiếng Việt), Recall theo trang, phân tầng theo modality. Ma trận quyết định và khả năng chạy trên GPU 6 GB. Không lặp lại: BM25/ANN (Module 05), ColBERT/InfoNCE cơ bản (Module 03), che PII văn bản (Module 04), spotlighting (Module 07), hiệu chuẩn/ngưỡng (Module 10).
 
 ### labs/
 README.md + 4–5 lab ngắn, mỗi lab 1 file markdown có code đầy đủ: (1) BM25 + dense + RRF trên tập FAQ nhỏ tiếng Việt tự tạo; (2) chunking & đo Recall@k/MRR/nDCG; (3) reranker cross-encoder và đo cải thiện; (4) mini RAG với FastAPI + Ollama/vLLM model nhỏ quantized (vừa 6GB) có citation và abstention; (5) LLM-as-judge + tính ECE cho bộ phân loại escalate. Kèm dataset mẫu (CSV/JSONL) tự sinh trong thư mục labs/data.

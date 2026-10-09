@@ -93,6 +93,7 @@ Khách hay gửi ảnh chụp màn hình lỗi; tài liệu sản phẩm thườ
 - **Ảnh / PDF scan:** OCR (Tesseract, PaddleOCR — có hỗ trợ tiếng Việt và tiếng Nhật) hoặc **VLM** (vision-language model) để mô tả ảnh. Với ảnh chụp màn hình lỗi, cái cần là *thông điệp lỗi + màn hình nào*, nên một VLM nhỏ được prompt "trích nguyên văn thông báo lỗi, tên màn hình, mã lỗi" thường hữu ích hơn OCR thô.
 - **Lưu ý PII:** ảnh chụp màn hình thường chứa email, tên, số tài khoản của khách — phải chạy che PII *sau* OCR/VLM.
 - **Chi phí:** chỉ xử lý đính kèm cho ticket đang mở và tài liệu sản phẩm; với ticket lịch sử, bỏ qua ảnh trừ khi đo thấy thiếu thông tin.
+- **Đi sâu:** cách parse bảng, mô tả hình bằng VLM, truy xuất trực tiếp trên ảnh trang (ColPali) và luồng xử lý đính kèm an toàn (kiểm tra malware, che PII trên ảnh) ở [Module 13](13-rag-da-phuong-thuc.md).
 
 ### 2.5 Tài liệu sản phẩm, API, release notes, chính sách
 

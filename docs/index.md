@@ -63,6 +63,7 @@ Một ticket nội bộ chỉ có hai dòng mô tả:
 | | [10 · Đánh giá, confidence & escalation](10-danh-gia-rag.md) | nDCG, RAGAS, LLM-judge, thống kê, hiệu chuẩn, risk–coverage, A/B | 50' |
 | **IV · Hệ thống** | [11 · Production & quy mô](11-production-va-quy-mo.md) | Ước lượng tải/chi phí, vLLM, KV cache, cache, observability, bảo mật | 50' |
 | | [12 · Capstone](12-capstone-thiet-ke-he-thong-zendesk.md) | Thiết kế end-to-end, LangGraph, webhook Zendesk, chính sách escalation, roadmap | 55' |
+| **V · Chuyên đề mở rộng** | [13 · RAG đa phương thức](13-rag-da-phuong-thuc.md) | Ảnh chụp màn hình, PDF, bảng: OCR/VLM, ColPali, modality gap, đính kèm Zendesk an toàn | 45' |
 | **Thực hành** | [Labs 01–05](labs/index.md) | Code chạy được trên dữ liệu mẫu | 60–90' |
 
 ```mermaid
@@ -73,6 +74,7 @@ flowchart LR
     H --> I[08]
     D --> J[09]
     H & I & J --> K[10] --> L[11] --> M[12]
+    E & F & H --> P[13]
     M -.-> N[Labs]
 ```
 
@@ -82,6 +84,7 @@ flowchart LR
 - **Theo mục tiêu** nếu đã có nền:
     - Cần dựng hệ thống ngay → 00, 07, 10, 11, 12.
     - Cần cải thiện chất lượng tìm kiếm → 03, 04, 05, 06, 09.
+    - Tài liệu có nhiều ảnh, PDF, bảng hoặc khách hay gửi ảnh chụp màn hình → 04, 05, 07, rồi 13.
     - Chuẩn bị phỏng vấn AI engineer → phần *Câu hỏi tự kiểm tra* ở cuối mỗi module và mục câu hỏi system design ở Module 12.
 - Mỗi module kết thúc bằng **Lỗi thường gặp**, **Tóm tắt**, **Câu hỏi tự kiểm tra** (đáp án thu gọn), **Bài tập** và **Tài liệu tham khảo**.
 

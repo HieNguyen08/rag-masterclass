@@ -809,7 +809,7 @@ Một kỹ thuật nâng cao đáng đưa vào khi **cả ba** điều kiện đ
 | Nhạy cảm (~5%) | Rule → escalate ngay; draft hỗ trợ cho agent | Bất kỳ tự động gửi nào |
 | Báo cáo cho manager CS (offline) | GraphRAG global/LazyGraphRAG hoặc RAPTOR trên ticket | Chạy online trong đường trả lời khách |
 
-Lộ trình mình khuyên: bắt đầu với naive + rerank + guardrails cho FAQ (giai đoạn 1) → thêm CRAG-lite và decomposition khi golden set chỉ ra lỗi retrieval → thêm tuyến agent cho `account` sau khi có MCP server chỉ đọc và eval cho tool calling → các kỹ thuật nặng (graph, RAPTOR) chỉ khi có bằng chứng.
+Lộ trình mình khuyên: bắt đầu với naive + rerank + guardrails cho FAQ (giai đoạn 1) → thêm CRAG-lite và decomposition khi golden set chỉ ra lỗi retrieval → thêm tuyến agent cho `account` sau khi có MCP server chỉ đọc và eval cho tool calling → các kỹ thuật nặng (graph, RAPTOR) chỉ khi có bằng chứng. Tài liệu nhiều sơ đồ và bảng (PDF tích hợp, slide) là một trục phức tạp hóa riêng — truy xuất thị giác và lai văn bản–thị giác — được bàn ở [Module 13](13-rag-da-phuong-thuc.md).
 
 <!-- fig:architecture-by-route -->
 <figure markdown="span">

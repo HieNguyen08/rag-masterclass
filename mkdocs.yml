@@ -114,6 +114,8 @@ nav:
   - "Phần IV · Hệ thống":
       - "11 · Production & quy mô": 11-production-va-quy-mo.md
       - "12 · Capstone: hệ thống AI CS Zendesk": 12-capstone-thiet-ke-he-thong-zendesk.md
+  - "Phần V · Chuyên đề mở rộng":
+      - "13 · RAG đa phương thức": 13-rag-da-phuong-thuc.md
   - "Thực hành":
       - labs/index.md
       - "Lab 01 · BM25, dense, RRF": labs/lab01_bm25_dense_rrf.md
