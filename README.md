@@ -4,7 +4,7 @@
 
 Website: https://hienguyen08.github.io/rag-masterclass/
 
-Giáo trình tiếng Việt ~8–9 giờ học: 14 module lý thuyết (toán + trực giác + ví dụ số + liên hệ thực tế) và 5 lab thực hành.
+Giáo trình tiếng Việt ~8–9 giờ học: 15 module lý thuyết (toán + trực giác + ví dụ số + liên hệ thực tế) và 5 lab thực hành.
 
 | Phần | Module |
 |---|---|
@@ -12,7 +12,7 @@ Giáo trình tiếng Việt ~8–9 giờ học: 14 module lý thuyết (toán + 
 | II · Pipeline RAG | 03 Embedding · 04 Ingestion & chunking · 05 Retrieval · 06 Query & reranking · 07 Generation & guardrails |
 | III · Nâng cao | 08 Kiến trúc nâng cao & Agentic RAG · 09 Fine-tuning cho RAG · 10 Đánh giá, confidence & escalation |
 | IV · Hệ thống | 11 Production & quy mô · 12 Capstone: hệ thống AI CS Zendesk |
-| V · Chuyên đề mở rộng | 13 RAG đa phương thức (ảnh chụp màn hình, PDF, bảng) |
+| V · Chuyên đề mở rộng | 13 RAG đa phương thức (ảnh chụp màn hình, PDF, bảng) · 14 RAG trên dữ liệu có cấu trúc (tool, text-to-SQL) |
 | Thực hành | Lab 01–05 (`docs/labs/`) |
 
 ## Chạy website trên máy
@@ -27,7 +27,7 @@ mkdocs serve            # mở http://127.0.0.1:8000
 
 ```
 docs/                 nội dung website (Markdown)
-  00-…md … 13-…md     các module lý thuyết
+  00-…md … 14-…md     các module lý thuyết
   labs/               lab thực hành (.md + .py) và dữ liệu mẫu
   javascripts/        cấu hình MathJax
   stylesheets/        CSS bổ sung

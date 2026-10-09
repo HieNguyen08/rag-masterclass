@@ -18,6 +18,7 @@ Mỗi người viết chỉ đi sâu phần của mình; với chủ đề thu�
 | 11 | 11-production-va-quy-mo.md | Serving, hiệu năng, chi phí, observability, bảo mật ở quy mô | 50' |
 | 12 | 12-capstone-thiet-ke-he-thong-zendesk.md | Capstone: thiết kế end-to-end AI CS Zendesk + system design interview | 55' |
 | 13 | 13-rag-da-phuong-thuc.md | Chuyên đề: RAG đa phương thức (ảnh chụp màn hình, PDF, bảng) | 45' |
+| 14 | 14-rag-du-lieu-co-cau-truc.md | Chuyên đề: RAG trên dữ liệu có cấu trúc (tool, lớp metric, text-to-SQL) | 40' |
 | L  | labs/ | Lab thực hành (GPU 6GB) | ~60' |
 
 ## Chi tiết
@@ -60,6 +61,9 @@ Khi nào fine-tune (embedding, reranker, generator) và khi nào không. Fine-tu
 
 ### 13 — RAG đa phương thức (chuyên đề mở rộng)
 Vì sao parse làm mất thông tin (mô hình xác suất nối tiếp). Ba hướng: chuyển về văn bản (OCR cổ điển, parsing bằng VLM — Docling, PaddleOCR-VL, DeepSeek-OCR; thứ tự đọc; serialize và chunk bảng theo hàng; mô tả ảnh bằng VLM), truy xuất trên ảnh trang (ViT/visual token, CLIP/SigLIP, modality gap, DSE, ColPali — MaxSim trên patch, chi phí lưu trữ đa vector, token pooling, MUVERA, ViDoRe V1–V3), và lai. Generation với ảnh (chi phí token, citation theo trang, lỗi đặc thù của VLM). Luồng xử lý đính kèm Zendesk: `malware_scan_result`, phân loại ảnh, OCR + che PII trên ảnh, trích mã lỗi, prompt injection qua ảnh, tín hiệu escalate. Đánh giá: CER/WER (dấu tiếng Việt), Recall theo trang, phân tầng theo modality. Ma trận quyết định và khả năng chạy trên GPU 6 GB. Không lặp lại: BM25/ANN (Module 05), ColBERT/InfoNCE cơ bản (Module 03), che PII văn bản (Module 04), spotlighting (Module 07), hiệu chuẩn/ngưỡng (Module 10).
+
+### 14 — RAG trên dữ liệu có cấu trúc (chuyên đề mở rộng)
+Vì sao top-$k$ không trả lời được câu hỏi tổng hợp. Ba mức tự do: tool tham số hóa (luồng khách hàng), lớp metric/semantic layer, text-to-SQL (nội bộ). Pipeline text-to-SQL: schema linking bằng retrieval, truy xuất giá trị, chọn ví dụ (DAIL-SQL), sinh + tự sửa (DIN-SQL), bỏ phiếu theo kết quả; benchmark Spider/BIRD/Spider 2.0. Đánh giá: execution accuracy, đúng do trùng hợp, nhiều trạng thái database. Bảo mật: prompt-to-SQL injection, kết nối chỉ đọc, RLS Postgres, view theo tenant, kiểm tra truy vấn, timeout. Bảng lớn: TableRAG, Chain-of-Table. Ghép tool + RAG văn bản, trích dẫn dữ liệu, kiểm tra số liệu tất định. Không lặp lại: MCP/LangGraph (Module 08), structured output (Module 07), metadata filter/multi-tenant (Module 05).
 
 ### labs/
 README.md + 4–5 lab ngắn, mỗi lab 1 file markdown có code đầy đủ: (1) BM25 + dense + RRF trên tập FAQ nhỏ tiếng Việt tự tạo; (2) chunking & đo Recall@k/MRR/nDCG; (3) reranker cross-encoder và đo cải thiện; (4) mini RAG với FastAPI + Ollama/vLLM model nhỏ quantized (vừa 6GB) có citation và abstention; (5) LLM-as-judge + tính ECE cho bộ phân loại escalate. Kèm dataset mẫu (CSV/JSONL) tự sinh trong thư mục labs/data.

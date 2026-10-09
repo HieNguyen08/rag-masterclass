@@ -116,6 +116,7 @@ nav:
       - "12 · Capstone: hệ thống AI CS Zendesk": 12-capstone-thiet-ke-he-thong-zendesk.md
   - "Phần V · Chuyên đề mở rộng":
       - "13 · RAG đa phương thức": 13-rag-da-phuong-thuc.md
+      - "14 · RAG trên dữ liệu có cấu trúc": 14-rag-du-lieu-co-cau-truc.md
   - "Thực hành":
       - labs/index.md
       - "Lab 01 · BM25, dense, RRF": labs/lab01_bm25_dense_rrf.md
