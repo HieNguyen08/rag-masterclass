@@ -31,6 +31,14 @@ Naive RAG cố định ba thứ: **luôn** retrieve, retrieve **một lần** v�
 
 Hình thức hóa: tại bước $t$, hệ thống có trạng thái $s_t$ (câu hỏi, tài liệu đã có, bản nháp, lịch sử hành động) và chọn hành động $a_t \in \{\texttt{retrieve}(q, \text{kho}), \texttt{call\_tool}(\cdot), \texttt{generate}, \texttt{escalate}, \texttt{stop}\}$ theo một **chính sách** $\pi(a_t \mid s_t)$. Naive RAG là chính sách cố định "retrieve → generate → stop". Self-RAG học $\pi$ bằng token đặc biệt; CRAG và Adaptive-RAG dùng bộ phân loại nhỏ; agentic RAG để chính LLM làm $\pi$ (qua tool calling), còn LangGraph cho ta khung để **ràng buộc** $\pi$ bằng đồ thị.
 
+<!-- fig:control-loop -->
+<figure markdown="span">
+  ![Từ đường ống cố định sang chính sách điều khiển π chọn hành động theo trạng thái](assets/figures/08/control-loop.light.svg#only-light){ loading=lazy }
+  ![Từ đường ống cố định sang chính sách điều khiển π chọn hành động theo trạng thái](assets/figures/08/control-loop.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.1 — Từ đường ống cố định sang chính sách điều khiển π chọn hành động theo trạng thái.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 1.2 Mô hình chi phí cho kiến trúc có định tuyến
 
 Gọi $R$ là tập các "tuyến" (route) xử lý, $\pi_r$ là tỷ lệ ticket đi vào tuyến $r$, $n_r$ là số lượt gọi LLM trung bình của tuyến, $\ell_r$ là latency trung bình. Chi phí và latency kỳ vọng:
@@ -46,6 +54,14 @@ $$
 $$
 
 Nếu cho *mọi* ticket đi qua agent (5 lượt), chi phí gấp ~2,4 lần, latency tăng tương ứng, và — quan trọng hơn — bề mặt tấn công (tool calling) mở ra cho cả 100% ticket thay vì 15%. Đây là lý lẽ định lượng cho nguyên tắc: **định tuyến trước, phức tạp hóa có chọn lọc**.
+
+<!-- fig:routing-cost -->
+<figure markdown="span">
+  ![Số lượt LLM kỳ vọng của ví dụ mục 1](assets/figures/08/routing-cost.light.svg#only-light){ loading=lazy }
+  ![Số lượt LLM kỳ vọng của ví dụ mục 1](assets/figures/08/routing-cost.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.2 — Số lượt LLM kỳ vọng của ví dụ mục 1.2: định tuyến (≈ 2,1) so với cho mọi ticket qua agent (5).</figcaption>
+</figure>
+<!-- /fig -->
 
 > **Liên hệ Zendesk.** Với ~1.500 ticket/ngày × 3–4 lượt trao đổi, khác biệt 2,1 vs 5 lượt LLM mỗi lượt xử lý là ~11.000 vs ~26.000 lượt gọi/ngày (ước lượng). Con số cụ thể về tiền và GPU ở Module 11; ở đây hãy nhớ rằng phân phối intent của *chính bạn* (đo từ 200.000 ticket lịch sử) quyết định kiến trúc, không phải độ "hot" của kỹ thuật.
 
@@ -70,6 +86,14 @@ $$
 $$
 
 Ý tưởng sâu hơn nằm ở *cách tạo nhãn*: nhãn mã hóa **chi phí tối thiểu để đúng**. Có thể tổng quát hóa thành bài toán chọn hành động có chi phí: chọn $c^\star = \arg\min_c \big[\text{cost}(c) + \lambda\, \mathbb{1}[\text{sai} \mid c]\big]$.
+
+<!-- fig:adaptive-rag -->
+<figure markdown="span">
+  ![Adaptive-RAG tạo nhãn bằng cách chạy cả ba chiến lược và chọn chiến lược rẻ nhất vẫn trả lời đúng](assets/figures/08/adaptive-rag.light.svg#only-light){ loading=lazy }
+  ![Adaptive-RAG tạo nhãn bằng cách chạy cả ba chiến lược và chọn chiến lược rẻ nhất vẫn trả lời đúng](assets/figures/08/adaptive-rag.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.3 — Adaptive-RAG tạo nhãn bằng cách chạy cả ba chiến lược và chọn chiến lược rẻ nhất vẫn trả lời đúng.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Áp vào Zendesk.** Không nên có lớp A ("không retrieve") cho câu hỏi về sản phẩm — tri thức tham số của LLM về sản phẩm *của bạn* gần như bằng không và dễ bịa. Lớp A hợp lý chỉ cho lời cảm ơn, xác nhận đã nhận ("ok cảm ơn, mình thử rồi được"). Bảng nhãn thực tế mình khuyên:
 
@@ -104,6 +128,14 @@ $$
 hoặc (biến thể tường minh) sinh một câu hỏi nhắm vào đúng đoạn không chắc chắn. Bài báo dùng $\theta$ khác nhau theo dataset (khoảng 0,4–0,8) và $\beta$ thường 0,4.
 
 **Ví dụ số.** Email đang viết: "Để bật SSO, vào Cài đặt > Bảo mật, chọn ..." Câu tạm tiếp theo: "Nhập *Entity ID* và *Metadata URL* do *Okta* cung cấp." Xác suất token (rút gọn theo từ): Nhập 0,92; Entity 0,81; ID 0,95; Metadata 0,44; URL 0,88; Okta 0,31. Với $\theta = 0{,}5$: $\min = 0{,}31 < 0{,}5$ → retrieve. Với $\beta = 0{,}4$: che "Okta" (0,31), giữ "Metadata" (0,44 ≥ 0,4) → query "Nhập Entity ID và Metadata URL do ___ cung cấp". Kết quả retrieve có thể là bài "Cấu hình SAML với nhà cung cấp danh tính" — đúng tài liệu, không bị kéo về riêng Okta trong khi khách dùng Azure AD.
+
+<!-- fig:flare-tokens -->
+<figure markdown="span">
+  ![FLARE trên ví dụ mục 2](assets/figures/08/flare-tokens.light.svg#only-light){ loading=lazy }
+  ![FLARE trên ví dụ mục 2](assets/figures/08/flare-tokens.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.4 — FLARE trên ví dụ mục 2.2: token thấp nhất dưới θ kích hoạt retrieve; token dưới β bị che khỏi truy vấn.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Trade-off.** FLARE cần **logprobs** từng token (API thương mại không phải lúc nào cũng trả đủ; vLLM tự host thì có — Module 01). Mỗi câu có thể tốn hai lượt sinh. Xác suất token thấp không đồng nghĩa với sai (một tên riêng hiếm có xác suất thấp dù đúng), và xác suất cao không đồng nghĩa với đúng (model tự tin sai — vấn đề hiệu chuẩn, Module 10). Với email CS ngắn (150–250 từ), mình thấy FLARE hiếm khi đáng chi phí; một bước "retrieve đủ rộng + decomposition" (Module 06) thường tốt hơn. FLARE đáng thử khi sinh tài liệu dài (ví dụ báo cáo sự cố, tóm tắt release cho khách Enterprise).
 
@@ -156,6 +188,14 @@ Bản cài đặt chính thức tinh chỉnh công thức một chút: `IsSup` c
 
 Ứng viên từ $d_1$ được chọn. Nếu đặt $w^{\text{IsSup}} = 2$, khoảng cách còn lớn hơn: tính có căn cứ chi phối quyết định.
 
+<!-- fig:selfrag-scores -->
+<figure markdown="span">
+  ![Điểm phê bình Self-RAG của hai tài liệu trong ví dụ, tách theo IsRel/IsSup/IsUse, với wSup = 1 và 2](assets/figures/08/selfrag-scores.light.svg#only-light){ loading=lazy }
+  ![Điểm phê bình Self-RAG của hai tài liệu trong ví dụ, tách theo IsRel/IsSup/IsUse, với wSup = 1 và 2](assets/figures/08/selfrag-scores.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.5 — Điểm phê bình Self-RAG của hai tài liệu trong ví dụ, tách theo IsRel/IsSup/IsUse, với w_Sup = 1 và 2.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trade-off & áp dụng thực tế.** Self-RAG đòi hỏi **fine-tune generator** với từ vựng mở rộng — không áp dụng được trực tiếp cho API thương mại. Bài học hữu ích hơn cho production là *mẫu thiết kế*: tách các câu hỏi phê bình thành **tín hiệu có cấu trúc** (relevance của từng tài liệu, support của từng câu, utility tổng thể) và kết hợp tuyến tính với trọng số điều chỉnh được. Bạn có thể tái tạo điều này *không cần fine-tune*: reranker cho IsRel (Module 06), NLI/verifier cho IsSup (Module 07), LLM-judge cho IsUse — và tập trọng số $w$ trở thành tham số hiệu chuẩn ở Module 10. Nếu tự host và fine-tune (Module 09), có thể huấn luyện một generator nhỏ phát token kiểu `[Escalate]` theo đúng tinh thần Self-RAG.
 
 ### 3.2 CRAG — Corrective RAG
@@ -181,6 +221,14 @@ Ngưỡng được chọn theo dataset (ví dụ trên PopQA: $\tau_{\text{up}} 
 - **Ambiguous** → kết hợp cả tri thức nội bộ đã tinh lọc và kết quả web.
 
 **Ví dụ số.** Email: "API rate limit của gói Business là bao nhiêu request/phút?" Ba tài liệu có $e = (0{,}72;\ 0{,}10;\ -0{,}40)$, ngưỡng $\tau_{\text{up}} = 0{,}5$, $\tau_{\text{low}} = -0{,}9$ → có $e_1 \ge 0{,}5$ → **Correct**; strip từ $d_1$ được chấm và giữ lại câu chứa con số rate limit. Nếu $e = (0{,}2;\ -0{,}3;\ -0{,}5)$ → không tài liệu nào $\ge 0{,}5$, không phải tất cả $< -0{,}9$ → **Ambiguous**.
+
+<!-- fig:crag-thresholds -->
+<figure markdown="span">
+  ![Hai ngưỡng của CRAG chia trục điểm thành ba vùng hành động; hai bộ điểm là hai ví dụ trong bài](assets/figures/08/crag-thresholds.light.svg#only-light){ loading=lazy }
+  ![Hai ngưỡng của CRAG chia trục điểm thành ba vùng hành động; hai bộ điểm là hai ví dụ trong bài](assets/figures/08/crag-thresholds.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.6 — Hai ngưỡng của CRAG chia trục điểm thành ba vùng hành động; hai bộ điểm là hai ví dụ trong bài.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Áp vào Zendesk — thay "web search" bằng gì?** Đây là chỗ phải điều chỉnh mạnh. Với CS, **không** dùng web công khai làm fallback cho câu hỏi chính sách/sản phẩm: web không biết chính sách của bạn, và là nguồn prompt injection gián tiếp (Module 07, OWASP LLM01). Ánh xạ hợp lý:
 
@@ -255,6 +303,14 @@ $$
 
 Trực giác: mỗi câu suy luận "đẩy" query về đúng vùng không gian embedding của bước tiếp theo — giống HyDE (Module 06) nhưng lặp và có trạng thái.
 
+<!-- fig:multihop -->
+<figure markdown="span">
+  ![Trái: vết ReAct/IRCoT của ví dụ mục 4](assets/figures/08/multihop.light.svg#only-light){ loading=lazy }
+  ![Trái: vết ReAct/IRCoT của ví dụ mục 4](assets/figures/08/multihop.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.7 — Trái: vết ReAct/IRCoT của ví dụ mục 4.3. Phải: xác suất có đủ chuỗi tài liệu với một lần và hai bước retrieve (số minh họa của mục 4.1).</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 4.3 ReAct — suy luận + hành động với tool
 
 Yao et al. (2022, ICLR 2023) — *ReAct* — tổng quát hóa: model sinh xen kẽ **Thought** (suy nghĩ), **Action** (gọi tool: search, lookup, API…), **Observation** (kết quả tool trả về). Retrieval chỉ là một tool trong số nhiều. Đây là tổ tiên trực tiếp của tool calling hiện đại: các API LLM ngày nay trả về `tool_calls` có cấu trúc thay vì chuỗi "Action: …" để parse.
@@ -291,6 +347,14 @@ Sarthi et al. (2024, ICLR) — RAPTOR — xây một **cây** từ dưới lên:
 
 Khi truy vấn, cách tốt nhất trong bài là **collapsed tree**: trải phẳng *mọi* node (lá và tóm tắt các tầng) vào một chỉ mục, rồi retrieve theo similarity cho tới khi hết ngân sách token (bài dùng ~2.000 token). Nhờ đó câu hỏi chi tiết trúng lá, câu hỏi tổng hợp trúng node tóm tắt — "độ phân giải" tự khớp với câu hỏi. Tóm tắt trong bài nén còn khoảng 28% độ dài các con của nó.
 
+<!-- fig:raptor-tree -->
+<figure markdown="span">
+  ![RAPTOR: cây tóm tắt xây từ dưới lên, và collapsed tree trải phẳng mọi node vào một chỉ mục](assets/figures/08/raptor-tree.light.svg#only-light){ loading=lazy }
+  ![RAPTOR: cây tóm tắt xây từ dưới lên, và collapsed tree trải phẳng mọi node vào một chỉ mục](assets/figures/08/raptor-tree.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.8 — RAPTOR: cây tóm tắt xây từ dưới lên, và collapsed tree trải phẳng mọi node vào một chỉ mục.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 5.3 Toán phân cụm: UMAP + GMM + BIC
 
 **Vì sao giảm chiều trước?** Embedding có $d$ cỡ 768–1024. Trong không gian chiều cao, khoảng cách giữa các điểm tập trung quanh một giá trị (hiện tượng tập trung độ đo — concentration of measure), và GMM với ma trận hiệp phương sai đầy đủ có $O(d^2)$ tham số mỗi thành phần — không ước lượng nổi với vài trăm điểm. RAPTOR dùng **UMAP** giảm xuống vài chiều; tham số `n_neighbors` điều khiển cấu trúc toàn cục (giá trị lớn) hay cục bộ (giá trị nhỏ), và bài dùng hai cấp: phân cụm toàn cục trước, rồi phân cụm cục bộ trong mỗi cụm toàn cục.
@@ -324,6 +388,14 @@ Chọn $K$ làm BIC nhỏ nhất: số hạng đầu thưởng mô hình khớp 
 - $K = 8$: $p = 8 \cdot 65 + 7 = 527$, phạt $\approx 2.793$. Giả sử $-2\ln\hat L = 2.900$ → BIC ≈ 5.693.
 
 Chọn $K = 5$ (log-likelihood là số giả định để minh họa). Ví dụ này cũng cho thấy vì sao phải giảm chiều: với $d' = 768$, mỗi thành phần có ~296.000 tham số — vô nghĩa với 200 điểm.
+
+<!-- fig:gmm-bic -->
+<figure markdown="span">
+  ![Trái: GMM cho phân cụm mềm (dữ liệu mô phỏng; vòng đen là điểm thuộc hơn một cụm)](assets/figures/08/gmm-bic.light.svg#only-light){ loading=lazy }
+  ![Trái: GMM cho phân cụm mềm (dữ liệu mô phỏng; vòng đen là điểm thuộc hơn một cụm)](assets/figures/08/gmm-bic.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.9 — Trái: GMM cho phân cụm mềm (dữ liệu mô phỏng; vòng đen là điểm thuộc hơn một cụm). Phải: BIC của ví dụ mục 5.3.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 5.4 Khi nào dùng RAPTOR cho CS
 
@@ -375,6 +447,14 @@ $$
 
 Nếu gộp tất cả vào một cộng đồng: $Q = \frac{7}{7} - 1^2 = 0$. Phân hoạch hai cụm tốt hơn hẳn — đúng trực giác "chủ đề SSO" và "chủ đề thanh toán".
 
+<!-- fig:modularity -->
+<figure markdown="span">
+  ![Đồ thị 6 node của ví dụ mục 6](assets/figures/08/modularity.light.svg#only-light){ loading=lazy }
+  ![Đồ thị 6 node của ví dụ mục 6](assets/figures/08/modularity.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.10 — Đồ thị 6 node của ví dụ mục 6.3 và modularity của phân hoạch hai cộng đồng.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Louvain → Leiden.** Tối đa hóa $Q$ là NP-khó; Louvain là heuristic tham lam (chuyển node cục bộ để tăng $Q$ → gộp cộng đồng thành siêu-node → lặp). Traag, Waltman & van Eck (2019, *Scientific Reports*) chỉ ra Louvain có thể tạo cộng đồng **không liên thông** bên trong, và đề xuất **Leiden** thêm pha **tinh chỉnh** (refinement) giữa pha di chuyển node và pha gộp, đảm bảo cộng đồng liên thông tốt, đồng thời hội tụ nhanh hơn. Áp dụng đệ quy (mỗi cộng đồng lại được chia tiếp) cho ra phân cấp mà GraphRAG dùng.
 
 ### 6.4 Truy vấn: local vs global
@@ -395,6 +475,14 @@ $$
 $$
 
 với $\mathbf{P}$ là ma trận chuyển (chuẩn hóa theo hàng), $\mathbf{e}_{\text{seed}}$ là phân phối khởi động tập trung vào node seed, $\alpha$ là xác suất "đi tiếp". Node có $r$ cao là node "gần" seed theo nhiều đường — cho phép multi-hop **trong một bước retrieve**. HippoRAG 2 (Gutiérrez et al., 2025, "From RAG to Memory") cải tiến theo hướng trí nhớ liên tục (continual) cho LLM.
+
+<!-- fig:ppr -->
+<figure markdown="span">
+  ![Personalized PageRank trên một đồ thị đồ chơi với seed «SSO»: các node gần seed theo nhiều đường nhận điểm cao](assets/figures/08/ppr.light.svg#only-light){ loading=lazy }
+  ![Personalized PageRank trên một đồ thị đồ chơi với seed «SSO»: các node gần seed theo nhiều đường nhận điểm cao](assets/figures/08/ppr.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.11 — Personalized PageRank trên một đồ thị đồ chơi với seed «SSO»: các node gần seed theo nhiều đường nhận điểm cao.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 6.6 Khi nào graph đáng tiền cho Zendesk?
 
@@ -425,6 +513,14 @@ $$
 
 với $\rho$ là tỷ lệ câu hỏi bị chuyển. Nếu $c_{\text{LC}} = 20\, c_{\text{RAG}}$ và $\rho = 0{,}15$: $\mathbb{E}[\text{cost}] = c_{\text{RAG}}(1 + 3) = 4\,c_{\text{RAG}}$ — vẫn rẻ hơn 5 lần so với LC cho mọi câu.
 
+<!-- fig:selfroute-cost -->
+<figure markdown="span">
+  ![Chi phí kỳ vọng của Self-Route theo tỷ lệ chuyển ρ, với giả định cLC = 20·cRAG](assets/figures/08/selfroute-cost.light.svg#only-light){ loading=lazy }
+  ![Chi phí kỳ vọng của Self-Route theo tỷ lệ chuyển ρ, với giả định cLC = 20·cRAG](assets/figures/08/selfroute-cost.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.12 — Chi phí kỳ vọng của Self-Route theo tỷ lệ chuyển ρ, với giả định c_LC = 20·c_RAG.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 7.2 CAG — Cache-Augmented Generation
 
 Chan et al. (2024, "Don't Do RAG: When Cache-Augmented Generation is All You Need for Knowledge Tasks") đề xuất: khi kho tri thức **nhỏ và ổn định**, nạp toàn bộ vào context **một lần**, tính trước **KV cache**, lưu lại; mỗi câu hỏi chỉ cần nối câu hỏi vào sau cache (và cắt bỏ phần token mới sau khi trả lời để tái sử dụng cache). Không có retrieval → không có lỗi chọn tài liệu, không có latency retrieve.
@@ -436,6 +532,14 @@ M_{KV} = 2 \cdot n_\ell \cdot n_{kv} \cdot d_h \cdot b \cdot L .
 $$
 
 **Ví dụ số.** Một model cỡ 8B kiểu GQA với $n_\ell = 32$, $n_{kv} = 8$, $d_h = 128$, FP16 ($b = 2$): mỗi token $2 \cdot 32 \cdot 8 \cdot 128 \cdot 2 = 131.072$ byte = 128 KiB. 800 bài Help Center × ~1.200 token ≈ 960.000 token — vượt context của phần lớn model và cần ~117 GiB KV cache: **CAG không khả thi cho toàn bộ Help Center**. Nhưng **300 macro × ~250 token ≈ 75.000 token** → ~9,2 GiB KV: khả thi trên một GPU datacenter, không khả thi trên RTX 4050 6 GB (đã chiếm gần hết bởi trọng số model quantized).
+
+<!-- fig:cag-kv-memory -->
+<figure markdown="span">
+  ![Bộ nhớ KV cache cho các kho tri thức theo công thức mục 7](assets/figures/08/cag-kv-memory.light.svg#only-light){ loading=lazy }
+  ![Bộ nhớ KV cache cho các kho tri thức theo công thức mục 7](assets/figures/08/cag-kv-memory.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.13 — Bộ nhớ KV cache cho các kho tri thức theo công thức mục 7.2 (trục log); kho chính sách dùng giả định ~30K token.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 7.3 Ma trận quyết định cho CS
 
@@ -467,6 +571,14 @@ Có một dải liên tục từ cứng đến tự do:
 
 Với CS production, mình khuyên dừng ở mức thứ tư: **đồ thị do người viết** (các bước, các cổng kiểm tra, điểm dừng cho người duyệt), bên trong có **một** node agent tự do gọi tool đọc trong một ngân sách. Đây chính là điều LangGraph được thiết kế để làm.
 
+<!-- fig:agent-spectrum -->
+<figure markdown="span">
+  ![Dải mức tự chủ của hệ thống RAG; mức được khuyến nghị cho CS là agent có tool nằm trong đồ thị ràng buộc](assets/figures/08/agent-spectrum.light.svg#only-light){ loading=lazy }
+  ![Dải mức tự chủ của hệ thống RAG; mức được khuyến nghị cho CS là agent có tool nằm trong đồ thị ràng buộc](assets/figures/08/agent-spectrum.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.14 — Dải mức tự chủ của hệ thống RAG; mức được khuyến nghị cho CS là agent có tool nằm trong đồ thị ràng buộc.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 8.2 LangGraph: state machine cho LLM
 
 Tính đến 10/2026, LangGraph đã ở dòng 1.x (bản 1.0 phát hành tháng 10/2025; bản mới nhất trên PyPI khi viết là 1.2.x) và là nền tảng mà agent của LangChain được xây trên đó. Các khái niệm cốt lõi:
@@ -477,6 +589,14 @@ Tính đến 10/2026, LangGraph đã ở dòng 1.x (bản 1.0 phát hành tháng
 - **Checkpointer**: lưu state sau mỗi bước theo `thread_id` → **durable execution** (worker crash thì chạy tiếp từ checkpoint), xem lại lịch sử, và **human-in-the-loop**: một node gọi `interrupt(...)` để tạm dừng; về sau ứng dụng gọi lại đồ thị với `Command(resume=...)` để tiếp tục. Production dùng checkpointer bền (ví dụ Postgres) thay cho bộ nhớ trong RAM.
 
 Hình thức hóa: LangGraph là một máy trạng thái $\langle S, N, E, s_0 \rangle$ trong đó hàm chuyển tại node $n$ là $s \mapsto s \oplus f_n(s)$ ($\oplus$ là phép gộp theo reducer), và cạnh điều kiện $g: S \to N$. Điểm mấu chốt về an toàn: **tập hành động khả dĩ bị giới hạn bởi đồ thị**, không phải bởi những gì LLM "muốn" làm — đây là cách hiện thực hóa các pattern Action-Selector/Plan-Then-Execute ở Module 07.
+
+<!-- fig:langgraph-state -->
+<figure markdown="span">
+  ![LangGraph như một máy trạng thái: node trả về cập nhật, reducer gộp vào state, cạnh điều kiện chọn node tiếp](assets/figures/08/langgraph-state.light.svg#only-light){ loading=lazy }
+  ![LangGraph như một máy trạng thái: node trả về cập nhật, reducer gộp vào state, cạnh điều kiện chọn node tiếp](assets/figures/08/langgraph-state.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.15 — LangGraph như một máy trạng thái: node trả về cập nhật, reducer gộp vào state, cạnh điều kiện chọn node tiếp.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 8.3 Đồ thị agentic RAG cho Zendesk
 
@@ -647,6 +767,14 @@ tools = [t for t in tools if t.name in ALLOWED]
 
 Chi tiết then chốt: **định danh tenant không phải là tham số LLM điền**. Tool nhận `org_id` từ state (lấy từ Zendesk API ở `load_context`), được inject phía server/adapter. Nếu LLM được phép truyền `org_id`, một email chứa "kiểm tra hóa đơn của org 4711 giúp tôi" có thể khiến agent đọc dữ liệu khách khác (OWASP LLM02 + LLM03). Kết quả tool cũng là **dữ liệu không tin cậy** (log lỗi có thể chứa chuỗi do người dùng nhập) — spotlight trước khi đưa lại cho LLM (Module 07).
 
+<!-- fig:mcp-tenant -->
+<figure markdown="span">
+  ![orgid đi từ state qua adapter, không đi qua LLM; agent chỉ thấy các tool chỉ đọc trong allowlist](assets/figures/08/mcp-tenant.light.svg#only-light){ loading=lazy }
+  ![orgid đi từ state qua adapter, không đi qua LLM; agent chỉ thấy các tool chỉ đọc trong allowlist](assets/figures/08/mcp-tenant.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.16 — org_id đi từ state qua adapter, không đi qua LLM; agent chỉ thấy các tool chỉ đọc trong allowlist.</figcaption>
+</figure>
+<!-- /fig -->
+
 > **Liên hệ Zendesk.** "Khi nào cần agent gọi tool?" — khi câu trả lời phụ thuộc **trạng thái riêng của khách** mà kho văn bản không thể chứa: "vì sao tài khoản tôi bị khóa", "hóa đơn tháng này sao cao hơn", "webhook của tôi không nhận được sự kiện từ hôm qua". Retrieval cho biết *chính sách và cách làm*; tool cho biết *chuyện gì đang xảy ra với khách này*. Draft tốt kết hợp cả hai: "Tài khoản của anh/chị bị tạm khóa do hóa đơn ngày 01/10 chưa thanh toán [T1]; theo chính sách, tài khoản sẽ mở lại tự động trong vòng 1 giờ sau khi thanh toán [S4]." — với `[T1]` là citation tới kết quả tool, được verify như mọi nguồn khác.
 
 ### 8.6 Memory: hội thoại và khách hàng
@@ -682,6 +810,14 @@ Một kỹ thuật nâng cao đáng đưa vào khi **cả ba** điều kiện đ
 | Báo cáo cho manager CS (offline) | GraphRAG global/LazyGraphRAG hoặc RAPTOR trên ticket | Chạy online trong đường trả lời khách |
 
 Lộ trình mình khuyên: bắt đầu với naive + rerank + guardrails cho FAQ (giai đoạn 1) → thêm CRAG-lite và decomposition khi golden set chỉ ra lỗi retrieval → thêm tuyến agent cho `account` sau khi có MCP server chỉ đọc và eval cho tool calling → các kỹ thuật nặng (graph, RAPTOR) chỉ khi có bằng chứng.
+
+<!-- fig:architecture-by-route -->
+<figure markdown="span">
+  ![Kiến trúc đề xuất cho từng loại ticket theo bảng mục 9](assets/figures/08/architecture-by-route.light.svg#only-light){ loading=lazy }
+  ![Kiến trúc đề xuất cho từng loại ticket theo bảng mục 9](assets/figures/08/architecture-by-route.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 8.17 — Kiến trúc đề xuất cho từng loại ticket theo bảng mục 9.2.</figcaption>
+</figure>
+<!-- /fig -->
 
 ---
 
