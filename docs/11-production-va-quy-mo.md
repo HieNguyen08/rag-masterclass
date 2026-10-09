@@ -16,6 +16,7 @@ Sau module này, bạn có thể:
 4. **Chọn chiến lược cache** phù hợp (embedding cache, prompt/prefix caching, semantic cache) và chỉ ra rủi ro sai lệch của semantic cache bằng phân tích chi phí kỳ vọng.
 5. **Thiết kế observability** (trace, metric, log che PII, alert, feedback loop) và một service FastAPI đạt chuẩn vận hành (healthcheck liveness/readiness, SSE cho UI nội bộ).
 6. **Liệt kê các yêu cầu tuân thủ** chính khi xử lý email khách hàng Việt Nam/Nhật bằng LLM (Luật BVDLCN 91/2025/QH15 và Nghị định 356/2025/NĐ-CP thay thế Nghị định 13/2023/NĐ-CP; APPI sửa đổi 2026) và chuyển chúng thành quyết định kiến trúc (ACL-aware retrieval, data residency, retention).
+7. **Dựng vòng phản hồi cho kho tri thức**: phân biệt thiếu nội dung / truy xuất trượt / lỗi thời từ log, gom cụm và gán nhãn chủ đề bằng c-TF-IDF, xếp ưu tiên theo tác động.
 
 ---
 
@@ -729,6 +730,131 @@ $$
 
 ---
 
+## 9. Vòng phản hồi bảo trì kho tri thức
+
+Mục 5.5 đóng vòng cho *hệ thống* (prompt, ngưỡng, index). Còn một vòng thứ hai thường bị bỏ quên: vòng cho *kho tri thức*. Điểm hỏng FP1 "missing content" của Module 02 (mục 6.2) không sửa được bằng retriever tốt hơn — chỉ sửa được bằng cách viết thêm hoặc cập nhật bài Help Center. Mục này biến log của hệ thống RAG thành danh sách việc có thứ tự ưu tiên cho người viết tài liệu.
+
+### 9.1 Vấn đề
+
+Kho 800 bài Help Center (giả định) thay đổi hằng tuần, nhưng không ai biết *bài nào còn thiếu*. Trong Zendesk, tính năng Content Cues (gợi ý bài cần viết dựa trên dữ liệu ticket) đã bị gỡ bỏ từ 01/05/2025; thông báo của Zendesk nói không có lựa chọn thay thế nào tái hiện đầy đủ chức năng đó. Hệ thống RAG của ta lại có sẵn tín hiệu tốt hơn bất kỳ báo cáo tìm kiếm nào: với *mỗi* email, ta biết retriever tìm được gì, model có abstain không, và agent đã sửa draft thế nào.
+
+### 9.2 Ba loại lỗ hổng, ba cách sửa
+
+Không phải mọi lần thất bại đều là "kho thiếu bài". Phân biệt đúng quyết định ai phải sửa:
+
+| Loại | Tín hiệu trong log | Ai sửa |
+|---|---|---|
+| **Thiếu nội dung** (content gap) | Abstain/escalate với lý do "không đủ căn cứ"; điểm rerank cao nhất thấp; agent trả lời bằng thông tin không có trong tài liệu nào được truy xuất (ví dụ thêm số liệu, bước làm mới) và không dán link bài nào | Người viết Help Center |
+| **Truy xuất trượt** (retrieval miss) | Agent dán link một bài *có* trong kho nhưng không nằm trong top-$k$ | Kỹ sư: retriever, query rewriting, đa ngữ (Module 05, 06, 09) |
+| **Nội dung lỗi thời** (stale) | Bài được truy xuất và trích dẫn, nhưng agent sửa đúng chỗ nói về tính năng/giá; hoặc bài cũ hơn release note liên quan | Người viết Help Center (cập nhật), kèm metadata hiệu lực (Module 04) |
+
+Điểm then chốt là link trong câu trả lời của agent: nó là nhãn yếu cho "tài liệu đúng" (Module 10, mục 5). Có link mà retriever không tìm thấy → lỗi kỹ thuật. Không có link nào và agent tự viết → khả năng cao kho thiếu.
+
+### 9.3 Từ hàng nghìn sự kiện đến vài chủ đề: gom cụm và gán nhãn
+
+Mỗi tuần có thể có hàng trăm sự kiện "thiếu nội dung". Người viết cần *chủ đề*, không cần danh sách email. Quy trình:
+
+1. **Lấy văn bản câu hỏi đã che PII** (Module 04, mục 6) của các sự kiện thiếu nội dung trong 1–2 tuần.
+2. **Embed và gom cụm** bằng embedding đa ngữ của Module 03 để email vi/en/ja cùng chủ đề rơi vào cùng cụm; dùng gom cụm phân cấp với ngưỡng khoảng cách cosine, hoặc HDBSCAN (không cần chọn trước số cụm, chấp nhận điểm nhiễu).
+3. **Gán nhãn cụm** bằng c-TF-IDF — biến thể TF-IDF theo lớp mà BERTopic (Grootendorst, 2022) dùng: gộp mọi văn bản của cụm $c$ thành một "tài liệu", rồi
+
+$$
+W_{t,c} = \mathrm{tf}_{t,c} \cdot \log\Big(1 + \frac{A}{f_t}\Big),
+$$
+
+với $\mathrm{tf}_{t,c}$ là tần suất từ $t$ trong cụm $c$, $f_t$ là tần suất của $t$ trên mọi cụm, $A$ là số từ trung bình mỗi cụm. Từ xuất hiện nhiều trong *một* cụm nhưng ít ở cụm khác được điểm cao.
+
+**Ví dụ số.** Hai cụm sau khi tách từ: cụm A = {hóa_đơn, hóa_đơn, mã_số_thuế, lỗi}, cụm B = {webhook, webhook, timeout, lỗi}. $A = 4$; $f_{\text{hóa\_đơn}} = 2$, $f_{\text{mã\_số\_thuế}} = 1$, $f_{\text{lỗi}} = 2$ (có ở cả hai cụm).
+
+- $W_{\text{hóa\_đơn},A} = 2 \ln(1 + 4/2) = 2\ln 3 \approx 2.20$
+- $W_{\text{mã\_số\_thuế},A} = 1 \cdot \ln(1 + 4/1) = \ln 5 \approx 1.61$
+- $W_{\text{lỗi},A} = 1 \cdot \ln(1 + 4/2) \approx 1.10$
+
+Nhãn cụm A là "hóa đơn, mã số thuế"; từ chung "lỗi" xếp cuối. Sau đó cho LLM viết một câu tóm tắt chủ đề từ nhãn + 5 câu hỏi đại diện (đã che PII) để người viết đọc nhanh.
+
+### 9.4 Xếp ưu tiên theo tác động
+
+Với cụm $c$, gọi $n_c$ là số ticket mỗi tuần thuộc cụm, $g_c$ là tỉ lệ ticket trong cụm thất bại vì thiếu nội dung, $h_c$ là thời gian xử lý trung bình của agent (phút) cho loại ticket đó. Phút agent có thể tiết kiệm mỗi tuần nếu lấp được lỗ hổng:
+
+$$
+\text{Impact}_c \approx n_c \cdot g_c \cdot h_c.
+$$
+
+| Cụm (giả định) | $n_c$/tuần | $g_c$ | $h_c$ (phút) | Impact (phút/tuần) |
+|---|---|---|---|---|
+| Xuất hóa đơn điện tử lỗi mã số thuế | 120 | 0,7 | 12 | 1.008 |
+| Cấu hình SSO với Azure AD | 40 | 0,9 | 25 | 900 |
+| Đổi mật khẩu | 300 | 0,15 | 8 | 360 |
+
+Cụm "đổi mật khẩu" có nhiều ticket nhất nhưng tác động thấp nhất: kho đã có bài, chỉ thỉnh thoảng thiếu. Công thức bỏ qua hai thứ cần cân nhắc bằng tay: rủi ro (cụm liên quan chính sách giá/hoàn tiền cần ưu tiên dù ít ticket) và độ khó viết.
+
+### 9.5 Quy trình hằng tuần
+
+```mermaid
+flowchart LR
+    T["Trace + kết quả draft<br/>(mục 5)"] --> G["Lọc sự kiện:<br/>thiếu nội dung / trượt / lỗi thời"]
+    G -->|"trượt"| ENG["Hàng đợi kỹ sư<br/>(golden set + retriever)"]
+    G -->|"thiếu / lỗi thời"| C["Gom cụm + c-TF-IDF<br/>+ tóm tắt LLM"]
+    C --> P["Xếp ưu tiên<br/>Impact + rủi ro"]
+    P --> W["Ticket cho người viết HC:<br/>chủ đề, ví dụ đã che PII,<br/>câu trả lời của agent"]
+    W --> HC["Bài mới / cập nhật<br/>(người duyệt)"]
+    HC --> IDX["Re-index tăng dần<br/>(mục 4.6)"]
+    IDX --> M["Đo lại g_c của cụm<br/>2–4 tuần sau"]
+```
+
+Ba nguyên tắc an toàn:
+
+- **Không tự động xuất bản bài do LLM viết từ ticket.** Câu trả lời của agent có thể là một ngoại lệ cho riêng một khách ("lần này bên mình hoàn tiền giúp anh") — biến nó thành bài Help Center là biến ngoại lệ thành chính sách. LLM chỉ được viết *bản nháp* cho người viết, và nội dung chính sách phải do người có thẩm quyền duyệt.
+- **Mọi thứ đi ra khỏi hệ thống đã che PII**, kể cả ví dụ đính kèm trong ticket gửi người viết (mục 5.4).
+- **Đo hiệu quả bằng so sánh trước/sau theo cụm**, có tính đến mùa vụ (ví dụ cuối tháng nhiều ticket hóa đơn hơn): so $g_c$ của cụm với một cụm đối chứng không được sửa trong cùng khoảng thời gian.
+
+### 9.6 Code: khai thác lỗ hổng từ trace (rút gọn)
+
+```python
+# Gom cụm sự kiện "thiếu nội dung" và xếp ưu tiên (chạy CPU)
+# events: list[dict] với các trường text (đã che PII), cluster_hint, aht_min, outcome, agent_links, retrieved_ids
+import math
+from collections import Counter
+import numpy as np
+from sklearn.cluster import AgglomerativeClustering
+
+def gap_type(e: dict) -> str | None:
+    links, got = set(e["agent_links"]), set(e["retrieved_ids"])
+    if links and not (links & got):
+        return "retrieval_miss"              # bài đúng có trong kho nhưng không được tìm thấy
+    if e["outcome"] in {"abstain", "escalate_no_evidence"} or (not links and e["agent_added_facts"]):
+        return "content_gap"
+    return None
+
+def cluster(emb: np.ndarray, threshold: float = 0.35) -> np.ndarray:
+    # emb đã chuẩn hóa L2; ngưỡng là khoảng cách cosine giữa hai cụm khi gộp (average linkage)
+    return AgglomerativeClustering(n_clusters=None, metric="cosine", linkage="average",
+                                   distance_threshold=threshold).fit_predict(emb)
+
+def ctfidf_labels(tokens_by_cluster: dict[int, list[str]], top: int = 4) -> dict[int, list[str]]:
+    tf = {c: Counter(toks) for c, toks in tokens_by_cluster.items()}
+    f = Counter()
+    for counts in tf.values():
+        f.update(counts)
+    A = np.mean([len(t) for t in tokens_by_cluster.values()])
+    return {c: [t for t, _ in sorted(((t, n * math.log(1 + A / f[t])) for t, n in counts.items()),
+                                     key=lambda x: -x[1])[:top]]
+            for c, counts in tf.items()}
+
+def impact(n_week: int, gap_rate: float, aht_min: float) -> float:
+    return n_week * gap_rate * aht_min
+
+# Ví dụ c-TF-IDF ở mục 9.3
+print(ctfidf_labels({0: ["hóa_đơn", "hóa_đơn", "mã_số_thuế", "lỗi"], 1: ["webhook", "webhook", "timeout", "lỗi"]}))
+print([impact(*r) for r in [(120, 0.7, 12), (40, 0.9, 25), (300, 0.15, 8)]])   # [1008.0, 900.0, 360.0]
+```
+
+Trường `agent_added_facts` cần một bước so sánh câu trả lời của agent với các chunk được truy xuất: dùng lại bộ tách claim + NLI của Module 07 (mục 8.1) — claim của agent *không* được chunk nào hỗ trợ là "thông tin mới". Ngưỡng gom cụm phải chỉnh trên dữ liệu thật: đọc thử 20 cụm, nếu nhiều cụm trộn hai chủ đề thì hạ ngưỡng.
+
+> **Liên hệ Zendesk.** Đầu ra của vòng này nên là một ticket nội bộ hằng tuần gửi group "Knowledge" trong chính Zendesk: 5 chủ đề có Impact cao nhất, mỗi chủ đề kèm nhãn c-TF-IDF, tóm tắt, 3 câu hỏi mẫu đã che PII và 1–2 câu trả lời của agent. Sau khi bài mới được xuất bản, chỉ số $g_c$ của cụm là KPI của chính đội viết tài liệu — đội CS và đội AI cùng nhìn một con số.
+
+---
+
 ## Lỗi thường gặp & cách xử lý
 
 | Triệu chứng | Nguyên nhân gốc | Cách xử lý |
@@ -755,6 +881,7 @@ $$
 - **Cache**: embedding cache và prefix cache — luôn làm; semantic cache cho câu trả lời — gần như không bao giờ ($e < c_{\text{run}}/c_{\text{err}}$).
 - **Index**: 200.000 × 1.024 × 4 B ≈ 0,8 GB — không cần shard; blue/green qua alias; freshness SLA theo nguồn.
 - **Tuân thủ VN 2026**: Luật 91/2025/QH15 + Nghị định 356/2025/NĐ-CP (thay Nghị định 13/2023) — chuyển dữ liệu xuyên biên giới cần hồ sơ đánh giá; thông báo vi phạm 72 giờ; ACL-aware retrieval; xóa theo yêu cầu ở mọi kho.
+- **Kho tri thức**: link trong câu trả lời của agent phân biệt *truy xuất trượt* (có bài, không tìm thấy) với *thiếu nội dung* (không bài nào, agent tự viết); gom cụm + c-TF-IDF $W_{t,c} = \mathrm{tf}_{t,c}\log(1 + A/f_t)$; ưu tiên theo $n_c g_c h_c$; LLM chỉ viết nháp, người duyệt chính sách.
 
 ## Câu hỏi tự kiểm tra / phỏng vấn
 
@@ -824,6 +951,12 @@ Khi $c_s + c_v < q\, c_\ell$, với $q$ là tỷ lệ model nhỏ đạt. Rủi 
 Vector float32 ≈ 819 MB; đồ thị tầng 0 ≈ 200.000 × 32 × 4 B ≈ 25,6 MB; payload ~400 MB. Tổng < 1,5 GB → một node + replica là đủ. Shard khi lên hàng chục triệu vector hoặc khi cần cô lập dữ liệu theo tenant/khu vực.
 </details>
 
+**12. Một tuần có 300 ticket thất bại. Làm sao biết bao nhiêu là do kho thiếu bài, bao nhiêu do retriever?**
+<details markdown="1"><summary>Gợi ý đáp án</summary>
+
+Dùng link agent dán trong câu trả lời làm nhãn yếu: nếu agent dán link một bài có trong kho mà bài đó không nằm trong top-$k$ → truy xuất trượt (việc của kỹ sư). Nếu agent không dán link nào và câu trả lời chứa claim không được chunk nào hỗ trợ (kiểm bằng NLI, Module 07) → thiếu nội dung. Nếu bài được truy xuất và trích dẫn nhưng agent sửa đúng phần nói về tính năng/giá → lỗi thời. Lấy mẫu 30 trường hợp cho người xác nhận để đo độ chính xác của bộ phân loại này trước khi tin con số.
+</details>
+
 ## Bài tập thực hành
 
 **Bài 1 — Máy tính KV cache và concurrency (chạy trên CPU, không cần GPU).**
@@ -838,10 +971,14 @@ Dựng FastAPI + Redis bằng Docker Compose. Endpoint `/webhooks/zendesk` xác 
 **Bài 4 — Bảng tính chi phí và độ nhạy (không cần GPU).**
 Mở rộng `cost_model.py` (mục 1.7) để: nhận bảng giá từ file YAML; vẽ chi phí/tháng theo $N_{\text{ticket}}$ từ 500 đến 10.000 cho ba phương án (API một model, routing + caching, self-host 2 GPU); đánh dấu điểm hòa vốn.
 
+**Bài 5 — Khai thác lỗ hổng kho tri thức (không cần GPU).**
+Dùng đầu ra `lab04_predictions.jsonl` của Lab 04 (hoặc dữ liệu giả lập): đánh dấu các email bị abstain/escalate vì thiếu căn cứ, embed bằng model của Lab 01, gom cụm bằng hàm `cluster` ở mục 9.6, gán nhãn bằng c-TF-IDF và tính Impact với AHT giả định theo intent. Thử ba ngưỡng gom cụm và đọc từng cụm để chọn ngưỡng.
+
 ## Tài liệu tham khảo
 
 Paper:
 
+- Grootendorst, M. (2022). *BERTopic: Neural topic modeling with a class-based TF-IDF procedure*. arXiv:2203.05794.
 - Kwon, W., Li, Z., et al. (2023). *Efficient Memory Management for Large Language Model Serving with PagedAttention*. SOSP 2023. arXiv:2309.06180.
 - Ainslie, J., Lee-Thorp, J., et al. (2023). *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*. EMNLP 2023. arXiv:2305.13245.
 - Leviathan, Y., Kalman, M., Matias, Y. (2022). *Fast Inference from Transformers via Speculative Decoding*. ICML 2023. arXiv:2211.17192.
@@ -875,3 +1012,4 @@ Pháp lý (bản phân tích thứ cấp — cần đối chiếu văn bản g�
 - Vietnam Briefing — Decree 356/2025: https://www.vietnam-briefing.com/news/vietnam-personal-data-protection-regulation-decree-356.html/
 - Tilleke & Gibbins — Vietnam's New Personal Data Protection Law: https://www.tilleke.com/insights/vietnams-new-personal-data-protection-law-a-closer-look/
 - A&O Shearman — Amendments to Japan's APPI promulgated (2026): https://www.aoshearman.com/en/insights/ao-shearman-on-data/amendments-to-the-act-on-the-protection-of-personal-information-promulgated
+- Zendesk — Announcing the removal of Content Cues (gỡ bỏ từ 01/05/2025): https://support.zendesk.com/hc/en-us/articles/8558652714778
