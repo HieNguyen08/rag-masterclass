@@ -1,11 +1,11 @@
-# Hình minh họa (Phần II–III)
+# Hình minh họa (Phần I–III)
 
 Mọi hình trong `docs/assets/figures/<module>/` được sinh bằng code trong thư mục này — sửa code rồi chạy lại, không sửa tay file SVG.
 
 | File | Nội dung |
 |---|---|
 | `figkit.py` | Bảng màu, style chung, xuất mỗi hình thành hai bản `.light.svg` / `.dark.svg` |
-| `ch03.py` … `ch10.py` | Hình của từng module (mỗi hàm `@figure("tên")` là một hình) |
+| `ch00.py` … `ch10.py` | Hình của từng module (mỗi hàm `@figure("tên")` là một hình) |
 | `insert.py` + `specs/m0X.py` | Chèn khối `<figure>` vào Markdown sau dòng neo, đánh số «Hình X.Y» theo thứ tự xuất hiện |
 
 ```bash

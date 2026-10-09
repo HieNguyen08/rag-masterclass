@@ -30,6 +30,14 @@ Trong NLG, **hallucination** là nội dung được sinh ra trôi chảy, có v
 - **Intrinsic hallucination:** đầu ra *mâu thuẫn* với nguồn được cung cấp. Ví dụ: tài liệu chính sách nói "hoàn tiền trong 14 ngày", model viết "hoàn tiền trong 30 ngày".
 - **Extrinsic hallucination:** đầu ra chứa thông tin *không kiểm chứng được* từ nguồn — không mâu thuẫn nhưng cũng không có căn cứ. Ví dụ: tài liệu không nhắc tới phí, model thêm "không mất phí xử lý". Thông tin extrinsic có thể tình cờ đúng, nhưng với hệ thống CS thì "tình cờ đúng" vẫn là lỗi quy trình.
 
+<!-- fig:intrinsic-extrinsic -->
+<figure markdown="span">
+  ![Trục 1 phân loại hallucination theo quan hệ với nguồn được cung cấp, minh họa bằng ví dụ chính sách hoàn tiền của mục 1](assets/figures/02/intrinsic-extrinsic.light.svg#only-light){ loading=lazy }
+  ![Trục 1 phân loại hallucination theo quan hệ với nguồn được cung cấp, minh họa bằng ví dụ chính sách hoàn tiền của mục 1](assets/figures/02/intrinsic-extrinsic.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.1 — Trục 1 phân loại hallucination theo quan hệ với nguồn được cung cấp, minh họa bằng ví dụ chính sách hoàn tiền của mục 1.1.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trục 2 — dành cho LLM** (Huang et al., 2023, survey):
 
 - **Factuality hallucination:** sai so với sự thật thế giới (bịa sự kiện, bịa trích dẫn, sai ngày).
@@ -67,6 +75,14 @@ $$
 - Benchmark nhị phân thông thường: $c = 0$ → ngưỡng $0$ → **luôn nên đoán**, dù $p = 0.05$.
 - Nếu phạt sai bằng điểm thưởng đúng ($c = 1$) → chỉ trả lời khi $p > 0.5$.
 - Nếu phạt sai gấp 9 lần ($c = 9$) → chỉ trả lời khi $p > 0.9$.
+
+<!-- fig:abstain-threshold -->
+<figure markdown="span">
+  ![Mô hình chấm điểm của mục 1](assets/figures/02/abstain-threshold.light.svg#only-light){ loading=lazy }
+  ![Mô hình chấm điểm của mục 1](assets/figures/02/abstain-threshold.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.2 — Mô hình chấm điểm của mục 1.2: trả lời có lợi khi đường nằm trên 0, tức p > c/(1 + c). Với c = 0 thì luôn nên đoán.</figcaption>
+</figure>
+<!-- /fig -->
 
 Đây là toán của **selective prediction**, và nó trùng khớp với quyết định escalate trong Zendesk: một email trả lời sai về hoàn tiền tốn kém hơn nhiều so với lợi ích một email đúng, nên ngưỡng tự gửi phải rất cao. Module 10 sẽ biến $c$ thành ma trận chi phí thật và $p$ thành xác suất đã hiệu chuẩn.
 
@@ -125,6 +141,14 @@ Một cách "đơn giản" để vượt qua cutoff và tri thức riêng: đưa
 
 Liu et al. (2024, TACL; preprint 2023) đặt một tài liệu chứa đáp án giữa nhiều tài liệu gây nhiễu (multi-document QA) và thay đổi *vị trí* của nó. Kết quả có hình chữ **U**: độ chính xác cao nhất khi tài liệu liên quan ở **đầu** hoặc **cuối** context, giảm rõ khi nó ở **giữa** — kể cả với các model được quảng cáo là long-context. Ở một số cấu hình, đặt đáp án ở giữa còn cho kết quả kém hơn cả việc không đưa tài liệu nào (closed-book).
 
+<!-- fig:lost-in-middle -->
+<figure markdown="span">
+  ![Sơ đồ định tính của hiệu ứng lost in the middle (Liu et al](assets/figures/02/lost-in-middle.light.svg#only-light){ loading=lazy }
+  ![Sơ đồ định tính của hiệu ứng lost in the middle (Liu et al](assets/figures/02/lost-in-middle.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.3 — Sơ đồ định tính của hiệu ứng lost in the middle (Liu et al., 2024): đường cong chỉ thể hiện hình dạng, không phải số liệu trong bài báo.</figcaption>
+</figure>
+<!-- /fig -->
+
 Một cách diễn giải trực giác dựa trên Module 01: causal attention + dữ liệu huấn luyện (thông tin quan trọng hay nằm đầu văn bản; token gần vị trí sinh thì có tín hiệu vị trí "gần") tạo thiên lệch vị trí; RoPE có xu hướng suy giảm theo khoảng cách. Đây là *giả thuyết giải thích*, không phải định lý — điều quan trọng với kỹ sư là **hiệu ứng được đo lặp lại nhiều lần**.
 
 ### 3.2 Độ dài hiệu dụng nhỏ hơn độ dài quảng cáo
@@ -149,6 +173,14 @@ $$
 
 Độ dài tăng 80 lần nhưng chi phí prefill tăng gần 1.000 lần. Thêm vào đó là bộ nhớ KV cache tăng tuyến tính theo $n$ (Module 11).
 
+<!-- fig:prefill-flops -->
+<figure markdown="span">
+  ![Ước lượng FLOPs prefill của mục 3](assets/figures/02/prefill-flops.light.svg#only-light){ loading=lazy }
+  ![Ước lượng FLOPs prefill của mục 3](assets/figures/02/prefill-flops.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.4 — Ước lượng FLOPs prefill của mục 3.3 cho cấu hình kiểu 7B: phần attention bậc hai chiếm ~14% ở 8K token và ~93% ở 640K token.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Chi phí tiền.** Giả định (để học, không phải bảng giá thật):
 - 1.500 ticket/ngày × ~3,5 lượt ≈ **5.250 lời gọi LLM soạn trả lời/ngày** (chưa tính các lời gọi phân loại, kiểm tra).
 - Giá input giả định **\$1 / 1 triệu token** (giá thật thay đổi theo model; hãy thay số của bạn).
@@ -161,6 +193,14 @@ $$
 | Long-context + prompt caching (đọc cache ở mức 0,1× giá input) | ~646.000 | ~3,39 tỷ | ~\$340 + chi phí ghi cache |
 
 Prompt caching (ví dụ API của Anthropic tính đến 10/2026: đọc cache ~0,1× giá input với đa số model, ghi cache 1,25× cho TTL 5 phút hoặc 2× cho TTL 1 giờ) giảm chi phí đáng kể, nhưng (1) vẫn đắt hơn RAG khoảng 10 lần trong giả định này, (2) không giải quyết chất lượng (lost in the middle, context rot), (3) không giải quyết phân quyền (mọi tenant thấy cùng một kho), và (4) không chứa nổi ticket lịch sử.
+
+<!-- fig:context-cost -->
+<figure markdown="span">
+  ![Chi phí input mỗi ngày theo bảng của mục 3](assets/figures/02/context-cost.light.svg#only-light){ loading=lazy }
+  ![Chi phí input mỗi ngày theo bảng của mục 3](assets/figures/02/context-cost.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.5 — Chi phí input mỗi ngày theo bảng của mục 3.3 (giá và lưu lượng đều là giả định để học).</figcaption>
+</figure>
+<!-- /fig -->
 
 > **Liên hệ Zendesk.** Long-context vẫn hữu ích ở *quy mô nhỏ hơn*: đưa **toàn bộ thread của ticket hiện tại** (kể cả quoted reply dài) và **toàn bộ một bài Help Center** đã được chọn, thay vì chặt nhỏ chúng. Tức là long-context là công cụ để *tăng kích thước đơn vị truy xuất*, không phải để *thay thế truy xuất*.
 
@@ -197,6 +237,14 @@ Prompt caching (ví dụ API của Anthropic tính đến 10/2026: đọc cache 
 | Văn phong, định dạng, keigo | + (few-shot) | + (few-shot từ macro) | ++ | + | + |
 | Độ phức tạp vận hành | ++ | − (pipeline index) | − (pipeline train/eval) | + | − (quản lý cache) |
 | Rủi ro lỗi do truy xuất sai | không có | có (cần đo) | không có | thấp | không có |
+
+<!-- fig:strategy-matrix -->
+<figure markdown="span">
+  ![Ma trận quyết định của mục 4](assets/figures/02/strategy-matrix.light.svg#only-light){ loading=lazy }
+  ![Ma trận quyết định của mục 4](assets/figures/02/strategy-matrix.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.6 — Ma trận quyết định của mục 4.3 dưới dạng bản đồ màu (xanh: phù hợp, đỏ: kém); cột RAG được viền đậm.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Đọc ma trận cho Zendesk.**
 - Tri thức sản phẩm + chính sách + ticket lịch sử → **RAG** là trục chính (lớn, thay đổi, cần trích dẫn và phân quyền).
@@ -292,6 +340,14 @@ Email: *"Gói Pro cho tối đa bao nhiêu user?"* Retriever trả về $k = 3$ 
 - Bước 2: $0.629(0.8) + 0.231(0.1) + 0.140(0.3) = 0.503 + 0.023 + 0.042 = 0.568$.
 - Tích: $0.696 \times 0.568 = 0.395$.
 
+<!-- fig:rag-seq-vs-token -->
+<figure markdown="span">
+  ![Ví dụ tính tay của mục 5](assets/figures/02/rag-seq-vs-token.light.svg#only-light){ loading=lazy }
+  ![Ví dụ tính tay của mục 5](assets/figures/02/rag-seq-vs-token.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.7 — Ví dụ tính tay của mục 5.3: phân phối retriever, xác suất generator theo từng tài liệu, và xác suất câu trả lời dưới hai cách lấy biên.</figcaption>
+</figure>
+<!-- /fig -->
+
 Ở ví dụ này RAG-Sequence gán xác suất cao hơn cho câu trả lời "nhất quán theo một nguồn". RAG-Token linh hoạt hơn (có thể lấy token này từ $z_1$, token kia từ $z_3$) — hữu ích khi câu trả lời cần *tổng hợp* nhiều tài liệu, nhưng cũng là con đường để **trộn lẫn thông tin từ nguồn lỗi thời** vào câu trả lời. Lewis et al. báo cáo hai biến thể mạnh ở các tác vụ khác nhau (ví dụ RAG-Token tốt trong một số tác vụ sinh câu hỏi cần ghép nhiều mẩu thông tin, RAG-Sequence tốt ở các tác vụ khác); không có biến thể thắng tuyệt đối.
 
 **Bài học cho LLM hiện đại.** Ngày nay ta hiếm khi lấy biên tường minh như vậy. Pipeline phổ biến là **nối $k$ chunk vào một prompt** và để attention của LLM tự "lấy biên mềm" bên trong (giống RAG-Token nhưng do attention quyết định, không phải $p_\eta$). Hệ quả: điểm retriever $p_\eta(z|x)$ không còn được dùng trực tiếp để trọng số hóa — thứ tự và cách trình bày chunk trong prompt trở thành "trọng số" ngầm (nhớ lost in the middle). Đó là lý do reranking và sắp xếp context có vai trò lớn (Module 06, 07).
@@ -328,6 +384,14 @@ $$
 
 Gradient theo điểm: $(0.966 - 0.629,\ 0.025 - 0.231,\ 0.009 - 0.140) = (+0.337, -0.206, -0.131)$. Retriever được đẩy để xếp bảng giá hiện hành cao hơn nữa, và xếp bài blog lỗi thời thấp đi — đúng điều ta muốn.
 
+<!-- fig:realm-posterior -->
+<figure markdown="span">
+  ![Ví dụ số của mục 5](assets/figures/02/realm-posterior.light.svg#only-light){ loading=lazy }
+  ![Ví dụ số của mục 5](assets/figures/02/realm-posterior.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.8 — Ví dụ số của mục 5.4: gradient theo điểm retriever bằng posterior trừ prior, đẩy bảng giá hiện hành lên và bài blog cũ xuống.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Chi phí thực tế.** Vì encoder tài liệu thay đổi khi huấn luyện, REALM phải **index lại kho** (tính lại embedding hàng triệu tài liệu) định kỳ theo kiểu bất đồng bộ. Đây là lý do nhiều hệ thống (kể cả RAG gốc) đóng băng encoder tài liệu.
 
 > **Liên hệ Zendesk.** Ý tưởng posterior của REALM có một phiên bản rất thực dụng: với 200.000 ticket đã giải quyết, ta biết **câu trả lời cuối cùng** agent đã gửi ($y$). Tài liệu Help Center nào làm câu trả lời đó "dễ sinh" nhất (ví dụ được agent đính link, hoặc có độ tương đồng cao với câu trả lời) là tài liệu dương tính tốt cho email đó — một nguồn nhãn yếu để **đánh giá retriever** (Module 10) và **fine-tune embedding** (Module 09) mà không cần gán nhãn tay.
@@ -344,6 +408,14 @@ H = \big[\mathrm{Enc}(x \oplus z_1);\ \mathrm{Enc}(x \oplus z_2);\ \dots;\ \math
 $$
 
 **Vì sao hiệu quả.** Self-attention trong encoder có chi phí bậc hai theo độ dài. Nếu nối $k$ tài liệu dài $\ell$ token rồi mới encode: $O\big((k\ell)^2\big)$. FiD encode riêng: $O(k\ell^2)$. Ví dụ $k = 100$, $\ell = 250$: $(k\ell)^2 = 6.25\cdot10^{8}$ so với $k\ell^2 = 6.25\cdot10^{6}$ — rẻ hơn 100 lần, cho phép dùng tới 100 đoạn văn. Izacard & Grave quan sát chất lượng tăng đều khi tăng số đoạn văn — bằng chứng sớm rằng **decoder tổng hợp được thông tin từ nhiều nguồn tốt hơn việc chọn một nguồn**.
+
+<!-- fig:fid-cost -->
+<figure markdown="span">
+  ![Fusion-in-Decoder encode từng cặp (câu hỏi, tài liệu) riêng nên chỉ tính các khối trên đường chéo của ma trận attention](assets/figures/02/fid-cost.light.svg#only-light){ loading=lazy }
+  ![Fusion-in-Decoder encode từng cặp (câu hỏi, tài liệu) riêng nên chỉ tính các khối trên đường chéo của ma trận attention](assets/figures/02/fid-cost.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.9 — Fusion-in-Decoder encode từng cặp (câu hỏi, tài liệu) riêng nên chỉ tính các khối trên đường chéo của ma trận attention.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Liên hệ hiện nay.** Kiến trúc decoder-only không tách được encoder như vậy, nhưng ý tưởng "xử lý tài liệu độc lập rồi hợp nhất" xuất hiện lại dưới dạng: tính KV cache riêng cho từng chunk và tái sử dụng (một hướng nghiên cứu của CAG/prefix caching), hoặc map–reduce (tóm tắt từng tài liệu rồi tổng hợp, Module 08).
 
@@ -404,6 +476,14 @@ $$
 
 và giả định số hạng cuối xấp xỉ 0 (với chính sách nội bộ, model không thể đúng nếu không có tài liệu — trừ khi đoán trúng), thì với các giá trị minh họa $0.95 \times 0.85 \times 0.90 \approx 0.73$. **Ba con số khá cao nhân lại cho ra một con số khá thấp.** Đây là lý do mỗi khâu phải được đo riêng (Module 10): nếu chỉ đo đầu ra cuối, bạn không biết sửa khâu nào.
 
+<!-- fig:pipeline-chain -->
+<figure markdown="span">
+  ![Xác suất trả lời đúng của pipeline naive là tích xác suất các khâu (giá trị minh họa của mục 6](assets/figures/02/pipeline-chain.light.svg#only-light){ loading=lazy }
+  ![Xác suất trả lời đúng của pipeline naive là tích xác suất các khâu (giá trị minh họa của mục 6](assets/figures/02/pipeline-chain.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.10 — Xác suất trả lời đúng của pipeline naive là tích xác suất các khâu (giá trị minh họa của mục 6.1).</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 6.2 Bảy điểm hỏng (Barnett et al., 2024)
 
 Barnett et al. rút kinh nghiệm từ ba hệ thống RAG thực tế (trong các lĩnh vực nghiên cứu, giáo dục, y sinh) và đề xuất bảy điểm hỏng (failure point, FP). Mình ánh xạ từng điểm vào Zendesk và module xử lý:
@@ -417,6 +497,14 @@ Barnett et al. rút kinh nghiệm từ ba hệ thống RAG thực tế (trong c�
 | FP5 | Wrong format | Sai định dạng yêu cầu (bảng, JSON, danh sách) | JSON quyết định route bị hỏng; email thiếu lời chào keigo | Module 07 (structured output, văn phong) |
 | FP6 | Incorrect specificity | Câu trả lời quá chung chung hoặc quá chi tiết so với nhu cầu | Khách hỏi "vì sao bị trừ tiền 2 lần?", AI dán nguyên chính sách thanh toán | Module 06 (hiểu query), Module 07 (prompt) |
 | FP7 | Incomplete | Trả lời đúng nhưng thiếu thông tin có sẵn trong context | Email hỏi 3 câu, AI trả lời 2 | Module 06 (tách câu hỏi), Module 10 (đánh giá completeness) |
+
+<!-- fig:failure-points -->
+<figure markdown="span">
+  ![Bảy điểm hỏng của Barnett et al](assets/figures/02/failure-points.light.svg#only-light){ loading=lazy }
+  ![Bảy điểm hỏng của Barnett et al](assets/figures/02/failure-points.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.11 — Bảy điểm hỏng của Barnett et al. (2024) gắn với các khâu của pipeline naive, cùng hai điểm hỏng bổ sung cho case Zendesk.</figcaption>
+</figure>
+<!-- /fig -->
 
 Các tác giả cũng rút ra hai bài học đáng nhớ: **đánh giá RAG chỉ thực sự diễn ra khi vận hành** (không thể dự đoán hết câu hỏi thật), và **độ bền của hệ thống được "tiến hóa" dần** qua theo dõi và sửa lỗi, không thiết kế xong một lần. Điều này khớp với lộ trình triển khai của case study: draft cho agent duyệt trước, tự gửi sau.
 
@@ -440,6 +528,14 @@ Survey của Gao et al. (2023/2024) phân loại các hệ thống RAG thành ba
 | Ví dụ kỹ thuật | Chunk cố định + dense top-k | Hybrid, rerank, query rewrite, metadata filter | Router theo intent, tool/API, truy xuất lặp, tự đánh giá |
 | Khi nào đủ | Prototype, FAQ đơn giản | Đa số câu hỏi FAQ/hướng dẫn | Câu hỏi nhiều bước, cần dữ liệu tài khoản, cần quyết định hành động |
 | Module khóa học | 03–05 | 04–07 | 08, 12 |
+
+<!-- fig:rag-paradigms -->
+<figure markdown="span">
+  ![Naive, Advanced và Modular RAG theo Gao et al](assets/figures/02/rag-paradigms.light.svg#only-light){ loading=lazy }
+  ![Naive, Advanced và Modular RAG theo Gao et al](assets/figures/02/rag-paradigms.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 2.12 — Naive, Advanced và Modular RAG theo Gao et al.: Advanced thêm bước trước và sau truy xuất; Modular có router, nhiều nguồn và vòng lặp.</figcaption>
+</figure>
+<!-- /fig -->
 
 Mình khuyên: **bắt đầu ở Advanced RAG có đo lường**, chỉ chuyển dần sang Modular cho những luồng mà số liệu cho thấy cần. Module 08 bàn kỹ "khi nào phức tạp hóa là xứng đáng".
 
