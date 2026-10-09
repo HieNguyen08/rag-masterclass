@@ -75,6 +75,14 @@ Vòng 4 — `(t, i)` = 8 → `ti`. Vòng 5 — `(ti, ề)` = 6 → `tiề`, và 
 
 Sau 5 phép gộp, *hoàn* từ 5 ký hiệu còn 2, *tiền* từ 5 còn 2, còn *tiếng* (hiếm hơn) vẫn là `ti · ế · n · g · </w>` = 5 ký hiệu. Đây chính là bản chất của BPE: **thứ gì phổ biến trong dữ liệu huấn luyện tokenizer thì rẻ, thứ gì hiếm thì đắt.** Nếu tokenizer được huấn luyện chủ yếu trên tiếng Anh, toàn bộ tiếng Việt rơi vào vùng "hiếm".
 
+<!-- fig:bpe-merges -->
+<figure markdown="span">
+  ![Ví dụ BPE của mục 1](assets/figures/01/bpe-merges.light.svg#only-light){ loading=lazy }
+  ![Ví dụ BPE của mục 1](assets/figures/01/bpe-merges.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.1 — Ví dụ BPE của mục 1.2: năm phép gộp theo thứ tự tần suất cặp, và kết quả tách của từng từ sau khi gộp.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Byte-level BPE.** GPT-2 (Radford et al., 2019) chạy BPE trên *byte* UTF-8 thay vì ký tự Unicode: từ vựng khởi đầu đúng 256 phần tử, không bao giờ có OOV. Các tokenizer họ `tiktoken` (cl100k_base, o200k_base), tokenizer của Llama 3, Qwen đều là byte-level BPE. Hệ quả quan trọng: một ký tự tiếng Việt có dấu chiếm 2–3 byte, một ký tự kana/kanji chiếm 3 byte; nếu chưa có phép gộp phù hợp, mỗi byte có thể thành một token riêng.
 
 ### 1.3 Unigram Language Model — tách theo xác suất
@@ -94,6 +102,14 @@ $$
 Huấn luyện: tối đa hóa log-likelihood biên của corpus $\mathcal{L} = \sum_{s} \log \sum_{\mathbf{x} \in S(X^{(s)})} P(\mathbf{x})$ bằng EM (ước lượng $p(x)$), sau đó với mỗi token tính mức giảm $\mathcal{L}$ nếu bỏ nó đi, loại bỏ khoảng 10–30% token "ít đóng góp" nhất, lặp lại đến khi đạt $V$.
 
 **Ví dụ nhỏ.** Giả sử $p(\text{đăng}) = p(\text{nhập}) = 0.02$, $p(\text{▁đăngnhập}) = 0.001$. Tách `[đăng, nhập]` có log-prob $2\ln 0.02 = -7.82$; tách `[▁đăngnhập]` có $\ln 0.001 = -6.91$ → thắng. Unigram tự nhiên ưu tiên ít mảnh nếu các mảnh đủ phổ biến; và vì có phân phối trên nhiều cách tách, có thể lấy mẫu cách tách khác nhau khi huấn luyện (subword regularization) để model bền hơn với lỗi chính tả.
+
+<!-- fig:unigram-viterbi -->
+<figure markdown="span">
+  ![Unigram LM xem mỗi cách tách là một đường đi trên lưới; Viterbi chọn đường có tổng log-prob cao nhất](assets/figures/01/unigram-viterbi.light.svg#only-light){ loading=lazy }
+  ![Unigram LM xem mỗi cách tách là một đường đi trên lưới; Viterbi chọn đường có tổng log-prob cao nhất](assets/figures/01/unigram-viterbi.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.2 — Unigram LM xem mỗi cách tách là một đường đi trên lưới; Viterbi chọn đường có tổng log-prob cao nhất.</figcaption>
+</figure>
+<!-- /fig -->
 
 **SentencePiece** (Kudo & Richardson, 2018) là thư viện cài đặt cả BPE lẫn Unigram, xử lý văn bản thô như chuỗi Unicode (khoảng trắng được mã hóa thành ký hiệu `▁`), không cần tách từ trước — rất hợp với tiếng Nhật (không có khoảng trắng) và tiếng Việt (khoảng trắng tách *âm tiết*, không tách *từ*). T5, Llama 1/2, Gemma dùng SentencePiece; Llama 3 trở đi chuyển sang byte-level BPE kiểu tiktoken.
 
@@ -121,6 +137,14 @@ $$
 Một chỉ số tiện hơn khi không có bản dịch song song là **fertility** = số token trung bình trên mỗi từ (hoặc mỗi âm tiết với tiếng Việt), hoặc **byte trên token**.
 
 > **Liên hệ Zendesk — ngân sách token.** Giả định (để học): một email khách trung bình 250 từ tiếng Anh ≈ 330 token với o200k. Nếu là tiếng Việt với premium 1,34× → ~440 token; với tokenizer cũ 2,14× → ~700 token. Prompt RAG gồm system prompt (~800 token) + 5 chunk tri thức (~5 × 400 token) + lịch sử thread (3–4 lượt × ~400) + email hiện tại. Cùng một ticket, chọn model có tokenizer kém với tiếng Việt/Nhật có thể làm **chi phí input tăng 30–60%** và ăn mất chỗ của context retrieval. Khi so sánh giá giữa các nhà cung cấp, đừng so "giá/1M token" — hãy so "**giá/ticket** trên mẫu ticket thật đa ngôn ngữ của bạn".
+
+<!-- fig:token-premium -->
+<figure markdown="span">
+  ![Trái: tỉ lệ token Việt/Anh theo phép đo cộng đồng nêu trong bài (mẫu nhỏ, chỉ nên coi là bậc độ lớn)](assets/figures/01/token-premium.light.svg#only-light){ loading=lazy }
+  ![Trái: tỉ lệ token Việt/Anh theo phép đo cộng đồng nêu trong bài (mẫu nhỏ, chỉ nên coi là bậc độ lớn)](assets/figures/01/token-premium.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.3 — Trái: tỉ lệ token Việt/Anh theo phép đo cộng đồng nêu trong bài (mẫu nhỏ, chỉ nên coi là bậc độ lớn). Phải: số token của một email ~250 từ theo giả định của mục này.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 1.5 Code: đo số token trên email đa ngôn ngữ
 
@@ -188,6 +212,14 @@ $$
 
 Nhiều model dùng **weight tying**: $W_{\text{out}} = E$ (tức $z_t = E[t,:] \cdot \mathbf{h}_n$), tiết kiệm $V \cdot d$ tham số — với $V = 151{,}936$ (họ Qwen) và $d = 1024$ đó là ~155M tham số, chiếm phần lớn một model 0.5B. Model lớn thường không tie để tăng sức biểu diễn.
 
+<!-- fig:embedding-lmhead -->
+<figure markdown="span">
+  ![Embedding là tra một hàng của E; LM head chiếu trạng thái ẩn cuối thành logits](assets/figures/01/embedding-lmhead.light.svg#only-light){ loading=lazy }
+  ![Embedding là tra một hàng của E; LM head chiếu trạng thái ẩn cuối thành logits](assets/figures/01/embedding-lmhead.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.4 — Embedding là tra một hàng của E; LM head chiếu trạng thái ẩn cuối thành logits. Khi tie, cùng một ma trận E được dùng ở cả hai đầu.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trực giác quan trọng cho cả khóa học:** $z_t$ là *tích vô hướng* giữa trạng thái ẩn và vector của token $t$. LLM sinh token là một phép "tìm kiếm tích vô hướng lớn nhất" trên từ vựng — cùng hình học với dense retrieval ở Module 03 và 05.
 
 > **Liên hệ Zendesk.** Tên sản phẩm nội bộ, tên tính năng mới ra (chưa có trong dữ liệu huấn luyện) sẽ bị tách thành nhiều token hiếm có embedding "chưa học kỹ". Model vẫn chép lại được tên đó từ context (nhờ attention), nhưng không *biết* gì về nó. Đây là một lý do kỹ thuật cụ thể cho việc phải đưa tài liệu sản phẩm vào context bằng RAG (Module 02).
@@ -253,6 +285,14 @@ Bước 3 — nhân với $V$:
 
 Token 1 chỉ "thấy" chính nó; token 3 dồn một nửa trọng số vào chính nó vì $\mathbf{q}_3 \cdot \mathbf{k}_3$ lớn nhất.
 
+<!-- fig:attention-example -->
+<figure markdown="span">
+  ![Ví dụ tính tay của mục 3](assets/figures/01/attention-example.light.svg#only-light){ loading=lazy }
+  ![Ví dụ tính tay của mục 3](assets/figures/01/attention-example.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.5 — Ví dụ tính tay của mục 3.1: ma trận trọng số sau causal mask, và mỗi đầu ra là tổ hợp lồi của các vector value.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 3.2 Vì sao chia cho $\sqrt{d_k}$? — lập luận phương sai
 
 **Mệnh đề.** Giả sử các thành phần của $\mathbf{q}, \mathbf{k} \in \mathbb{R}^{d_k}$ độc lập, kỳ vọng 0, phương sai 1. Khi đó $\mathrm{Var}(\mathbf{q}\cdot\mathbf{k}) = d_k$.
@@ -273,6 +313,14 @@ Các số hạng độc lập nên phương sai cộng lại: $\mathrm{Var}(\mat
 - $\mathrm{softmax}(1, 0, 0) = (0.576, 0.212, 0.212)$
 
 Jacobian của softmax là $\partial p_i/\partial z_j = p_i(\delta_{ij} - p_j)$. Khi $p$ gần one-hot, mọi phần tử của Jacobian gần 0 (ví dụ $p_1(1-p_1) \approx 0.0007$) → **gradient biến mất**, attention bị "đóng băng" vào một token ngay từ đầu huấn luyện. Chia $\sqrt{d_k}$ giữ điểm ở thang đo ~1, softmax còn "mềm", gradient chảy được. Đây cũng là lần đầu ta gặp vai trò của **nhiệt độ** trong softmax — $\sqrt{d_k}$ chính là một temperature cố định (xem lại ở mục 6).
+
+<!-- fig:sqrt-dk -->
+<figure markdown="span">
+  ![Trái: mô phỏng phân bố của q·k với dk = 128 trước và sau khi chia √dk](assets/figures/01/sqrt-dk.light.svg#only-light){ loading=lazy }
+  ![Trái: mô phỏng phân bố của q·k với dk = 128 trước và sau khi chia √dk](assets/figures/01/sqrt-dk.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.6 — Trái: mô phỏng phân bố của q·k với d_k = 128 trước và sau khi chia √d_k. Phải: hai phân phối softmax so sánh trong bài.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 3.3 Causal mask — vì sao decoder không được nhìn tương lai
 
@@ -295,6 +343,14 @@ $$
 với $W_O \in \mathbb{R}^{d \times d}$. Tổng tham số attention một lớp: $W_Q, W_K, W_V, W_O$ mỗi cái $d \times d$ → $4d^2$ (không đổi so với 1 đầu chiều $d$; chia đầu không tốn thêm tham số).
 
 **MQA / GQA.** Khi sinh văn bản, model phải lưu $K, V$ của mọi token trước đó (KV cache, mục 9). Multi-Query Attention dùng chung 1 bộ $K,V$ cho mọi đầu; **Grouped-Query Attention** (Ainslie et al., 2023) chia $H$ đầu query thành $G$ nhóm, mỗi nhóm chung một bộ $K, V$. Llama 3 8B dùng 32 đầu query và 8 đầu KV → KV cache nhỏ đi 4 lần mà chất lượng gần như giữ nguyên. Công thức bộ nhớ chi tiết ở Module 11.
+
+<!-- fig:gqa -->
+<figure markdown="span">
+  ![MHA, GQA và MQA khác nhau ở số bộ K,V dùng chung (minh họa với 8 đầu query)](assets/figures/01/gqa.light.svg#only-light){ loading=lazy }
+  ![MHA, GQA và MQA khác nhau ở số bộ K,V dùng chung (minh họa với 8 đầu query)](assets/figures/01/gqa.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.7 — MHA, GQA và MQA khác nhau ở số bộ K,V dùng chung (minh họa với 8 đầu query). Llama 3 8B dùng 32 đầu query và 8 bộ K,V.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 3.5 FFN — nơi lưu "tri thức" theo vị trí
 
@@ -332,6 +388,14 @@ $$
 
 Ví dụ: $\mathbf{x} = (2, -1, 3, 0)$, $\boldsymbol\gamma = \mathbf 1$. RMS $= \sqrt{(4 + 1 + 9 + 0)/4} = \sqrt{3.5} = 1.871$ → $\mathrm{RMSNorm}(\mathbf{x}) = (1.069, -0.535, 1.604, 0)$. LayerNorm: $\mu = 1$, $\sigma^2 = (1 + 4 + 4 + 1)/4 = 2.5$, $\sigma = 1.581$ → $(0.632, -1.265, 1.265, -0.632)$.
 
+<!-- fig:rmsnorm -->
+<figure markdown="span">
+  ![Ví dụ của mục 3](assets/figures/01/rmsnorm.light.svg#only-light){ loading=lazy }
+  ![Ví dụ của mục 3](assets/figures/01/rmsnorm.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.8 — Ví dụ của mục 3.6: cùng vector x sau RMSNorm và LayerNorm (γ = 1, β = 0).</figcaption>
+</figure>
+<!-- /fig -->
+
 RMSNorm rẻ hơn (bớt một phép reduce), thực nghiệm chất lượng tương đương; hầu hết LLM mở hiện nay (Llama, Qwen, Mistral, Gemma) dùng RMSNorm.
 
 **Pre-norm vs post-norm.** Transformer gốc đặt norm *sau* phép cộng residual (post-LN). Xiong et al. (2020) phân tích rằng với post-LN, gradient ở các lớp gần đầu ra lớn lúc khởi tạo nên cần warm-up learning rate cẩn thận; đặt norm *trước* khối con (pre-LN, như sơ đồ trên) cho gradient ổn định hơn và huấn luyện dễ hơn. Gần như mọi LLM lớn hiện nay dùng pre-norm.
@@ -351,6 +415,14 @@ Với kiến trúc kiểu Llama-2-7B: $d = 4096$, $N = 32$ lớp, $d_{ff} = 1100
 | **Tổng** | | **≈ 6,74 tỷ** |
 
 Hai nhận xét thực tế. (1) FFN chiếm ~2/3 mỗi lớp. (2) Với FP16/BF16 (2 byte/tham số), riêng trọng số 6,74B cần ~13,5 GB → **không vừa GPU 6 GB của bạn**. Model 7–8B chỉ chạy được trên RTX 4050 khi lượng tử hóa 4-bit (~4 GB trọng số) và context ngắn; lab của khóa học dùng model 0.5B–3B hoặc 7B dạng 4-bit (Module 09, 11, labs).
+
+<!-- fig:param-count -->
+<figure markdown="span">
+  ![Phân bổ tham số của kiến trúc kiểu Llama-2-7B theo bảng ở mục 3](assets/figures/01/param-count.light.svg#only-light){ loading=lazy }
+  ![Phân bổ tham số của kiến trúc kiểu Llama-2-7B theo bảng ở mục 3](assets/figures/01/param-count.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.9 — Phân bổ tham số của kiến trúc kiểu Llama-2-7B theo bảng ở mục 3.7, và bộ nhớ trọng số so với GPU 6 GB.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 3.8 Code: causal multi-head attention bằng NumPy
 
@@ -404,6 +476,14 @@ $$
 
 Mỗi cặp chiều là một "kim đồng hồ" quay với tần số $\theta_i$ (cặp đầu quay nhanh, cặp cuối rất chậm). Vì vị trí được *cộng* vào nội dung, tích $\mathbf{q}\cdot\mathbf{k}$ trộn lẫn các số hạng nội dung–vị trí, nên tính tương đối không được đảm bảo.
 
+<!-- fig:sinusoidal -->
+<figure markdown="span">
+  ![Positional encoding sinusoidal với d = 64: các cặp chiều đầu dao động nhanh theo vị trí, các cặp cuối gần như không đổi](assets/figures/01/sinusoidal.light.svg#only-light){ loading=lazy }
+  ![Positional encoding sinusoidal với d = 64: các cặp chiều đầu dao động nhanh theo vị trí, các cặp cuối gần như không đổi](assets/figures/01/sinusoidal.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.10 — Positional encoding sinusoidal với d = 64: các cặp chiều đầu dao động nhanh theo vị trí, các cặp cuối gần như không đổi.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 4.3 RoPE — Rotary Position Embedding
 
 **Ý tưởng** (Su et al., RoFormer, 2021): thay vì cộng vị trí vào embedding, **quay** vector query và key một góc tỉ lệ với vị trí của chúng, ngay trước khi tính tích vô hướng. Khi đó tích vô hướng chỉ phụ thuộc *hiệu* hai góc, tức *khoảng cách* hai vị trí.
@@ -437,6 +517,14 @@ $$
 
 Điểm attention không đổi khi *dịch* cả hai vị trí — đó chính là "tính tương đối".
 
+<!-- fig:rope -->
+<figure markdown="span">
+  ![Ví dụ số của mục 4](assets/figures/01/rope.light.svg#only-light){ loading=lazy }
+  ![Ví dụ số của mục 4](assets/figures/01/rope.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.11 — Ví dụ số của mục 4.3 (q = (1, 0), k = (0,6; 0,8), θ = 0,5): điểm attention sau RoPE chỉ phụ thuộc khoảng cách m − n.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Vì sao RoPE thắng thế.**
 - Tính tương đối *chính xác* (không phải học xấp xỉ), không thêm tham số.
 - Các cặp tần số thấp quay chậm → mang thông tin vị trí xa; tần số cao quay nhanh → phân biệt vị trí gần. Với $d = 128$, $b = 10^4$: cặp đầu có chu kỳ $2\pi \approx 6.3$ token; cặp cuối có chu kỳ ≈ 54.000 token.
@@ -465,6 +553,14 @@ Với $\theta_i' = b'^{-2i/d}$: cặp $i = 0$ có $\theta_0' = 1 = \theta_0$ (t�
 | NTK-aware | $b \to b\,s^{d/(d-2)}$ | Có thể dùng không fine-tune, tốt hơn khi có | Giữ tần số cao, nội suy tần số thấp |
 | YaRN | Nội suy theo nhóm tần số + nhiệt độ attention | Ít | Tốt nhất trong ba, phổ biến hiện nay |
 
+<!-- fig:rope-scaling -->
+<figure markdown="span">
+  ![Tỉ lệ tần số quay mới so với gốc khi mở rộng context 4 lần (d = 128)](assets/figures/01/rope-scaling.light.svg#only-light){ loading=lazy }
+  ![Tỉ lệ tần số quay mới so với gốc khi mở rộng context 4 lần (d = 128)](assets/figures/01/rope-scaling.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.12 — Tỉ lệ tần số quay mới so với gốc khi mở rộng context 4 lần (d = 128). Đường YaRN là minh họa với tham số giả định α = 1, β = 32, cửa sổ gốc 4K.</figcaption>
+</figure>
+<!-- /fig -->
+
 > **Liên hệ Zendesk.** "Model hỗ trợ 128K/1M token" là khả năng *đọc được* chừng đó token, không phải khả năng *dùng tốt* thông tin ở mọi vị trí. Module 02 sẽ cho thấy hiện tượng "lost in the middle" và "context rot". Với email CS, phần lớn ticket chỉ cần vài nghìn token context; đừng chọn model chỉ vì cửa sổ ngữ cảnh lớn, và nếu self-host với RoPE scaling (ví dụ bật YaRN trong vLLM), hãy đo lại chất lượng trên ticket ngắn — một số cấu hình scaling tĩnh có thể làm giảm nhẹ chất lượng ở văn bản ngắn.
 
 ---
@@ -489,6 +585,14 @@ $$
 
 Gradient = "dự đoán trừ sự thật". Ví dụ: $\mathbf{z} = (2, 1, 0)$, token đúng là $c = 2$ (vị trí giữa). $\mathbf{p} = (0.665, 0.245, 0.090)$, $\ell = -\ln 0.245 = 1.41$. Gradient $= (0.665, 0.245 - 1, 0.090) = (0.665, -0.755, 0.090)$: đẩy logit đúng lên, kéo các logit sai xuống tỉ lệ với xác suất chúng đang chiếm.
 
+<!-- fig:ce-gradient -->
+<figure markdown="span">
+  ![Gradient của cross-entropy theo logit bằng p − y; số liệu theo ví dụ z = (2, 1, 0) của mục 5](assets/figures/01/ce-gradient.light.svg#only-light){ loading=lazy }
+  ![Gradient của cross-entropy theo logit bằng p − y; số liệu theo ví dụ z = (2, 1, 0) của mục 5](assets/figures/01/ce-gradient.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.13 — Gradient của cross-entropy theo logit bằng p − y; số liệu theo ví dụ z = (2, 1, 0) của mục 5.1.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Tính chất "học không cần nhãn".** Mọi văn bản đều tự cung cấp nhãn (token tiếp theo). Đó là lý do LLM có thể huấn luyện trên hàng nghìn tỷ token. Nhưng cũng là lý do mục tiêu này *không* thưởng cho sự thật hay sự trung thực — nó thưởng cho việc *giống văn bản trong dữ liệu*. Module 02 sẽ quay lại điểm này khi bàn về nguồn gốc hallucination.
 
 ### 5.2 Perplexity
@@ -500,6 +604,14 @@ $$
 **Trực giác:** PPL là "số lựa chọn đều nhau tương đương" mà model phân vân ở mỗi bước. Model đoán ngẫu nhiên đều trên $V$ token có PPL $= V$; model hoàn hảo có PPL $= 1$.
 
 **Ví dụ.** Model gán xác suất $(0.5, 0.25, 0.8, 0.1)$ cho 4 token đúng của một câu. $\mathcal{L} = -\tfrac14(\ln 0.5 + \ln 0.25 + \ln 0.8 + \ln 0.1) = -\tfrac14(-0.693 - 1.386 - 0.223 - 2.303) = 1.151$ nat/token, $\mathrm{PPL} = e^{1.151} = 3.16$.
+
+<!-- fig:perplexity -->
+<figure markdown="span">
+  ![Ví dụ của mục 5](assets/figures/01/perplexity.light.svg#only-light){ loading=lazy }
+  ![Ví dụ của mục 5](assets/figures/01/perplexity.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.14 — Ví dụ của mục 5.2: loss từng token, loss trung bình và perplexity.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Cảnh báo:** PPL phụ thuộc tokenizer — không so PPL giữa hai model khác tokenizer (dùng *bits per byte* nếu cần). PPL thấp $\neq$ trả lời đúng: một model trôi chảy văn phong CS nhưng bịa chính sách vẫn có PPL thấp. Ứng dụng hữu ích trong Zendesk: PPL dưới một model nhỏ giúp phát hiện email "lạ" (spam, mã hóa hỏng) hoặc làm tín hiệu phụ cho độ tin cậy (Module 10).
 
@@ -538,6 +650,14 @@ Với $\alpha \approx \beta$, cả hai số mũ ≈ 0,5: **khi ngân sách tính
 - Loss dự đoán: $1.69 + 406.4/(7\cdot10^9)^{0.34} + 410.7/(1.4\cdot10^{11})^{0.28} \approx 1.69 + 0.183 + 0.311 = 2.18$.
 - Nếu huấn luyện 7B đó trên 2T token (vượt xa điểm Chinchilla): $\hat L \approx 2.02$ — tốt hơn, dù không "tối ưu tính toán".
 
+<!-- fig:chinchilla -->
+<figure markdown="span">
+  ![Loss dự đoán theo công thức Chinchilla cho model 7B khi tăng số token huấn luyện](assets/figures/01/chinchilla.light.svg#only-light){ loading=lazy }
+  ![Loss dự đoán theo công thức Chinchilla cho model 7B khi tăng số token huấn luyện](assets/figures/01/chinchilla.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.15 — Loss dự đoán theo công thức Chinchilla cho model 7B khi tăng số token huấn luyện. Điểm 15T token chỉ để minh họa xu hướng, vẫn dùng N = 7B.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Thực tế: "over-training" có chủ đích.** Chinchilla tối ưu chi phí *huấn luyện*, nhưng model được phục vụ hàng tỷ lần và chi phí suy luận ∝ $N$. Vì vậy các nhà phát triển cố ý huấn luyện model nhỏ trên rất nhiều token — Llama 3 8B được huấn luyện trên khoảng 15T token (~1.900 token/tham số). Đó là lý do model 7–8B hiện nay mạnh hơn nhiều model 70B năm 2022 — tin tốt cho người self-host trên GPU nhỏ.
 
 > **Liên hệ Zendesk.** Scaling laws là lý do chính đáng để *không* tự huấn luyện LLM cho bài toán CS: một model nền tốt đã tiêu tốn $10^{23}$–$10^{25}$ FLOPs. Đội nhỏ nên tập trung vào retrieval, prompt, đánh giá; chỉ fine-tune nhẹ (LoRA) khi có lý do đo được (Module 09). Ngoài ra, khi chọn model để self-host, "nhỏ nhưng được huấn luyện nhiều token" thường là lựa chọn kinh tế nhất cho tải 1.500 ticket/ngày.
@@ -572,6 +692,14 @@ Temperature **không đổi thứ hạng** các token, chỉ đổi độ "nhọ
 | 1 | (0,665; 0,245; 0,090) | 0,83 |
 | 2 | (0,506; 0,307; 0,186) | 1,02 |
 
+<!-- fig:temperature -->
+<figure markdown="span">
+  ![Bảng temperature của mục 6](assets/figures/01/temperature.light.svg#only-light){ loading=lazy }
+  ![Bảng temperature của mục 6](assets/figures/01/temperature.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.16 — Bảng temperature của mục 6.2 vẽ thành đồ thị: T đổi độ nhọn của phân phối nhưng không đổi thứ hạng.</figcaption>
+</figure>
+<!-- /fig -->
+
 Liên hệ ngược về mục 3.2: chia $\sqrt{d_k}$ trong attention chính là đặt một temperature cố định. Và ở Module 10, **temperature scaling** để hiệu chuẩn xác suất của một bộ phân loại cũng dùng đúng công thức này (khi đó $T$ được *học* trên tập validation).
 
 ### 6.3 Top-k và top-p (nucleus)
@@ -588,6 +716,14 @@ $$
 - $p = 0.9$: cần 4 token (0,85 < 0,9 ≤ 0,95). Phân phối mới: chia cho 0,95 → $(0.526, 0.211, 0.158, 0.105, 0)$.
 - $p = 0.7$: 2 token → $(0.714, 0.286, 0, 0, 0)$.
 - Nếu phân phối là $(0.96, 0.02, \dots)$ thì với $p = 0.9$ chỉ còn 1 token — tự động thích nghi.
+
+<!-- fig:top-p -->
+<figure markdown="span">
+  ![Ví dụ top-p của mục 6](assets/figures/01/top-p.light.svg#only-light){ loading=lazy }
+  ![Ví dụ top-p của mục 6](assets/figures/01/top-p.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.17 — Ví dụ top-p của mục 6.3: chọn tập nhỏ nhất có tổng xác suất ≥ p rồi chuẩn hóa lại.</figcaption>
+</figure>
+<!-- /fig -->
 
 Thứ tự áp dụng phổ biến trong các engine (ví dụ vLLM, Hugging Face): logits → (penalty) → chia $T$ → top-k → top-p → lấy mẫu. Ngoài ra còn **min-p** (giữ các token có $p \ge p_{\min} \cdot p_{\max}$), **repetition/presence/frequency penalty**, và **seed** để tái lập kết quả.
 
@@ -712,6 +848,14 @@ Tên paper nói đúng bản chất: model ngôn ngữ "ngầm" là một reward
 
 **Ví dụ số.** $\beta = 0.1$. Với một cặp: $\log\pi_\theta(y_w|x) = -12$, $\log\pi_{\text{ref}}(y_w|x) = -14$ (policy đã tăng xác suất câu tốt thêm 2 nat); $\log\pi_\theta(y_l|x) = -15$, $\log\pi_{\text{ref}}(y_l|x) = -14$ (giảm câu tệ 1 nat). Đối số của sigmoid $= 0.1 \cdot (2 - (-1)) = 0.3$; loss $= -\ln\sigma(0.3) = 0.554$. Gradient đẩy tăng khoảng cách này, với trọng số lớn hơn ở những cặp mà reward ẩn đang *xếp sai thứ tự*.
 
+<!-- fig:preference-loss -->
+<figure markdown="span">
+  ![Reward model Bradley–Terry và DPO dùng chung dạng loss −ln σ(Δ); hai điểm là hai ví dụ số trong mục 7](assets/figures/01/preference-loss.light.svg#only-light){ loading=lazy }
+  ![Reward model Bradley–Terry và DPO dùng chung dạng loss −ln σ(Δ); hai điểm là hai ví dụ số trong mục 7](assets/figures/01/preference-loss.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.18 — Reward model Bradley–Terry và DPO dùng chung dạng loss −ln σ(Δ); hai điểm là hai ví dụ số trong mục 7.2 và 7.3.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trade-off.** DPO chỉ cần 2 model (policy + reference), huấn luyện như supervised, ổn định — nên rất phổ biến, đặc biệt với đội nhỏ. Nhược điểm: học offline từ dữ liệu sở thích cố định (không tự khám phá như RL online), có thể overfit nếu dữ liệu cặp ít. Các biến thể (IPO, KTO, ORPO, SimPO...) và cách áp DPO cho văn phong email CS: Module 09.
 
 ### 7.4 Điều post-training làm và *không* làm
@@ -736,6 +880,14 @@ $$
 
 > **Liên hệ Zendesk.** Với ~300 macro của đội CS, một chiến lược mạnh và rẻ: retrieve 2–3 macro + 2–3 ticket đã giải quyết có CSAT cao giống email hiện tại nhất, đưa vào prompt như demonstrations văn phong, *tách biệt* với phần "tài liệu tham khảo" dùng làm căn cứ sự thật. Cần cẩn thận: ví dụ ticket cũ chứa PII và chính sách có thể đã lỗi thời (Module 04, 07).
 
+<!-- fig:icl-prompt -->
+<figure markdown="span">
+  ![Cấu trúc prompt gợi ý cho bài toán Zendesk: demonstrations dạy văn phong, tách biệt với tài liệu dùng làm căn cứ](assets/figures/01/icl-prompt.light.svg#only-light){ loading=lazy }
+  ![Cấu trúc prompt gợi ý cho bài toán Zendesk: demonstrations dạy văn phong, tách biệt với tài liệu dùng làm căn cứ](assets/figures/01/icl-prompt.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.19 — Cấu trúc prompt gợi ý cho bài toán Zendesk: demonstrations dạy văn phong, tách biệt với tài liệu dùng làm căn cứ.</figcaption>
+</figure>
+<!-- /fig -->
+
 ---
 
 ## 9. KV cache — giới thiệu
@@ -746,6 +898,14 @@ Khi sinh token thứ $i+1$, attention cần $K, V$ của mọi token $1..i$. Cá
 - **Decode:** sinh từng token; mỗi bước chỉ tính $\mathbf{q}, \mathbf{k}, \mathbf{v}$ cho token mới và attend vào cache (nặng *băng thông bộ nhớ*).
 
 Bộ nhớ KV cache tăng tuyến tính theo số lớp, số đầu KV, độ dài chuỗi và số request đồng thời; với context dài nó có thể lớn hơn cả trọng số model. Công thức, cách vLLM quản lý bằng PagedAttention, prefix caching và ước lượng cho GPU 6 GB: **Module 11**.
+
+<!-- fig:kv-cache -->
+<figure markdown="span">
+  ![Hai pha suy luận: prefill xử lý cả prompt và điền KV cache; decode sinh từng token và attend vào cache](assets/figures/01/kv-cache.light.svg#only-light){ loading=lazy }
+  ![Hai pha suy luận: prefill xử lý cả prompt và điền KV cache; decode sinh từng token và attend vào cache](assets/figures/01/kv-cache.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.20 — Hai pha suy luận: prefill xử lý cả prompt và điền KV cache; decode sinh từng token và attend vào cache.</figcaption>
+</figure>
+<!-- /fig -->
 
 ---
 
@@ -762,6 +922,14 @@ $$
 trong đó $\mathrm{TopK}$ đặt các logit ngoài $k$ lớn nhất thành $-\infty$. Huấn luyện thêm một loss cân bằng tải để router không dồn mọi token vào vài chuyên gia.
 
 **Ví dụ.** Mixtral 8x7B (Jiang et al., 2024): 8 chuyên gia, chọn 2 mỗi token; tổng ~47B tham số nhưng mỗi token chỉ dùng ~13B. DeepSeek-V3 (2024): 671B tham số tổng, ~37B kích hoạt mỗi token. Nhiều model mở và thương mại hàng đầu năm 2025–2026 là MoE.
+
+<!-- fig:moe -->
+<figure markdown="span">
+  ![Mixture of Experts: router chọn top-2 trong 8 chuyên gia cho mỗi token (trọng số g chỉ để minh họa)](assets/figures/01/moe.light.svg#only-light){ loading=lazy }
+  ![Mixture of Experts: router chọn top-2 trong 8 chuyên gia cho mỗi token (trọng số g chỉ để minh họa)](assets/figures/01/moe.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 1.21 — Mixture of Experts: router chọn top-2 trong 8 chuyên gia cho mỗi token (trọng số g chỉ để minh họa).</figcaption>
+</figure>
+<!-- /fig -->
 
 **Trade-off.** Tính toán mỗi token ∝ tham số *kích hoạt*; bộ nhớ ∝ tham số *tổng* (mọi chuyên gia phải nằm trong VRAM) → MoE không hợp GPU 6 GB, hợp cụm GPU phục vụ batch lớn. "Chuyên gia" không phải chuyên gia theo chủ đề (không có "chuyên gia hoàn tiền"); router học phân chia ở mức thống kê.
 
