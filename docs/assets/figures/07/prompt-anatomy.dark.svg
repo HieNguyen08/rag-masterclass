@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="630.72pt" height="261.197419pt" viewBox="0 0 630.72 261.197419" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 261.197419 
+L 630.72 261.197419 
+L 630.72 0 
+L 0 0 
+L 0 261.197419 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 81.661935 71.674839 
+L 469.16129 71.674839 
+Q 475.153548 71.674839 475.153548 65.682581 
+L 475.153548 32.725161 
+Q 475.153548 26.732903 469.16129 26.732903 
+L 81.661935 26.732903 
+Q 75.669677 26.732903 75.669677 32.725161 
+L 75.669677 65.682581 
+Q 75.669677 71.674839 81.661935 71.674839 
+z
+" clip-path="url(#p7984ebed78)" style="fill: #1a2b18; stroke: #008300; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 81.661935 107.628387 
+L 469.16129 107.628387 
+Q 475.153548 107.628387 475.153548 101.636129 
+L 475.153548 83.659355 
+Q 475.153548 77.667097 469.16129 77.667097 
+L 81.661935 77.667097 
+Q 75.669677 77.667097 75.669677 83.659355 
+L 75.669677 101.636129 
+Q 75.669677 107.628387 81.661935 107.628387 
+z
+" clip-path="url(#p7984ebed78)" style="fill: #1a2b18; stroke: #008300; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 81.661935 158.562581 
+L 469.16129 158.562581 
+Q 475.153548 158.562581 475.153548 152.570323 
+L 475.153548 119.612903 
+Q 475.153548 113.620645 469.16129 113.620645 
+L 81.661935 113.620645 
+Q 75.669677 113.620645 75.669677 119.612903 
+L 75.669677 152.570323 
+Q 75.669677 158.562581 81.661935 158.562581 
+z
+" clip-path="url(#p7984ebed78)" style="fill: #342b18; stroke: #c98500; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 81.661935 209.496774 
+L 469.16129 209.496774 
+Q 475.153548 209.496774 475.153548 203.504516 
+L 475.153548 170.547097 
+Q 475.153548 164.554839 469.16129 164.554839 
+L 81.661935 164.554839 
+Q 75.669677 164.554839 75.669677 170.547097 
+L 75.669677 203.504516 
+Q 75.669677 209.496774 81.661935 209.496774 
+z
+" clip-path="url(#p7984ebed78)" style="fill: #382726; stroke: #e66767; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 81.661935 240.456774 
+L 469.16129 240.456774 
+Q 475.153548 240.456774 475.153548 234.464516 
+L 475.153548 221.48129 
+Q 475.153548 215.489032 469.16129 215.489032 
+L 81.661935 215.489032 
+Q 75.669677 215.489032 75.669677 221.48129 
+L 75.669677 234.464516 
+Q 75.669677 240.456774 81.661935 240.456774 
+z
+" clip-path="url(#p7984ebed78)" style="fill: #1a2b18; stroke: #008300; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="81.661935" y="51.916566" transform="rotate(-0 81.661935 51.916566)">Vai trò · chính sách bất biến · grounding &amp; citation · schema</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace; text-anchor: end; fill: #c3c2b7" x="65.682581" y="51.385902" transform="rotate(-0 65.682581 51.385902)">system</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="490.134194" y="51.610191" transform="rotate(-0 490.134194 51.610191)">tin cậy</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="81.661935" y="95.360437" transform="rotate(-0 81.661935 95.360437)">Metadata ticket (ngôn ngữ, gói, tên) — lấy từ API</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace; text-anchor: end; fill: #c3c2b7" x="65.682581" y="94.829773" transform="rotate(-0 65.682581 94.829773)">user</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="490.134194" y="95.054062" transform="rotate(-0 490.134194 95.054062)">tin cậy</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="81.661935" y="138.488879" transform="rotate(-0 81.661935 138.488879)">&lt;sources&gt; S1, S2, … có ID + type/authority/updated_at</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace; text-anchor: end; fill: #c3c2b7" x="65.682581" y="138.273644" transform="rotate(-0 65.682581 138.273644)">user</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="490.134194" y="138.497933" transform="rotate(-0 490.134194 138.497933)">bán tin cậy</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="81.661935" y="189.423072" transform="rotate(-0 81.661935 189.423072)">&lt;customer_email&gt; đã làm sạch, escape, datamark</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace; text-anchor: end; fill: #c3c2b7" x="65.682581" y="189.207838" transform="rotate(-0 65.682581 189.207838)">user</text>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="490.134194" y="189.980377" transform="rotate(-0 490.134194 189.980377)">KHÔNG tin cậy</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="81.661935" y="230.816419" transform="rotate(-0 81.661935 230.816419)">Nhắc lại nhiệm vụ (2–3 dòng, gần vị trí sinh)</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace; text-anchor: end; fill: #c3c2b7" x="65.682581" y="230.154934" transform="rotate(-0 65.682581 230.154934)">user</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="490.134194" y="230.379224" transform="rotate(-0 490.134194 230.379224)">tin cậy</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="75.669677" y="15.747097" transform="rotate(-0 75.669677 15.747097)">đầu prompt (phần cố định → hưởng prefix caching)</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="75.669677" y="252.940645" transform="rotate(-0 75.669677 252.940645)">cuối prompt — vị trí sinh</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="490.134194" y="15.747097" transform="rotate(-0 490.134194 15.747097)">lệnh chỉ đến từ khối xanh</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p7984ebed78">
+   <rect x="5.76" y="5.76" width="619.2" height="249.677419"/>
+  </clipPath>
+ </defs>
+</svg>
