@@ -14,6 +14,7 @@ Sau module này, bạn có thể:
 - Áp dụng thống kê cơ bản cho eval: khoảng tin cậy Wilson, cỡ mẫu, McNemar, bootstrap cặp, cận trên khi không quan sát thấy lỗi.
 - Xây hệ thống quyết định SEND / DRAFT / ESCALATE: kết hợp tín hiệu confidence, hiệu chuẩn (ECE, temperature scaling, Platt), chọn ngưỡng theo chi phí và ràng buộc rủi ro trên đường cong risk–coverage.
 - Thiết kế đánh giá online (shadow mode, A/B, KPI CS) và một eval harness chạy trong CI.
+- Dùng eval harness để tối ưu prompt tự động (DSPy, MIPROv2, GEPA) mà không mắc lời nguyền người thắng trên tập dev.
 
 ## 1. Vì sao đánh giá là xương sống của hệ thống RAG
 
@@ -1055,6 +1056,120 @@ Chạy 1.000 test case với pipeline đầy đủ cộng judge cho 6 mục chec
 
 Về công cụ: các thư viện như RAGAS, DeepEval, promptfoo và các nền tảng tracing/eval như Langfuse, LangSmith, Arize Phoenix đều hỗ trợ một phần quy trình trên. Chúng thay đổi nhanh, nên hãy kiểm tra phiên bản và API hiện hành trước khi dùng. Lời khuyên: dùng chúng cho phần tiện ích (tracing, giao diện xem kết quả, metric có sẵn), nhưng giữ **định nghĩa golden set, scorer quan trọng và gate** trong mã của chính mình để kiểm soát và tái lập được.
 
+## 10. Tối ưu prompt và pipeline tự động theo metric
+
+Có golden set và eval harness (mục 5, 9) rồi, câu hỏi tiếp theo đến rất tự nhiên: *nếu máy chấm được, sao không để máy tự sửa prompt?* Đây là hướng của DSPy và các bộ tối ưu prompt. Mục này trình bày ý tưởng, toán của rủi ro chính (overfit vào tập dev), và cách đưa vào quy trình mà không phá các gate an toàn.
+
+### 10.1 Vấn đề: chỉnh prompt bằng tay là tìm kiếm thủ công
+
+Prompt của pipeline Zendesk gồm nhiều mảnh: chỉ dẫn cho bộ phân loại intent, chỉ dẫn viết lại query (Module 06), prompt sinh draft (Module 07), prompt judge (mục 4). Mỗi lần kỹ sư sửa một câu chỉ dẫn và "thử vài email", họ đang làm **tìm kiếm cục bộ trên một không gian rời rạc**, với hàm mục tiêu được ước lượng trên 3–5 ví dụ. Hai hệ quả: tốn công, và rất dễ cải thiện đúng mấy ví dụ đang nhìn trong khi làm hỏng phân tầng khác (ví dụ email tiếng Nhật).
+
+### 10.2 Hình thức hóa
+
+Gọi pipeline là một chương trình $\Phi$ gồm $M$ module gọi LLM. Tham số của module $m$ là $\theta_m = (\iota_m, \Delta_m)$: chỉ dẫn $\iota_m$ (văn bản) và tập ví dụ minh họa $\Delta_m$ (few-shot, Module 01 mục 8). Với metric $\mu$ (ví dụ "đúng intent", "PASS checklist") và phân phối dữ liệu $\mathcal{D}$:
+
+$$
+\theta^* = \arg\max_{\theta = (\theta_1,\dots,\theta_M)} \; \mathbb{E}_{(x,y)\sim\mathcal{D}}\big[\mu(\Phi_\theta(x), y)\big].
+$$
+
+Không gian $\theta$ rời rạc và không có gradient, nên mọi phương pháp đều là **tìm kiếm hộp đen**: đề xuất ứng viên → chạy chương trình trên một mẫu → đo $\mu$ → giữ cái tốt. Khác nhau ở cách *đề xuất* ứng viên và cách *tiết kiệm* lượt đánh giá. Lưu ý không cần nhãn cho từng module: chỉ cần nhãn của đầu ra cuối, giống cách RAG gốc coi tài liệu là biến ẩn (Module 02, mục 5.2).
+
+### 10.3 Các họ phương pháp
+
+| Phương pháp | Đề xuất ứng viên bằng cách | Kết quả báo cáo (trên benchmark của tác giả) |
+|---|---|---|
+| **Bootstrap demo** (DSPy; Khattab et al., 2023) | Chạy chương trình trên tập huấn luyện, giữ các *trace* đạt metric làm ví dụ minh họa cho từng module | Pipeline tự bootstrap hơn few-shot chuẩn trên 25% (GPT-3.5) và 65% (llama2-13b-chat) |
+| **OPRO** (Yang et al., 2023) | LLM làm "bộ tối ưu": meta-prompt chứa các chỉ dẫn cũ kèm điểm, yêu cầu viết chỉ dẫn mới tốt hơn | Prompt tìm được hơn prompt người viết tới 8% trên GSM8K, tới 50% trên Big-Bench Hard |
+| **MIPRO / MIPROv2** (Opsahl-Ong et al., 2024) | Đề xuất chỉ dẫn dựa trên dữ liệu và cấu trúc chương trình; đánh giá theo mini-batch ngẫu nhiên và học một mô hình thay thế (surrogate) của metric để chọn tổ hợp chỉ dẫn × ví dụ | Hơn các bộ tối ưu cơ sở ở 5/7 chương trình nhiều bước với Llama-3-8B, cải thiện tới 13% |
+| **TextGrad** (Yuksekgonul et al., 2024) | LLM viết "gradient bằng văn bản" (phê bình) cho từng thành phần và lan ngược qua đồ thị tính toán | Ví dụ: GPT-4o zero-shot trên Google-Proof QA từ 51% lên 55% |
+| **GEPA** (Agrawal et al., 2025) | Đọc trace (suy luận, gọi tool, kết quả) và phản hồi văn bản của metric, phản tư để sửa prompt; giữ một biên Pareto các ứng viên và trộn bài học bổ sung | Hơn GRPO trung bình 6% (tới 20%) với ít hơn tới 35 lần số rollout; hơn MIPROv2 trên 10% |
+
+Hai quan sát. Thứ nhất, các phương pháp mới dùng **phản hồi bằng ngôn ngữ** (vì sao sai) chứ không chỉ điểm số — với bài toán CS, đây là lợi thế vì judge và verifier của ta (Module 07, mục 8) vốn trả về lý do. Thứ hai, tất cả các con số trên là trên benchmark học thuật; với pipeline của bạn, độ cải thiện phải được đo lại bằng chính harness của mục 9.
+
+### 10.4 Rủi ro chính: lời nguyền người thắng trên tập dev
+
+Bộ tối ưu chọn ứng viên có điểm *đo được* cao nhất trên tập dev $n$ mẫu. Điểm đo được có nhiễu, nên ứng viên thắng thường là ứng viên *may mắn*. Giả sử $K$ ứng viên có cùng độ chính xác thật $p$; điểm đo của mỗi ứng viên xấp xỉ chuẩn với độ lệch $\sigma = \sqrt{p(1-p)/n}$. Kỳ vọng của điểm lớn nhất:
+
+$$
+\mathbb{E}\Big[\max_{k \le K} \hat p_k\Big] \approx p + \sigma \cdot \mathbb{E}\Big[\max_{k \le K} Z_k\Big], \qquad Z_k \sim \mathcal{N}(0,1).
+$$
+
+**Ví dụ số.** $K = 30$, $p = 0.80$, $n = 100$: $\sigma = 0.04$ và $\mathbb{E}[\max Z] \approx 2.04$ với 30 biến chuẩn, nên ứng viên thắng có điểm dev kỳ vọng $\approx 0.80 + 0.04 \times 2.04 \approx 0.88$ (mô phỏng nhị thức cho 0,878) — tức **báo cáo cải thiện 8 điểm trong khi thật ra không ứng viên nào tốt hơn**. Với $n = 400$, khoảng lạc quan giảm còn ~4 điểm (mô phỏng 0,840). Bộ tối ưu chạy hàng trăm thử nghiệm, nên hiệu ứng còn mạnh hơn.
+
+<!-- fig:winners-curse -->
+<figure markdown="span">
+  ![Mô phỏng mục 10](assets/figures/10/winners-curse.light.svg#only-light){ loading=lazy }
+  ![Mô phỏng mục 10](assets/figures/10/winners-curse.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.20 — Mô phỏng mục 10.4: khi 30 ứng viên có cùng độ chính xác thật 0,80, ứng viên có điểm dev cao nhất trông tốt hơn ~8 điểm với 100 mẫu dev; độ lạc quan tăng theo số ứng viên và giảm theo cỡ tập dev.</figcaption>
+</figure>
+<!-- /fig -->
+
+Quy tắc vận hành:
+
+1. **Ba tập tách biệt**: tập huấn luyện (nguồn ví dụ minh họa), tập dev (bộ tối ưu chọn ứng viên), tập kiểm tra giữ kín — chỉ chạy *một lần* cho quyết định cuối. Đừng dùng golden set của CI làm tập dev cho bộ tối ưu.
+2. **So cặp với baseline** trên tập kiểm tra bằng McNemar hoặc bootstrap cặp (mục 6), không so điểm tuyệt đối.
+3. **Phân tầng**: cải thiện tổng mà làm giảm phân tầng tiếng Nhật hoặc intent nhạy cảm là không chấp nhận (gate chất lượng mục 9.2).
+4. **Đừng tối ưu thẳng vào judge** mà không kiểm tra lại bằng nhãn người: bộ tối ưu sẽ học cách làm *judge* hài lòng (ví dụ viết dài, lặp lại từ khóa của rubric) — đúng các bias ở mục 4.1. Lấy mẫu kết quả cuối cho người chấm và đo lại kappa.
+
+### 10.5 Áp vào pipeline Zendesk
+
+| Module | Metric để tối ưu | Ghi chú |
+|---|---|---|
+| Phân loại intent / độ nhạy | Recall của lớp nhạy cảm ở precision cố định; macro-F1 | Ứng viên tốt nhất cho tối ưu tự động: nhãn rõ, rẻ để chấm |
+| Viết lại query | Recall@k của retriever sau khi viết lại (mục 2) | Không cần chấm văn bản; metric hoàn toàn tự động |
+| Sinh draft | Gate an toàn (không vi phạm chính sách) + checklist judge đã hiệu chuẩn | Rủi ro reward hacking judge; bắt buộc người kiểm tra mẫu |
+| Prompt judge | Kappa với nhãn người trên tập hiệu chuẩn | Tối ưu judge bằng chính nhãn người, không bằng judge khác |
+
+**Chi phí (ước lượng).** Một lượt tối ưu kiểu MIPROv2 với 50 thử nghiệm, mỗi thử nghiệm chạy mini-batch 35 ví dụ qua chương trình 3 lời gọi LLM, tốn $50 \times 35 \times 3 = 5.250$ lời gọi; với ~4.000 token mỗi lời gọi là ~21 triệu token — cỡ \$21 ở giá giả định \$1/1 triệu token của Module 02. Rẻ so với một tuần công kỹ sư, nhưng nên chạy offline, có cache (mục 9.4), và mỗi kết quả tối ưu phải đi qua đúng CI gate như một thay đổi prompt viết tay.
+
+### 10.6 Code: khung DSPy cho bộ phân loại intent (rút gọn)
+
+```python
+# Tối ưu prompt phân loại intent bằng DSPy (API tính đến dspy 3.4 — kiểm tra docs trước khi dùng)
+# pip install dspy
+from typing import Literal
+import dspy
+
+dspy.configure(lm=dspy.LM("openai/qwen3-4b", api_base="http://localhost:8000/v1", api_key="local"))
+
+Intent = Literal["login", "billing", "refund", "api_error", "feature_request", "other"]
+
+class ClassifyEmail(dspy.Signature):
+    """Phân loại email hỗ trợ khách hàng (vi/en/ja) theo intent và độ nhạy cảm."""
+    email: str = dspy.InputField(desc="thân email đã làm sạch và che PII")
+    intent: Intent = dspy.OutputField()
+    sensitive: bool = dspy.OutputField(desc="liên quan giá, hoàn tiền, pháp lý, bảo mật")
+
+program = dspy.Predict(ClassifyEmail)
+
+def metric(gold, pred, trace=None) -> float:
+    # Bỏ sót email nhạy cảm bị phạt nặng hơn sai intent thường (chi phí bất đối xứng, mục 7.6)
+    if gold.sensitive and not pred.sensitive:
+        return 0.0
+    return 0.5 * float(pred.intent == gold.intent) + 0.5 * float(pred.sensitive == gold.sensitive)
+
+def to_examples(rows):
+    return [dspy.Example(email=r["email"], intent=r["intent"], sensitive=r["sensitive"]).with_inputs("email")
+            for r in rows]
+
+# train_rows / dev_rows / test_rows: ba tập TÁCH BIỆT, phân tầng theo ngôn ngữ (mục 10.4)
+trainset, devset, testset = to_examples(train_rows), to_examples(dev_rows), to_examples(test_rows)
+
+optimizer = dspy.MIPROv2(metric=metric, auto="light")
+optimized = optimizer.compile(program, trainset=trainset, valset=devset)
+
+evaluate = dspy.Evaluate(devset=testset, metric=metric, num_threads=8, display_progress=True)
+print("baseline:", evaluate(program))
+print("optimized:", evaluate(optimized))      # chạy tập test MỘT lần, rồi so cặp (mục 6)
+optimized.save("intent_classifier.json")      # phiên bản hóa như mọi thay đổi prompt, qua CI gate
+```
+
+Cách đặt tên tham số (`auto`, `valset`) và lớp `dspy.LM` theo tài liệu DSPy hiện hành; thư viện thay đổi nhanh nên coi đoạn trên là khung. Điều quan trọng không nằm ở API mà ở ba tập tách biệt, metric bất đối xứng, và việc kết quả tối ưu là một **artifact có phiên bản** đi qua CI.
+
+> **Liên hệ Zendesk.** Thứ tự mình khuyên: tối ưu bộ phân loại intent và bộ viết lại query trước (metric tự động, rủi ro thấp), để prompt sinh draft cho người viết tay lâu hơn — đó là nơi chi phí lỗi cao nhất và metric (judge) dễ bị "lừa" nhất.
+
+---
+
 ## Lỗi thường gặp & cách xử lý
 
 | Triệu chứng | Nguyên nhân gốc | Cách xử lý |
@@ -1079,6 +1194,7 @@ Về công cụ: các thư viện như RAGAS, DeepEval, promptfoo và các nền
 - **Escalation lớp 2:** $\hat p$ = logistic trên nhiều tín hiệu (retrieval, logprob, tự khai, entropy ngữ nghĩa, verifier, ngữ cảnh) → hiệu chuẩn (ECE, temperature, Platt) → ngưỡng $\tau^* = 1 - C_h/C_w$ theo intent → kiểm tra cận trên risk trên đường cong risk–coverage → $\tau = \max(\tau_{\text{chi phí}}, \tau_{\text{rủi ro}})$.
 - **Online:** shadow mode sinh nhãn qua NED; KPI có guardrail (reopen, CSAT); A/B theo khách hàng; vòng phản hồi 1–2 tuần.
 - **CI:** gate an toàn tuyệt đối + gate chất lượng so cặp với baseline.
+- **Tối ưu prompt tự động:** $\theta^*=\arg\max_\theta \mathbb{E}[\mu(\Phi_\theta(x),y)]$ bằng tìm kiếm hộp đen (bootstrap demo, OPRO, MIPROv2, GEPA); điểm dev của ứng viên thắng lạc quan $\approx \sigma\,\mathbb{E}[\max Z]$ → ba tập tách biệt, test chạy một lần, so cặp, không tối ưu thẳng vào judge.
 
 ## Câu hỏi tự kiểm tra / phỏng vấn
 
@@ -1170,15 +1286,30 @@ Về công cụ: các thư viện như RAGAS, DeepEval, promptfoo và các nền
 
     </details>
 
+12. Bộ tối ưu prompt thử 30 ứng viên trên tập dev 100 email và báo cáo ứng viên tốt nhất đạt 0,88 so với baseline 0,80. Bạn có tin không? Cần làm gì trước khi đưa vào production?
+
+    <details markdown="1"><summary>Đáp án gợi ý</summary>
+
+    Chưa tin. Nếu mọi ứng viên thật ra ngang baseline ($p = 0{,}80$), độ lệch chuẩn điểm dev là $\sqrt{0{,}8 \cdot 0{,}2/100} = 0{,}04$, và max của 30 ứng viên kỳ vọng cao hơn khoảng $2{,}04 \times 0{,}04 \approx 0{,}08$ — đúng mức 0,88 quan sát được. Cần: chạy ứng viên thắng *một lần* trên tập test giữ kín, so cặp với baseline (McNemar/bootstrap cặp), kiểm tra từng phân tầng ngôn ngữ/intent, và cho qua đúng CI gate như một thay đổi prompt bình thường.
+
+    </details>
+
 ## Bài tập thực hành
 
 1. **Tính tay metric retrieval** (không cần GPU). Lấy 5 email trong `labs/data/emails.jsonl`, chạy retriever BM25 của Lab 01, tự gán nhãn liên quan cho top-5, tính P@5, R@5, MRR, AP, nDCG@5. So với hàm cài đặt sẵn trong [Lab 02](labs/lab02_chunking_metrics.md).
 2. **Đo judge** (cần LLM local hoặc API). Chọn 40 draft trong `labs/data/judge_set.jsonl`, tự chấm PASS/FAIL theo checklist mục 4.2, rồi cho judge chấm. Tính kappa, Se, Sp; thử đổi prompt judge thành thang 1–10 và so sánh độ ổn định qua 3 lần chạy.
 3. **Hiệu chuẩn và chọn ngưỡng** (không cần GPU). Làm [Lab 05](labs/lab05_eval_escalation.md): tính ECE trước/sau Platt và temperature scaling, vẽ reliability diagram, dựng đường cong risk–coverage, chọn ngưỡng theo chi phí và theo cận trên risk 2%. Thay đổi $C_w$ để thấy ngưỡng dịch chuyển.
 4. **Eval harness mini.** Viết `run_eval.py` theo khung mục 9.3 cho pipeline của Lab 04 với LLM giả lập; thêm gate "không ticket `needs_human` nào bị SEND" và cho nó chạy trong GitHub Actions khi đổi file prompt.
+5. **Tối ưu prompt phân loại intent** (LLM local qua vLLM/Ollama hoặc API). Chia 60 email của `labs/data/emails.jsonl` thành train/dev/test 20/20/20 theo phân tầng ngôn ngữ; chạy khung DSPy ở mục 10.6 với `auto="light"`. Báo cáo điểm dev và điểm test của ứng viên thắng, so cặp với prompt viết tay; đo khoảng chênh dev–test và giải thích bằng mục 10.4.
 
 ## Tài liệu tham khảo
 
+- Khattab, O. et al. (2023). *DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines*. arXiv:2310.03714.
+- Yang, C. et al. (2023). *Large Language Models as Optimizers* (OPRO). arXiv:2309.03409.
+- Opsahl-Ong, K. et al. (2024). *Optimizing Instructions and Demonstrations for Multi-Stage Language Model Programs* (MIPRO). arXiv:2406.11695.
+- Yuksekgonul, M. et al. (2024). *TextGrad: Automatic "Differentiation" via Text*. arXiv:2406.07496.
+- Agrawal, L. A. et al. (2025). *GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning*. arXiv:2507.19457.
+- DSPy (tài liệu chính thức; phiên bản 3.4 tính đến 10/2026): https://dspy.ai/
 - Järvelin, K., & Kekäläinen, J. (2002). *Cumulated gain-based evaluation of IR techniques*. ACM Transactions on Information Systems 20(4).
 - Es, S., James, J., Espinosa-Anke, L., & Schockaert, S. (2023). *RAGAS: Automated Evaluation of Retrieval Augmented Generation*. arXiv:2309.15217.
 - Saad-Falcon, J., Khattab, O., Potts, C., & Zaharia, M. (2023). *ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems*. arXiv:2311.09476.

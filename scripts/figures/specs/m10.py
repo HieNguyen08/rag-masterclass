@@ -41,4 +41,6 @@ FIGS = [
      "Cỡ mẫu cần để phát hiện CSAT giảm δ (α = 5% hai phía, power 80%); điểm đánh dấu là ví dụ δ = 0,03."),
     ("Nguyên tắc: gate an toàn dùng **ngưỡng tuyệt đối**", "eval-gates",
      "Hai loại gate trong CI theo bảng mục 9.2."),
+    ("— tức **báo cáo cải thiện 8 điểm trong khi thật ra không ứng viên nào tốt hơn**", "winners-curse",
+     "Mô phỏng mục 10.4: khi 30 ứng viên có cùng độ chính xác thật 0,80, ứng viên có điểm dev cao nhất trông tốt hơn ~8 điểm với 100 mẫu dev; độ lạc quan tăng theo số ứng viên và giảm theo cỡ tập dev."),
 ]

@@ -430,5 +430,36 @@ def _(fig, t):
             fontsize=8, color=t["fg2"])
 
 
+
+# ---------------------------------------------------------------- 10.4 lời nguyền người thắng
+@figure("winners-curse", size=(8.4, 3.0))
+def _(fig, t):
+    a1, a2 = fig.subplots(1, 2, gridspec_kw=dict(wspace=0.32, width_ratios=[1.2, 1]))
+    rng = np.random.default_rng(0)
+    p, K = 0.80, 30
+    best100 = rng.binomial(100, p, size=(20000, K)).max(1) / 100
+    best400 = rng.binomial(400, p, size=(20000, K)).max(1) / 400
+    bins = np.arange(0.76, 0.96, 0.01)
+    a1.hist(best100, bins=bins, color=t["c"][ORANGE], alpha=0.8, density=True, label=f"n = 100 dev (TB {best100.mean():.3f})".replace(".", ","))
+    a1.hist(best400, bins=np.arange(0.76, 0.96, 0.0025), color=t["c"][BLUE], alpha=0.75, density=True, label=f"n = 400 dev (TB {best400.mean():.3f})".replace(".", ","))
+    a1.axvline(p, color=t["fg"], ls="--", lw=1.2)
+    a1.set_xlim(0.70, 0.96)
+    a1.text(p - 0.004, a1.get_ylim()[1] * 0.55, "độ chính xác\nthật 0,80", ha="right", fontsize=7.8, color=t["fg"])
+    a1.set_xlabel("điểm dev của ứng viên «thắng»")
+    a1.set_yticks([])
+    a1.legend(fontsize=7.6, loc="upper right")
+    a1.set_title("30 ứng viên ngang nhau, chọn cái điểm dev cao nhất", fontsize=9)
+    Ks = np.array([1, 2, 5, 10, 20, 30, 50, 100, 200])
+    ez = np.array([rng.standard_normal((20000, k)).max(1).mean() for k in Ks])
+    a2.plot(Ks, 0.04 * ez, "o-", color=t["c"][ORANGE], lw=1.6, ms=4, label="n = 100 (σ = 0,04)")
+    a2.plot(Ks, 0.02 * ez, "o-", color=t["c"][BLUE], lw=1.6, ms=4, label="n = 400 (σ = 0,02)")
+    a2.set_xscale("log")
+    a2.set_xlabel("số ứng viên K")
+    a2.set_ylabel("độ lạc quan kỳ vọng")
+    a2.set_ylim(0, 0.13)
+    a2.legend(fontsize=7.6, loc="upper left")
+    a2.set_title("σ · E[max Z] tăng theo K", fontsize=9)
+    ygrid(a2, t)
+
 if __name__ == "__main__":
     run("10")
