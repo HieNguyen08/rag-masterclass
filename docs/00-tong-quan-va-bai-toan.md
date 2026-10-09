@@ -37,6 +37,14 @@ $$
 
 Phần thứ ba thường bị xem nhẹ, trong khi nó quyết định hệ thống có dám chạy tự động hay không. Vì vậy khóa học dành hẳn một phần lớn của Module 10 cho **confidence và escalation**.
 
+<!-- fig:three-subproblems -->
+<figure markdown="span">
+  ![Bài toán của khóa học là tổ hợp ba bài toán con; đầu ra cuối cùng là một trong ba quyết định SEND / DRAFT / ESCALATE](assets/figures/00/three-subproblems.light.svg#only-light){ loading=lazy }
+  ![Bài toán của khóa học là tổ hợp ba bài toán con; đầu ra cuối cùng là một trong ba quyết định SEND / DRAFT / ESCALATE](assets/figures/00/three-subproblems.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 0.1 — Bài toán của khóa học là tổ hợp ba bài toán con; đầu ra cuối cùng là một trong ba quyết định SEND / DRAFT / ESCALATE.</figcaption>
+</figure>
+<!-- /fig -->
+
 ## 2. Giả định quy mô dùng xuyên suốt
 
 Để mọi phép tính trong khóa học nhất quán, ta cố định một kịch bản giả định (con số để học, không phải số liệu thật của công ty nào):
@@ -47,7 +55,23 @@ Phần thứ ba thường bị xem nhẹ, trong khi nó quyết định hệ th�
 - Ràng buộc cứng: không bịa chính sách, không lộ dữ liệu khách khác, có PII, email có thể chứa prompt injection.
 - Rollout an toàn: **giai đoạn 1** AI chỉ viết draft dưới dạng internal note cho agent duyệt → **giai đoạn 2** tự gửi với nhóm intent rủi ro thấp → mở rộng dần theo số liệu.
 
+<!-- fig:rollout-stages -->
+<figure markdown="span">
+  ![Lộ trình rollout từ draft cho agent duyệt tới tự gửi có chọn lọc](assets/figures/00/rollout-stages.light.svg#only-light){ loading=lazy }
+  ![Lộ trình rollout từ draft cho agent duyệt tới tự gửi có chọn lọc](assets/figures/00/rollout-stages.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 0.2 — Lộ trình rollout từ draft cho agent duyệt tới tự gửi có chọn lọc.</figcaption>
+</figure>
+<!-- /fig -->
+
 Một phép tính nhanh để cảm nhận quy mô (chi tiết ở Module 11): 1.500 ticket × ~3,5 lượt ≈ 5.250 lần sinh trả lời/ngày. Nếu mỗi lần gửi vào model ~6.000 token context và nhận ~400 token đầu ra, ta có khoảng 31,5 triệu token đầu vào và 2,1 triệu token đầu ra mỗi ngày. Con số này đủ lớn để chi phí, caching và việc chọn model trở thành quyết định thiết kế chứ không còn là chi tiết.
+
+<!-- fig:scale-at-a-glance -->
+<figure markdown="span">
+  ![Phép tính quy mô của mục 2: từ số ticket mỗi ngày đến lưu lượng token](assets/figures/00/scale-at-a-glance.light.svg#only-light){ loading=lazy }
+  ![Phép tính quy mô của mục 2: từ số ticket mỗi ngày đến lưu lượng token](assets/figures/00/scale-at-a-glance.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 0.3 — Phép tính quy mô của mục 2: từ số ticket mỗi ngày đến lưu lượng token.</figcaption>
+</figure>
+<!-- /fig -->
 
 ## 3. Bản đồ kiến thức
 
