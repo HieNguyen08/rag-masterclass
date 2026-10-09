@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="630.72pt" height="269.52pt" viewBox="0 0 630.72 269.52" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 269.52 
+L 630.72 269.52 
+L 630.72 0 
+L 0 0 
+L 0 269.52 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 20.208 48.588 
+L 383.472 48.588 
+Q 387.6 48.588 387.6 44.46 
+L 387.6 20.724 
+Q 387.6 16.596 383.472 16.596 
+L 20.208 16.596 
+Q 16.08 16.596 16.08 20.724 
+L 16.08 44.46 
+Q 16.08 48.588 20.208 48.588 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #1a2b18; stroke: #008300; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 389.148 33.366 
+L 399.468 33.366 
+L 399.468 31.818 
+L 389.148 31.818 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #008300; stroke: #008300; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 20.208 119.796 
+L 383.472 119.796 
+Q 387.6 119.796 387.6 115.668 
+L 387.6 60.972 
+Q 387.6 56.844 383.472 56.844 
+L 20.208 56.844 
+Q 16.08 56.844 16.08 60.972 
+L 16.08 115.668 
+Q 16.08 119.796 20.208 119.796 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #36261d; stroke: #d95926; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 389.148 89.094 
+L 399.468 89.094 
+L 399.468 87.546 
+L 389.148 87.546 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #d95926; stroke: #d95926; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 20.208 191.004 
+L 383.472 191.004 
+Q 387.6 191.004 387.6 186.876 
+L 387.6 132.18 
+Q 387.6 128.052 383.472 128.052 
+L 20.208 128.052 
+Q 16.08 128.052 16.08 132.18 
+L 16.08 186.876 
+Q 16.08 191.004 20.208 191.004 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #222c36; stroke: #3987e5; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 389.148 160.302 
+L 399.468 160.302 
+L 399.468 158.754 
+L 389.148 158.754 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #3987e5; stroke: #3987e5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 20.208 231.252 
+L 383.472 231.252 
+Q 387.6 231.252 387.6 227.124 
+L 387.6 203.388 
+Q 387.6 199.26 383.472 199.26 
+L 20.208 199.26 
+Q 16.08 199.26 16.08 203.388 
+L 16.08 227.124 
+Q 16.08 231.252 20.208 231.252 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #2d2b37; stroke: #9085e9; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 389.148 216.03 
+L 399.468 216.03 
+L 399.468 214.482 
+L 389.148 214.482 
+z
+" clip-path="url(#p54b9703d82)" style="fill: #9085e9; stroke: #9085e9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="26.4" y="35.393531" transform="rotate(-0 26.4 35.393531)">Dạ em vẫn chưa xuất được hóa đơn ạ, nút Export bị mờ.</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="403.08" y="35.619406" transform="rotate(-0 403.08 35.619406)">nội dung mới → GIỮ</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(26.4 79.045875)">Trân trọng,</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(26.4 91.121531)">Nguyễn Văn A — Phòng Kế toán</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(26.4 103.137469)">ĐT: 09xx xxx xxx</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="403.08" y="91.121906" transform="rotate(-0 403.08 91.121906)">chữ ký + PII → cắt</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(26.4 150.448781)">Vào Th 3, 14 thg 10, 2026 lúc 09:12, Support đã viết:</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(26.4 162.013875)">&gt; Chào anh A, anh vui lòng vào Settings &gt; Billing…</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(26.4 173.605875)">&gt;&gt; On Mon, Oct 13, 2026 … wrote: Hi, I can't export…</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="403.08" y="162.329906" transform="rotate(-0 403.08 162.329906)">quoted reply (đã có ở comment trước) → cắt</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="26.4" y="217.573875" transform="rotate(-0 26.4 217.573875)">CONFIDENTIAL: This email and any attachments are…</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="403.08" y="218.057906" transform="rotate(-0 403.08 218.057906)">disclaimer lặp ở hàng nghìn email → cắt</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #c3c2b7" x="16.08" y="257.568" transform="rotate(-0 16.08 257.568)">Embed nguyên comment → vector bị kéo về câu trả lời cũ, chữ ký thành hub, PII lan khắp index.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p54b9703d82">
+   <rect x="5.76" y="5.76" width="619.2" height="258"/>
+  </clipPath>
+ </defs>
+</svg>

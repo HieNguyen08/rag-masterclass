@@ -1,0 +1,4100 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LLM & RAG từ nền tảng đến hệ thống production — xoay quanh bài toán AI tư vấn khách hàng qua Zendesk">
+      
+      
+        <meta name="author" content="HieNguyen08">
+      
+      
+        <link rel="canonical" href="https://hienguyen08.github.io/rag-masterclass/08-kien-truc-rag-nang-cao/">
+      
+      
+        <link rel="prev" href="../07-generation-grounding-guardrails/">
+      
+      
+        <link rel="next" href="../09-fine-tuning-cho-rag/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>08 · Kiến trúc nâng cao & Agentic RAG - RAG Masterclass</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Be+Vietnam+Pro:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Be Vietnam Pro";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#module-08-kien-truc-rag-nang-cao-agentic-rag" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="RAG Masterclass" class="md-header__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RAG Masterclass
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              08 · Kiến trúc nâng cao & Agentic RAG
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00-tong-quan-va-bai-toan/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần I · Nền tảng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../03-embedding-va-bieu-dien/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần II · Pipeline RAG
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần III · Nâng cao
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11-production-va-quy-mo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần IV · Hệ thống
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../13-rag-da-phuong-thuc/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần V · Chuyên đề mở rộng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../labs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Thực hành
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="RAG Masterclass" class="md-nav__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    RAG Masterclass
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần I · Nền tảng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần I · Nền tảng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-tong-quan-va-bai-toan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00 · Tổng quan & bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-nen-tang-llm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 · Nền tảng LLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-gioi-han-llm-va-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 · Giới hạn LLM & RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần II · Pipeline RAG
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần II · Pipeline RAG
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-embedding-va-bieu-dien/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 · Embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-ingestion-va-chunking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 · Ingestion & chunking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-retrieval-sparse-dense-hybrid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 · Retrieval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-query-va-reranking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 · Query & reranking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-generation-grounding-guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 · Generation & guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần III · Nâng cao
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần III · Nâng cao
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 · Kiến trúc nâng cao & Agentic RAG
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 · Kiến trúc nâng cao & Agentic RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu-hoc-tap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu học tập
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-tu-uong-ong-tinh-en-vong-ieu-khien" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Từ đường ống tĩnh đến vòng điều khiển
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Từ đường ống tĩnh đến vòng điều khiển">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-ba-quyet-inh-ma-naive-rag-bo-qua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Ba quyết định mà naive RAG bỏ qua
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-mo-hinh-chi-phi-cho-kien-truc-co-inh-tuyen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Mô hình chi phí cho kiến trúc có định tuyến
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-adaptive-retrieval-khi-nao-can-retrieve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Adaptive retrieval: khi nào cần retrieve
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Adaptive retrieval: khi nào cần retrieve">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-adaptive-rag-phan-loai-o-phuc-tap-cau-hoi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Adaptive-RAG — phân loại độ phức tạp câu hỏi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-flare-retrieve-khi-model-khong-chac-tung-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 FLARE — retrieve khi model "không chắc" từng token
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-tu-anh-gia-retrieval-self-rag-va-crag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Tự đánh giá retrieval: Self-RAG và CRAG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Tự đánh giá retrieval: Self-RAG và CRAG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-self-rag-reflection-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Self-RAG — reflection tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crag-corrective-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 CRAG — Corrective RAG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-so-sanh-nhanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 So sánh nhanh
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-retrieval-a-buoc-ircot-va-react" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Retrieval đa bước: IRCoT và ReAct
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Retrieval đa bước: IRCoT và ReAct">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-vi-sao-mot-lan-retrieve-khong-u" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Vì sao một lần retrieve không đủ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-ircot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 IRCoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-react-suy-luan-hanh-ong-voi-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 ReAct — suy luận + hành động với tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-raptor-cay-tom-tat-phan-cum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. RAPTOR: cây tóm tắt phân cụm
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. RAPTOR: cây tóm tắt phân cụm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Ý tưởng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-toan-phan-cum-umap-gmm-bic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Toán phân cụm: UMAP + GMM + BIC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-khi-nao-dung-raptor-cho-cs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Khi nào dùng RAPTOR cho CS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-graphrag-va-cac-bien-the" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. GraphRAG và các biến thể
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. GraphRAG và các biến thể">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-van-e-cau-hoi-toan-cuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Vấn đề: câu hỏi "toàn cục"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-pipeline-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Pipeline indexing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-toan-modularity-va-leiden-muc-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Toán: modularity và Leiden (mức ý tưởng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-truy-van-local-vs-global" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Truy vấn: local vs global
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-lightrag-va-hipporag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 LightRAG và HippoRAG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-khi-nao-graph-ang-tien-cho-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Khi nào graph đáng tiền cho Zendesk?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-long-context-rag-va-cag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Long-context, RAG và CAG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Long-context, RAG và CAG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-ket-qua-nghien-cuu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Kết quả nghiên cứu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-cag-cache-augmented-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 CAG — Cache-Augmented Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-ma-tran-quyet-inh-cho-cs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Ma trận quyết định cho CS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-agentic-rag-voi-langgraph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Agentic RAG với LangGraph
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Agentic RAG với LangGraph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-agent-trong-bai-toan-nay-nghia-la-gi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 "Agent" trong bài toán này nghĩa là gì
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-langgraph-state-machine-cho-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 LangGraph: state machine cho LLM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-o-thi-agentic-rag-cho-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Đồ thị agentic RAG cho Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-code-khung-rut-gon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Code khung (rút gọn)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-node-agent-va-tool-qua-mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 Node agent và tool qua MCP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-memory-hoi-thoai-va-khach-hang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 Memory: hội thoại và khách hàng
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-khi-nao-phuc-tap-hoa-la-xung-ang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Khi nào phức tạp hóa là xứng đáng
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Khi nào phức tạp hóa là xứng đáng">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-khung-quyet-inh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Khung quyết định
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-ap-vao-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Áp vào Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap-cach-xu-ly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi thường gặp &amp; cách xử lý
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tóm tắt (cheat-sheet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-tu-kiem-tra-phong-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Câu hỏi tự kiểm tra / phỏng vấn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bai-tap-thuc-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bài tập thực hành
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-fine-tuning-cho-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 · Fine-tuning cho RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-danh-gia-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 · Đánh giá, confidence & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần IV · Hệ thống
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần IV · Hệ thống
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-production-va-quy-mo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 · Production & quy mô
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-capstone-thiet-ke-he-thong-zendesk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 · Capstone: hệ thống AI CS Zendesk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-rag-da-phuong-thuc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 · RAG đa phương thức
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-rag-du-lieu-co-cau-truc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 · RAG trên dữ liệu có cấu trúc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../labs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Thực hành
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Thực hành
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab01_bm25_dense_rrf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 · BM25, dense, RRF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab02_chunking_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 · Chunking & metric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab03_reranker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 · Reranker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab04_mini_rag_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 04 · Mini RAG API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab05_eval_escalation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 05 · Đánh giá & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab06_agentic_langgraph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 06 · Agentic RAG với LangGraph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab07_finetune_embedding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 07 · Fine-tune embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab08_ingestion_dedup_pii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 08 · Làm sạch, MinHash, PII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab09_query_rewriting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 09 · Xử lý query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/data/README_data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dữ liệu mẫu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu-hoc-tap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu học tập
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-tu-uong-ong-tinh-en-vong-ieu-khien" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Từ đường ống tĩnh đến vòng điều khiển
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Từ đường ống tĩnh đến vòng điều khiển">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-ba-quyet-inh-ma-naive-rag-bo-qua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Ba quyết định mà naive RAG bỏ qua
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-mo-hinh-chi-phi-cho-kien-truc-co-inh-tuyen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Mô hình chi phí cho kiến trúc có định tuyến
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-adaptive-retrieval-khi-nao-can-retrieve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Adaptive retrieval: khi nào cần retrieve
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Adaptive retrieval: khi nào cần retrieve">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-adaptive-rag-phan-loai-o-phuc-tap-cau-hoi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Adaptive-RAG — phân loại độ phức tạp câu hỏi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-flare-retrieve-khi-model-khong-chac-tung-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 FLARE — retrieve khi model "không chắc" từng token
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-tu-anh-gia-retrieval-self-rag-va-crag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Tự đánh giá retrieval: Self-RAG và CRAG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Tự đánh giá retrieval: Self-RAG và CRAG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-self-rag-reflection-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Self-RAG — reflection tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crag-corrective-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 CRAG — Corrective RAG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-so-sanh-nhanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 So sánh nhanh
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-retrieval-a-buoc-ircot-va-react" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Retrieval đa bước: IRCoT và ReAct
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Retrieval đa bước: IRCoT và ReAct">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-vi-sao-mot-lan-retrieve-khong-u" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Vì sao một lần retrieve không đủ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-ircot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 IRCoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-react-suy-luan-hanh-ong-voi-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 ReAct — suy luận + hành động với tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-raptor-cay-tom-tat-phan-cum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. RAPTOR: cây tóm tắt phân cụm
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. RAPTOR: cây tóm tắt phân cụm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Ý tưởng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-toan-phan-cum-umap-gmm-bic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Toán phân cụm: UMAP + GMM + BIC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-khi-nao-dung-raptor-cho-cs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Khi nào dùng RAPTOR cho CS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-graphrag-va-cac-bien-the" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. GraphRAG và các biến thể
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. GraphRAG và các biến thể">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-van-e-cau-hoi-toan-cuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Vấn đề: câu hỏi "toàn cục"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-pipeline-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Pipeline indexing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-toan-modularity-va-leiden-muc-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Toán: modularity và Leiden (mức ý tưởng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-truy-van-local-vs-global" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Truy vấn: local vs global
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-lightrag-va-hipporag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 LightRAG và HippoRAG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-khi-nao-graph-ang-tien-cho-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Khi nào graph đáng tiền cho Zendesk?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-long-context-rag-va-cag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Long-context, RAG và CAG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Long-context, RAG và CAG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-ket-qua-nghien-cuu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Kết quả nghiên cứu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-cag-cache-augmented-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 CAG — Cache-Augmented Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-ma-tran-quyet-inh-cho-cs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Ma trận quyết định cho CS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-agentic-rag-voi-langgraph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Agentic RAG với LangGraph
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Agentic RAG với LangGraph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-agent-trong-bai-toan-nay-nghia-la-gi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 "Agent" trong bài toán này nghĩa là gì
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-langgraph-state-machine-cho-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 LangGraph: state machine cho LLM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-o-thi-agentic-rag-cho-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Đồ thị agentic RAG cho Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-code-khung-rut-gon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Code khung (rút gọn)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-node-agent-va-tool-qua-mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 Node agent và tool qua MCP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-memory-hoi-thoai-va-khach-hang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 Memory: hội thoại và khách hàng
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-khi-nao-phuc-tap-hoa-la-xung-ang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Khi nào phức tạp hóa là xứng đáng
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Khi nào phức tạp hóa là xứng đáng">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-khung-quyet-inh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Khung quyết định
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-ap-vao-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Áp vào Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap-cach-xu-ly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi thường gặp &amp; cách xử lý
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tóm tắt (cheat-sheet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-tu-kiem-tra-phong-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Câu hỏi tự kiểm tra / phỏng vấn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bai-tap-thuc-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bài tập thực hành
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/HieNguyen08/rag-masterclass/edit/main/docs/08-kien-truc-rag-nang-cao.md" title="Chỉnh sửa" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="module-08-kien-truc-rag-nang-cao-agentic-rag">Module 08 — Kiến trúc RAG nâng cao &amp; Agentic RAG<a class="headerlink" href="#module-08-kien-truc-rag-nang-cao-agentic-rag" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Thời lượng: ~55 phút (đọc kỹ + làm bài: ~2 giờ) · Mức độ: Nâng cao · Tiên quyết: Module 02 (hình thức hóa RAG), Module 05–06 (retrieval, reranking), Module 07 (grounding, verify, prompt injection)</p>
+</blockquote>
+<p>Pipeline ở Module 02–07 là một <strong>đường ống tĩnh</strong>: query → retrieve một lần → generate → verify. Nó đủ cho phần lớn câu hỏi FAQ. Nhưng có ba loại câu hỏi làm nó gãy: (1) câu hỏi mà một lần retrieve không đủ (cần nhiều bước, câu sau phụ thuộc kết quả câu trước); (2) câu hỏi mà retrieve <em>sai</em> và hệ thống không biết mình sai; (3) câu hỏi cần dữ liệu không nằm trong kho văn bản mà nằm sau một API (trạng thái tài khoản, hóa đơn, log lỗi). Module này đi qua các kiến trúc giải quyết từng loại — Self-RAG, CRAG, Adaptive-RAG, FLARE, IRCoT/ReAct, RAPTOR, GraphRAG, long-context/CAG — rồi ghép lại thành một <strong>agentic RAG</strong> bằng LangGraph với MCP làm lớp tool. Thông điệp xuyên suốt: mỗi lớp phức tạp phải <em>trả tiền</em> cho chính nó bằng chất lượng đo được.</p>
+<h2 id="muc-tieu-hoc-tap">Mục tiêu học tập<a class="headerlink" href="#muc-tieu-hoc-tap" title="Permanent link">&para;</a></h2>
+<p>Sau module này, bạn có thể:</p>
+<ol>
+<li>Mô tả RAG nâng cao như một <strong>chính sách điều khiển</strong> (khi nào retrieve, retrieve gì, khi nào dừng) và ước lượng chi phí/latency kỳ vọng của một hệ thống có định tuyến.</li>
+<li>Giải thích và tính tay cơ chế ra quyết định của <strong>FLARE</strong> (ngưỡng xác suất token), <strong>Self-RAG</strong> (reflection tokens, điểm phân đoạn), <strong>CRAG</strong> (retrieval evaluator với hai ngưỡng) và <strong>Adaptive-RAG</strong> (bộ phân loại độ phức tạp).</li>
+<li>Trình bày <strong>RAPTOR</strong> (UMAP + GMM + BIC, collapsed tree) và <strong>GraphRAG</strong> (trích xuất thực thể, Leiden, modularity, local/global search) ở mức toán ý tưởng; nhận diện khi nào chúng có ích cho dữ liệu CS.</li>
+<li>So sánh RAG với <strong>long-context</strong> và <strong>CAG</strong> bằng mô hình chi phí, và ước lượng bộ nhớ KV cache cho phương án CAG.</li>
+<li>Thiết kế một đồ thị <strong>LangGraph</strong> cho agentic RAG Zendesk: state, node, cạnh điều kiện, tool qua <strong>MCP</strong>, human-in-the-loop, memory — kèm các ràng buộc bảo mật từ Module 07.</li>
+<li>Lập luận "khi nào phức tạp hóa là xứng đáng" cho từng loại ticket.</li>
+</ol>
+<hr />
+<h2 id="1-tu-uong-ong-tinh-en-vong-ieu-khien">1. Từ đường ống tĩnh đến vòng điều khiển<a class="headerlink" href="#1-tu-uong-ong-tinh-en-vong-ieu-khien" title="Permanent link">&para;</a></h2>
+<h3 id="11-ba-quyet-inh-ma-naive-rag-bo-qua">1.1 Ba quyết định mà naive RAG bỏ qua<a class="headerlink" href="#11-ba-quyet-inh-ma-naive-rag-bo-qua" title="Permanent link">&para;</a></h3>
+<p>Naive RAG cố định ba thứ: <strong>luôn</strong> retrieve, retrieve <strong>một lần</strong> với query gốc, lấy <strong>top-<span class="arithmatex">\(k\)</span> cố định</strong>. RAG nâng cao biến chúng thành quyết định:</p>
+<table>
+<thead>
+<tr>
+<th>Quyết định</th>
+<th>Câu hỏi</th>
+<th>Kỹ thuật đại diện</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Có</em> retrieve không?</td>
+<td>Model đã biết, hay cần tra cứu?</td>
+<td>Adaptive-RAG, Self-RAG (<code>Retrieve</code>), FLARE</td>
+</tr>
+<tr>
+<td>Retrieve <em>cái gì</em>, <em>từ đâu</em>?</td>
+<td>Query nào, kho nào (Help Center, ticket, API, graph)?</td>
+<td>Query rewriting (Module 06), routing, agent tool calling, GraphRAG</td>
+</tr>
+<tr>
+<td>Kết quả <em>có dùng được</em> không, <em>dừng</em> chưa?</td>
+<td>Tài liệu có liên quan? Câu trả lời đủ chưa?</td>
+<td>CRAG evaluator, Self-RAG <code>IsRel</code>/<code>IsSup</code>, IRCoT, ReAct</td>
+</tr>
+</tbody>
+</table>
+<p>Hình thức hóa: tại bước <span class="arithmatex">\(t\)</span>, hệ thống có trạng thái <span class="arithmatex">\(s_t\)</span> (câu hỏi, tài liệu đã có, bản nháp, lịch sử hành động) và chọn hành động <span class="arithmatex">\(a_t \in \{\texttt{retrieve}(q, \text{kho}), \texttt{call\_tool}(\cdot), \texttt{generate}, \texttt{escalate}, \texttt{stop}\}\)</span> theo một <strong>chính sách</strong> <span class="arithmatex">\(\pi(a_t \mid s_t)\)</span>. Naive RAG là chính sách cố định "retrieve → generate → stop". Self-RAG học <span class="arithmatex">\(\pi\)</span> bằng token đặc biệt; CRAG và Adaptive-RAG dùng bộ phân loại nhỏ; agentic RAG để chính LLM làm <span class="arithmatex">\(\pi\)</span> (qua tool calling), còn LangGraph cho ta khung để <strong>ràng buộc</strong> <span class="arithmatex">\(\pi\)</span> bằng đồ thị.</p>
+<!-- fig:control-loop -->
+<figure>
+  <img alt="Từ đường ống cố định sang chính sách điều khiển π chọn hành động theo trạng thái" loading="lazy" src="../assets/figures/08/control-loop.light.svg#only-light" />
+  <img alt="Từ đường ống cố định sang chính sách điều khiển π chọn hành động theo trạng thái" loading="lazy" src="../assets/figures/08/control-loop.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.1 — Từ đường ống cố định sang chính sách điều khiển π chọn hành động theo trạng thái.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="12-mo-hinh-chi-phi-cho-kien-truc-co-inh-tuyen">1.2 Mô hình chi phí cho kiến trúc có định tuyến<a class="headerlink" href="#12-mo-hinh-chi-phi-cho-kien-truc-co-inh-tuyen" title="Permanent link">&para;</a></h3>
+<p>Gọi <span class="arithmatex">\(R\)</span> là tập các "tuyến" (route) xử lý, <span class="arithmatex">\(\pi_r\)</span> là tỷ lệ ticket đi vào tuyến <span class="arithmatex">\(r\)</span>, <span class="arithmatex">\(n_r\)</span> là số lượt gọi LLM trung bình của tuyến, <span class="arithmatex">\(\ell_r\)</span> là latency trung bình. Chi phí và latency kỳ vọng:</p>
+<div class="arithmatex">\[
+\mathbb{E}[\text{số lượt LLM}] = \sum_{r \in R} \pi_r\, n_r, \qquad \mathbb{E}[\ell] = \sum_{r \in R} \pi_r\, \ell_r .
+\]</div>
+<p><strong>Ví dụ số (giả định để học).</strong> Giả sử phân phối ticket: 55% FAQ/how-to một bước; 25% nhiều câu hỏi hoặc cần tổng hợp vài tài liệu; 15% cần điều tra tài khoản (gọi API nội bộ); 5% nhạy cảm, escalate ngay sau phân loại. Số lượt LLM trung bình mỗi tuyến (gồm phân loại, generate, verify): 1,3; 2,5; 5; 0,5.</p>
+<div class="arithmatex">\[
+\mathbb{E}[n] = 0{,}55 \cdot 1{,}3 + 0{,}25 \cdot 2{,}5 + 0{,}15 \cdot 5 + 0{,}05 \cdot 0{,}5 = 0{,}715 + 0{,}625 + 0{,}75 + 0{,}025 \approx 2{,}1 .
+\]</div>
+<p>Nếu cho <em>mọi</em> ticket đi qua agent (5 lượt), chi phí gấp ~2,4 lần, latency tăng tương ứng, và — quan trọng hơn — bề mặt tấn công (tool calling) mở ra cho cả 100% ticket thay vì 15%. Đây là lý lẽ định lượng cho nguyên tắc: <strong>định tuyến trước, phức tạp hóa có chọn lọc</strong>.</p>
+<!-- fig:routing-cost -->
+<figure>
+  <img alt="Số lượt LLM kỳ vọng của ví dụ mục 1" loading="lazy" src="../assets/figures/08/routing-cost.light.svg#only-light" />
+  <img alt="Số lượt LLM kỳ vọng của ví dụ mục 1" loading="lazy" src="../assets/figures/08/routing-cost.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.2 — Số lượt LLM kỳ vọng của ví dụ mục 1.2: định tuyến (≈ 2,1) so với cho mọi ticket qua agent (5).</figcaption>
+</figure>
+<!-- /fig -->
+
+<blockquote>
+<p><strong>Liên hệ Zendesk.</strong> Với ~1.500 ticket/ngày × 3–4 lượt trao đổi, khác biệt 2,1 vs 5 lượt LLM mỗi lượt xử lý là ~11.000 vs ~26.000 lượt gọi/ngày (ước lượng). Con số cụ thể về tiền và GPU ở Module 11; ở đây hãy nhớ rằng phân phối intent của <em>chính bạn</em> (đo từ 200.000 ticket lịch sử) quyết định kiến trúc, không phải độ "hot" của kỹ thuật.</p>
+</blockquote>
+<hr />
+<h2 id="2-adaptive-retrieval-khi-nao-can-retrieve">2. Adaptive retrieval: khi nào cần retrieve<a class="headerlink" href="#2-adaptive-retrieval-khi-nao-can-retrieve" title="Permanent link">&para;</a></h2>
+<h3 id="21-adaptive-rag-phan-loai-o-phuc-tap-cau-hoi">2.1 Adaptive-RAG — phân loại độ phức tạp câu hỏi<a class="headerlink" href="#21-adaptive-rag-phan-loai-o-phuc-tap-cau-hoi" title="Permanent link">&para;</a></h3>
+<p><strong>Vấn đề.</strong> Retrieve đa bước cho câu hỏi đơn giản là lãng phí; retrieve một bước cho câu hỏi đa bước là thiếu. Jeong et al. (2024, NAACL) đề xuất huấn luyện một <strong>bộ phân loại nhỏ</strong> dự đoán độ phức tạp của câu hỏi, rồi chọn chiến lược:</p>
+<ul>
+<li><strong>A</strong> — không retrieve (LLM tự trả lời);</li>
+<li><strong>B</strong> — retrieve một bước;</li>
+<li><strong>C</strong> — retrieve lặp nhiều bước (kiểu IRCoT, mục 4).</li>
+</ul>
+<p><strong>Nhãn tự động.</strong> Không ai gán nhãn tay. Với mỗi câu hỏi mẫu, chạy cả ba chiến lược; nhãn là chiến lược <strong>đơn giản nhất</strong> trả lời đúng (A ưu tiên hơn B, B hơn C). Câu hỏi không chiến lược nào đúng thì dùng "thiên lệch của dataset": câu từ dataset single-hop gán B, multi-hop gán C. Bộ phân loại trong bài là T5-Large (~770M tham số), và ablation cho thấy bản nhỏ hơn nhiều vẫn hoạt động gần tương đương; dữ liệu huấn luyện chỉ khoảng 400 câu mỗi dataset.</p>
+<p><strong>Toán.</strong> Đây là phân loại 3 lớp với cross-entropy:</p>
+<div class="arithmatex">\[
+\mathcal{L} = -\sum_{i} \log p_\phi(c_i \mid q_i), \quad c_i \in \{A, B, C\}.
+\]</div>
+<p>Ý tưởng sâu hơn nằm ở <em>cách tạo nhãn</em>: nhãn mã hóa <strong>chi phí tối thiểu để đúng</strong>. Có thể tổng quát hóa thành bài toán chọn hành động có chi phí: chọn <span class="arithmatex">\(c^\star = \arg\min_c \big[\text{cost}(c) + \lambda\, \mathbb{1}[\text{sai} \mid c]\big]\)</span>.</p>
+<!-- fig:adaptive-rag -->
+<figure>
+  <img alt="Adaptive-RAG tạo nhãn bằng cách chạy cả ba chiến lược và chọn chiến lược rẻ nhất vẫn trả lời đúng" loading="lazy" src="../assets/figures/08/adaptive-rag.light.svg#only-light" />
+  <img alt="Adaptive-RAG tạo nhãn bằng cách chạy cả ba chiến lược và chọn chiến lược rẻ nhất vẫn trả lời đúng" loading="lazy" src="../assets/figures/08/adaptive-rag.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.3 — Adaptive-RAG tạo nhãn bằng cách chạy cả ba chiến lược và chọn chiến lược rẻ nhất vẫn trả lời đúng.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Áp vào Zendesk.</strong> Không nên có lớp A ("không retrieve") cho câu hỏi về sản phẩm — tri thức tham số của LLM về sản phẩm <em>của bạn</em> gần như bằng không và dễ bịa. Lớp A hợp lý chỉ cho lời cảm ơn, xác nhận đã nhận ("ok cảm ơn, mình thử rồi được"). Bảng nhãn thực tế mình khuyên:</p>
+<table>
+<thead>
+<tr>
+<th>Nhãn</th>
+<th>Ví dụ email</th>
+<th>Tuyến</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ack</code></td>
+<td>"Cảm ơn, đã giải quyết"</td>
+<td>Không retrieve, có thể đóng ticket theo rule (vẫn cần người duyệt ở giai đoạn 1)</td>
+</tr>
+<tr>
+<td><code>faq</code></td>
+<td>"Xuất hóa đơn VAT ở đâu?"</td>
+<td>Naive + rerank (Module 05–07)</td>
+</tr>
+<tr>
+<td><code>multi_doc</code></td>
+<td>"So sánh gói Business và Enterprise về SSO và giới hạn API"</td>
+<td>Decomposition + retrieve nhiều lần</td>
+</tr>
+<tr>
+<td><code>account</code></td>
+<td>"Tại sao tài khoản tôi bị khóa sau khi thanh toán?"</td>
+<td>Agent + tool (API nội bộ)</td>
+</tr>
+<tr>
+<td><code>sensitive</code></td>
+<td>Hoàn tiền, pháp lý, sự cố bảo mật</td>
+<td>Escalate (draft hỗ trợ nếu an toàn)</td>
+</tr>
+</tbody>
+</table>
+<p>Nhãn có thể tạo bán tự động từ ticket lịch sử: ticket mà agent giải quyết chỉ bằng một macro → <code>faq</code>; ticket mà agent phải xem trang admin hoặc hỏi kỹ thuật → <code>account</code>. Đây là "inductive bias" của dữ liệu CS, tương tự cách Adaptive-RAG dùng nguồn dataset làm nhãn dự phòng.</p>
+<h3 id="22-flare-retrieve-khi-model-khong-chac-tung-token">2.2 FLARE — retrieve khi model "không chắc" từng token<a class="headerlink" href="#22-flare-retrieve-khi-model-khong-chac-tung-token" title="Permanent link">&para;</a></h3>
+<p><strong>Vấn đề.</strong> Với văn bản dài (một email hướng dẫn nhiều bước), thông tin cần thiết thay đổi theo từng đoạn. Retrieve một lần ở đầu có thể thiếu tài liệu cho bước thứ ba.</p>
+<p><strong>Ý tưởng.</strong> Jiang et al. (2023, "Active Retrieval Augmented Generation") đề xuất FLARE (Forward-Looking Active REtrieval): sinh <strong>tạm</strong> câu tiếp theo; nếu model tự tin ở mọi token thì giữ câu đó; nếu có token xác suất thấp thì dùng câu tạm làm truy vấn (nhìn về phía trước — <em>forward-looking</em>), retrieve, rồi sinh lại câu.</p>
+<p><strong>Toán.</strong> Gọi câu tạm là <span class="arithmatex">\(\hat s = (\hat y_1, \dots, \hat y_m)\)</span> sinh theo <span class="arithmatex">\(p_\theta(\cdot \mid x, D, y_{&lt;t})\)</span> với <span class="arithmatex">\(D\)</span> là tài liệu hiện có. Quy tắc kích hoạt:</p>
+<div class="arithmatex">\[
+\text{retrieve} \iff \min_{1 \le j \le m} p_\theta(\hat y_j \mid x, D, y_{&lt;t}, \hat y_{&lt;j}) &lt; \theta .
+\]</div>
+<p>Khi kích hoạt, truy vấn được tạo bằng cách <strong>che</strong> (mask) các token có xác suất dưới ngưỡng <span class="arithmatex">\(\beta\)</span> — vì token không chắc chắn có thể sai và kéo retrieval lệch:</p>
+<div class="arithmatex">\[
+q = \text{mask}(\hat s, \{ j : p(\hat y_j) &lt; \beta \}),
+\]</div>
+<p>hoặc (biến thể tường minh) sinh một câu hỏi nhắm vào đúng đoạn không chắc chắn. Bài báo dùng <span class="arithmatex">\(\theta\)</span> khác nhau theo dataset (khoảng 0,4–0,8) và <span class="arithmatex">\(\beta\)</span> thường 0,4.</p>
+<p><strong>Ví dụ số.</strong> Email đang viết: "Để bật SSO, vào Cài đặt &gt; Bảo mật, chọn ..." Câu tạm tiếp theo: "Nhập <em>Entity ID</em> và <em>Metadata URL</em> do <em>Okta</em> cung cấp." Xác suất token (rút gọn theo từ): Nhập 0,92; Entity 0,81; ID 0,95; Metadata 0,44; URL 0,88; Okta 0,31. Với <span class="arithmatex">\(\theta = 0{,}5\)</span>: <span class="arithmatex">\(\min = 0{,}31 &lt; 0{,}5\)</span> → retrieve. Với <span class="arithmatex">\(\beta = 0{,}4\)</span>: che "Okta" (0,31), giữ "Metadata" (0,44 ≥ 0,4) → query "Nhập Entity ID và Metadata URL do ___ cung cấp". Kết quả retrieve có thể là bài "Cấu hình SAML với nhà cung cấp danh tính" — đúng tài liệu, không bị kéo về riêng Okta trong khi khách dùng Azure AD.</p>
+<!-- fig:flare-tokens -->
+<figure>
+  <img alt="FLARE trên ví dụ mục 2" loading="lazy" src="../assets/figures/08/flare-tokens.light.svg#only-light" />
+  <img alt="FLARE trên ví dụ mục 2" loading="lazy" src="../assets/figures/08/flare-tokens.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.4 — FLARE trên ví dụ mục 2.2: token thấp nhất dưới θ kích hoạt retrieve; token dưới β bị che khỏi truy vấn.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Trade-off.</strong> FLARE cần <strong>logprobs</strong> từng token (API thương mại không phải lúc nào cũng trả đủ; vLLM tự host thì có — Module 01). Mỗi câu có thể tốn hai lượt sinh. Xác suất token thấp không đồng nghĩa với sai (một tên riêng hiếm có xác suất thấp dù đúng), và xác suất cao không đồng nghĩa với đúng (model tự tin sai — vấn đề hiệu chuẩn, Module 10). Với email CS ngắn (150–250 từ), mình thấy FLARE hiếm khi đáng chi phí; một bước "retrieve đủ rộng + decomposition" (Module 06) thường tốt hơn. FLARE đáng thử khi sinh tài liệu dài (ví dụ báo cáo sự cố, tóm tắt release cho khách Enterprise).</p>
+<hr />
+<h2 id="3-tu-anh-gia-retrieval-self-rag-va-crag">3. Tự đánh giá retrieval: Self-RAG và CRAG<a class="headerlink" href="#3-tu-anh-gia-retrieval-self-rag-va-crag" title="Permanent link">&para;</a></h2>
+<h3 id="31-self-rag-reflection-tokens">3.1 Self-RAG — reflection tokens<a class="headerlink" href="#31-self-rag-reflection-tokens" title="Permanent link">&para;</a></h3>
+<p><strong>Vấn đề.</strong> Model RAG thông thường luôn dùng mọi tài liệu được đưa vào, kể cả tài liệu không liên quan, và không tự kiểm tra câu trả lời có được hỗ trợ không.</p>
+<p><strong>Ý tưởng.</strong> Asai et al. (2023, ICLR 2024) huấn luyện một LM duy nhất vừa sinh văn bản vừa sinh <strong>reflection tokens</strong> — token đặc biệt trong từ vựng mở rộng — để tự quyết định và tự phê bình:</p>
+<table>
+<thead>
+<tr>
+<th>Loại token</th>
+<th>Giá trị</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Retrieve</code></td>
+<td>yes / no / continue</td>
+<td>Có cần retrieve cho đoạn tiếp theo không</td>
+</tr>
+<tr>
+<td><code>IsRel</code></td>
+<td>relevant / irrelevant</td>
+<td>Đoạn tài liệu <span class="arithmatex">\(d\)</span> có liên quan tới <span class="arithmatex">\(x\)</span> không</td>
+</tr>
+<tr>
+<td><code>IsSup</code></td>
+<td>fully / partially / no support</td>
+<td>Đoạn sinh ra có được <span class="arithmatex">\(d\)</span> hỗ trợ không</td>
+</tr>
+<tr>
+<td><code>IsUse</code></td>
+<td>5, 4, 3, 2, 1</td>
+<td>Mức hữu ích tổng thể của câu trả lời</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Huấn luyện (hai giai đoạn, không cần RL).</strong></p>
+<ol>
+<li><strong>Critic</strong> <span class="arithmatex">\(\mathcal{C}\)</span>: prompt GPT-4 để gán reflection token cho dữ liệu mẫu (vài nghìn tới ~20 nghìn mẫu mỗi loại token), rồi huấn luyện critic bằng mục tiêu ngôn ngữ có điều kiện <span class="arithmatex">\(\max_{\mathcal C} \mathbb{E}\,[\log p_{\mathcal C}(r \mid x, y)]\)</span>.</li>
+<li><strong>Generator</strong> <span class="arithmatex">\(\mathcal{M}\)</span>: dùng critic chèn reflection token <em>offline</em> vào corpus huấn luyện, rồi huấn luyện generator bằng next-token prediction thông thường trên chuỗi đã chèn: <span class="arithmatex">\(\max_{\mathcal M} \mathbb{E}\,[\log p_{\mathcal M}(y, r \mid x)]\)</span>. Phần văn bản tài liệu được retrieve bị <strong>mask</strong> khỏi loss (model không học "chép" tài liệu). Base model trong bài là Llama 2 7B/13B.</li>
+</ol>
+<p>Điểm tinh tế: critic chỉ cần lúc tạo dữ liệu, không cần lúc suy luận.</p>
+<p><strong>Suy luận — quyết định retrieve.</strong> Gọi <span class="arithmatex">\(p(\texttt{yes})\)</span>, <span class="arithmatex">\(p(\texttt{no})\)</span> là xác suất model gán cho token <code>Retrieve</code>. Retrieve khi tỷ lệ chuẩn hóa vượt ngưỡng <span class="arithmatex">\(\delta\)</span>:</p>
+<div class="arithmatex">\[
+\frac{p(\texttt{Retrieve}=\texttt{yes})}{p(\texttt{Retrieve}=\texttt{yes}) + p(\texttt{Retrieve}=\texttt{no})} &gt; \delta .
+\]</div>
+<p>Mã nguồn chính thức dùng mặc định <span class="arithmatex">\(\delta = 0{,}2\)</span> — ngưỡng thấp, nghiêng về retrieve nhiều.</p>
+<p><strong>Suy luận — chấm điểm phân đoạn.</strong> Khi retrieve <span class="arithmatex">\(K\)</span> tài liệu, model sinh song song một ứng viên <span class="arithmatex">\(y_t^{(d)}\)</span> cho mỗi tài liệu <span class="arithmatex">\(d\)</span> rồi chấm. Bài báo định nghĩa điểm cho phân đoạn:</p>
+<div class="arithmatex">\[
+f(y_t, d) = p(y_t \mid x, d, y_{&lt;t}) + \mathcal{S}(\text{Critique}), \qquad \mathcal{S} = \sum_{G \in \{\text{IsRel}, \text{IsSup}, \text{IsUse}\}} w^G s_t^G ,
+\]</div>
+<p>trong đó <span class="arithmatex">\(s_t^G\)</span> là xác suất chuẩn hóa của giá trị <strong>mong muốn nhất</strong> của nhóm token <span class="arithmatex">\(G\)</span> (ví dụ <code>relevant</code>, <code>fully supported</code>, <code>5</code>). Trọng số <span class="arithmatex">\(w^G\)</span> là <strong>núm điều chỉnh lúc suy luận</strong> — không cần huấn luyện lại: tăng <span class="arithmatex">\(w^{\text{IsSup}}\)</span> khi cần ưu tiên tính có căn cứ (như CS), giảm khi cần văn phong trôi chảy. Phân đoạn tốt nhất được giữ bằng beam search ở mức phân đoạn.</p>
+<p>Bản cài đặt chính thức tinh chỉnh công thức một chút: <code>IsSup</code> cho điểm một phần với "partially" (hệ số 0,5), <code>IsUse</code> lấy kỳ vọng với trọng số <span class="arithmatex">\((-1, -0{,}5, 0, 0{,}5, 1)\)</span> cho mức 1–5; mặc định <span class="arithmatex">\(w^{\text{IsRel}} = 1\)</span>, <span class="arithmatex">\(w^{\text{IsSup}} = 1\)</span>, <span class="arithmatex">\(w^{\text{IsUse}} = 0{,}5\)</span>.</p>
+<p><strong>Ví dụ số (theo cách cài đặt chính thức).</strong> Hai tài liệu cho câu hỏi "Gói Business có hỗ trợ SSO không?":</p>
+<ul>
+<li><span class="arithmatex">\(d_1\)</span> (bài "So sánh gói"): <span class="arithmatex">\(P(\text{relevant}) = 0{,}9\)</span> → <span class="arithmatex">\(s^{\text{Rel}} = 0{,}9\)</span>. IsSup: full 0,7; partial 0,2; no 0,1 → <span class="arithmatex">\(s^{\text{Sup}} = 0{,}7 + 0{,}5 \cdot 0{,}2 = 0{,}8\)</span>. IsUse (mức 5→1): 0,5; 0,3; 0,1; 0,05; 0,05 → <span class="arithmatex">\(s^{\text{Use}} = 0{,}5 \cdot 1 + 0{,}3 \cdot 0{,}5 + 0{,}1 \cdot 0 + 0{,}05 \cdot (-0{,}5) + 0{,}05 \cdot (-1) = 0{,}575\)</span>. Tổng <span class="arithmatex">\(\mathcal S_1 = 0{,}9 + 0{,}8 + 0{,}5 \cdot 0{,}575 \approx 1{,}99\)</span>.</li>
+<li><span class="arithmatex">\(d_2\)</span> (ticket cũ): <span class="arithmatex">\(s^{\text{Rel}} = 0{,}6\)</span>; IsSup: 0,2/0,3/0,5 → <span class="arithmatex">\(0{,}2 + 0{,}15 = 0{,}35\)</span>; IsUse: 0,2/0,3/0,3/0,1/0,1 → <span class="arithmatex">\(0{,}2 + 0{,}15 + 0 - 0{,}05 - 0{,}1 = 0{,}2\)</span>. <span class="arithmatex">\(\mathcal S_2 = 0{,}6 + 0{,}35 + 0{,}1 = 1{,}05\)</span>.</li>
+</ul>
+<p>Ứng viên từ <span class="arithmatex">\(d_1\)</span> được chọn. Nếu đặt <span class="arithmatex">\(w^{\text{IsSup}} = 2\)</span>, khoảng cách còn lớn hơn: tính có căn cứ chi phối quyết định.</p>
+<!-- fig:selfrag-scores -->
+<figure>
+  <img alt="Điểm phê bình Self-RAG của hai tài liệu trong ví dụ, tách theo IsRel/IsSup/IsUse, với wSup = 1 và 2" loading="lazy" src="../assets/figures/08/selfrag-scores.light.svg#only-light" />
+  <img alt="Điểm phê bình Self-RAG của hai tài liệu trong ví dụ, tách theo IsRel/IsSup/IsUse, với wSup = 1 và 2" loading="lazy" src="../assets/figures/08/selfrag-scores.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.5 — Điểm phê bình Self-RAG của hai tài liệu trong ví dụ, tách theo IsRel/IsSup/IsUse, với w_Sup = 1 và 2.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Trade-off &amp; áp dụng thực tế.</strong> Self-RAG đòi hỏi <strong>fine-tune generator</strong> với từ vựng mở rộng — không áp dụng được trực tiếp cho API thương mại. Bài học hữu ích hơn cho production là <em>mẫu thiết kế</em>: tách các câu hỏi phê bình thành <strong>tín hiệu có cấu trúc</strong> (relevance của từng tài liệu, support của từng câu, utility tổng thể) và kết hợp tuyến tính với trọng số điều chỉnh được. Bạn có thể tái tạo điều này <em>không cần fine-tune</em>: reranker cho IsRel (Module 06), NLI/verifier cho IsSup (Module 07), LLM-judge cho IsUse — và tập trọng số <span class="arithmatex">\(w\)</span> trở thành tham số hiệu chuẩn ở Module 10. Nếu tự host và fine-tune (Module 09), có thể huấn luyện một generator nhỏ phát token kiểu <code>[Escalate]</code> theo đúng tinh thần Self-RAG.</p>
+<h3 id="32-crag-corrective-rag">3.2 CRAG — Corrective RAG<a class="headerlink" href="#32-crag-corrective-rag" title="Permanent link">&para;</a></h3>
+<p><strong>Vấn đề.</strong> Khi retrieval trả về tài liệu sai, generator vẫn "cố" dùng chúng. Yan et al. (2024, "Corrective Retrieval Augmented Generation") thêm một <strong>bộ đánh giá retrieval</strong> nhẹ, độc lập với generator, và các <strong>hành động sửa chữa</strong>.</p>
+<p><strong>Retrieval evaluator.</strong> Một model T5-Large (~0,77B tham số) fine-tune để chấm cặp (câu hỏi, tài liệu) với điểm trong <span class="arithmatex">\([-1, 1]\)</span> (nhãn huấn luyện: liên quan = 1, không liên quan = −1). Với các tài liệu <span class="arithmatex">\(d_1, \dots, d_k\)</span> có điểm <span class="arithmatex">\(e_i\)</span>, và hai ngưỡng <span class="arithmatex">\(\tau_{\text{low}} &lt; \tau_{\text{up}}\)</span>:</p>
+<div class="arithmatex">\[
+\text{action} = \begin{cases}
+\textbf{Correct} &amp; \text{nếu } \exists i:\ e_i \ge \tau_{\text{up}} \\
+\textbf{Incorrect} &amp; \text{nếu } \forall i:\ e_i &lt; \tau_{\text{low}} \\
+\textbf{Ambiguous} &amp; \text{ngược lại.}
+\end{cases}
+\]</div>
+<p>Ngưỡng được chọn theo dataset (ví dụ trên PopQA: <span class="arithmatex">\(\tau_{\text{up}} = 0{,}59\)</span>, <span class="arithmatex">\(\tau_{\text{low}} = -0{,}99\)</span>).</p>
+<p><strong>Hành động.</strong></p>
+<ul>
+<li><strong>Correct</strong> → <em>tinh lọc tri thức</em> (knowledge refinement) bằng <strong>decompose-then-recompose</strong>: cắt tài liệu thành các "strip" nhỏ (1–vài câu), chấm từng strip bằng evaluator, loại strip dưới ngưỡng (bài dùng −0,5), giữ top vài strip (bài dùng 5), ghép lại thành context gọn.</li>
+<li><strong>Incorrect</strong> → bỏ tài liệu nội bộ, <strong>tìm kiếm web</strong>: viết lại câu hỏi thành từ khóa (bài dùng ChatGPT), lấy vài URL đầu, ưu tiên nguồn uy tín, rồi tinh lọc như trên.</li>
+<li><strong>Ambiguous</strong> → kết hợp cả tri thức nội bộ đã tinh lọc và kết quả web.</li>
+</ul>
+<p><strong>Ví dụ số.</strong> Email: "API rate limit của gói Business là bao nhiêu request/phút?" Ba tài liệu có <span class="arithmatex">\(e = (0{,}72;\ 0{,}10;\ -0{,}40)\)</span>, ngưỡng <span class="arithmatex">\(\tau_{\text{up}} = 0{,}5\)</span>, <span class="arithmatex">\(\tau_{\text{low}} = -0{,}9\)</span> → có <span class="arithmatex">\(e_1 \ge 0{,}5\)</span> → <strong>Correct</strong>; strip từ <span class="arithmatex">\(d_1\)</span> được chấm và giữ lại câu chứa con số rate limit. Nếu <span class="arithmatex">\(e = (0{,}2;\ -0{,}3;\ -0{,}5)\)</span> → không tài liệu nào <span class="arithmatex">\(\ge 0{,}5\)</span>, không phải tất cả <span class="arithmatex">\(&lt; -0{,}9\)</span> → <strong>Ambiguous</strong>.</p>
+<!-- fig:crag-thresholds -->
+<figure>
+  <img alt="Hai ngưỡng của CRAG chia trục điểm thành ba vùng hành động; hai bộ điểm là hai ví dụ trong bài" loading="lazy" src="../assets/figures/08/crag-thresholds.light.svg#only-light" />
+  <img alt="Hai ngưỡng của CRAG chia trục điểm thành ba vùng hành động; hai bộ điểm là hai ví dụ trong bài" loading="lazy" src="../assets/figures/08/crag-thresholds.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.6 — Hai ngưỡng của CRAG chia trục điểm thành ba vùng hành động; hai bộ điểm là hai ví dụ trong bài.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Áp vào Zendesk — thay "web search" bằng gì?</strong> Đây là chỗ phải điều chỉnh mạnh. Với CS, <strong>không</strong> dùng web công khai làm fallback cho câu hỏi chính sách/sản phẩm: web không biết chính sách của bạn, và là nguồn prompt injection gián tiếp (Module 07, OWASP LLM01). Ánh xạ hợp lý:</p>
+<table>
+<thead>
+<tr>
+<th>Hành động CRAG</th>
+<th>Phiên bản cho CS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Correct</td>
+<td>Tinh lọc strip → generate có citation</td>
+</tr>
+<tr>
+<td>Ambiguous</td>
+<td>Mở rộng <em>nội bộ</em>: thêm ticket lịch sử, release notes, query rewriting/HyDE (Module 06); nếu vẫn mơ hồ → draft một phần + escalate</td>
+</tr>
+<tr>
+<td>Incorrect</td>
+<td><strong>Escalate</strong> với lý do <code>insufficient_context</code>, ghi "knowledge gap" cho team nội dung; <em>không</em> đoán, <em>không</em> web</td>
+</tr>
+</tbody>
+</table>
+<p>Evaluator không nhất thiết là T5 fine-tune: một cross-encoder reranker đa ngữ đã có (Module 06) cho điểm liên quan; chỉ cần <strong>hiệu chuẩn ngưỡng</strong> trên golden set (Module 10). Đó là CRAG "rẻ": gần như miễn phí vì điểm rerank đã được tính.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nd">@dataclass</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">Doc</span><span class="p">:</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">score</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># điểm reranker đã hiệu chuẩn về [-1, 1] hoặc [0, 1]</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">crag_action</span><span class="p">(</span><span class="n">docs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Doc</span><span class="p">],</span> <span class="n">t_up</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t_low</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="sd">"""Quyết định hành động kiểu CRAG từ điểm evaluator/reranker."""</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">score</span> <span class="o">&gt;=</span> <span class="n">t_up</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">):</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="k">return</span> <span class="s2">"correct"</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">score</span> <span class="o">&lt;</span> <span class="n">t_low</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">):</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="k">return</span> <span class="s2">"incorrect"</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="k">return</span> <span class="s2">"ambiguous"</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="k">def</span><span class="w"> </span><span class="nf">refine</span><span class="p">(</span><span class="n">docs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Doc</span><span class="p">],</span> <span class="n">strip_scorer</span><span class="p">,</span> <span class="n">keep</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">min_score</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="sd">"""Decompose-then-recompose: tách câu, chấm từng strip, giữ top strip."""</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="n">strips</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>        <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">". "</span><span class="p">):</span>          <span class="c1"># production: dùng bộ tách câu đa ngữ</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>            <span class="n">s</span> <span class="o">=</span> <span class="n">strip_scorer</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>                <span class="c1"># ví dụ: cross-encoder(query, sent)</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>            <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="n">min_score</span><span class="p">:</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>                <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">sent</span><span class="p">))</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>    <span class="n">strips</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>    <span class="c1"># Giữ ID nguồn để còn citation ở Module 07</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">doc_id</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">sent</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">doc_id</span><span class="p">,</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">strips</span><span class="p">[:</span><span class="n">keep</span><span class="p">])</span>
+</span></code></pre></div>
+<p>Lưu ý khi tinh lọc: cắt tài liệu thành strip rồi ghép lại có thể làm mất <strong>điều kiện</strong> nằm ở câu khác ("…áp dụng cho hợp đồng ký sau 1/1/2026"). Với tài liệu chính sách, hãy giữ nguyên chunk (hoặc parent chunk — Module 04) thay vì strip.</p>
+<h3 id="33-so-sanh-nhanh">3.3 So sánh nhanh<a class="headerlink" href="#33-so-sanh-nhanh" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Self-RAG</th>
+<th>CRAG</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ai đánh giá</td>
+<td>Chính generator (token đặc biệt)</td>
+<td>Evaluator riêng, nhẹ</td>
+</tr>
+<tr>
+<td>Cần fine-tune generator</td>
+<td>Có</td>
+<td>Không (plug-and-play)</td>
+</tr>
+<tr>
+<td>Đánh giá cái gì</td>
+<td>Retrieve?, relevance, support, utility</td>
+<td>Chất lượng tập tài liệu retrieve</td>
+</tr>
+<tr>
+<td>Hành động khi tài liệu kém</td>
+<td>Bỏ ứng viên điểm thấp</td>
+<td>Tinh lọc / tìm nguồn khác</td>
+</tr>
+<tr>
+<td>Hợp với API thương mại</td>
+<td>Kém</td>
+<td>Tốt</td>
+</tr>
+<tr>
+<td>Trong hệ CS</td>
+<td>Mượn <em>ý tưởng</em> (tín hiệu + trọng số)</td>
+<td>Dùng gần như nguyên vẹn, fallback = escalate</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-retrieval-a-buoc-ircot-va-react">4. Retrieval đa bước: IRCoT và ReAct<a class="headerlink" href="#4-retrieval-a-buoc-ircot-va-react" title="Permanent link">&para;</a></h2>
+<h3 id="41-vi-sao-mot-lan-retrieve-khong-u">4.1 Vì sao một lần retrieve không đủ<a class="headerlink" href="#41-vi-sao-mot-lan-retrieve-khong-u" title="Permanent link">&para;</a></h3>
+<p>Câu hỏi đa bước (multi-hop) có cấu trúc "tìm A, rồi dùng A để tìm B". Ví dụ CS: <em>"Từ bản cập nhật tháng trước, tính năng xuất báo cáo của bọn mình bị lỗi định dạng ngày — có phải do thay đổi trong release đó không và có cách khắc phục chưa?"</em> Cần: (1) tìm release notes tháng trước, (2) xác định thay đổi liên quan định dạng ngày, (3) tìm known issue/workaround cho thay đổi đó. Query ban đầu chứa ít từ khóa của bước (3), nên retrieve một lần với email gốc thường trượt.</p>
+<p>Gọi <span class="arithmatex">\(q\)</span> là câu hỏi, cần chuỗi tài liệu <span class="arithmatex">\(d^{(1)}, d^{(2)}\)</span> với <span class="arithmatex">\(d^{(2)}\)</span> chỉ "tìm thấy được" khi biết nội dung <span class="arithmatex">\(d^{(1)}\)</span>. Nếu retriever một bước có <span class="arithmatex">\(P(d^{(1)} \in \text{top-}k \mid q) = 0{,}8\)</span> và <span class="arithmatex">\(P(d^{(2)} \in \text{top-}k \mid q) = 0{,}3\)</span>, xác suất có đủ cả hai là tối đa 0,3. Với retrieve hai bước, <span class="arithmatex">\(P(d^{(2)} \in \text{top-}k \mid q, d^{(1)})\)</span> có thể lên 0,7, cho xác suất có đủ <span class="arithmatex">\(\approx 0{,}8 \times 0{,}7 = 0{,}56\)</span> (giả định minh họa). Đa bước đổi <strong>thêm latency</strong> lấy <strong>recall chuỗi</strong>.</p>
+<h3 id="42-ircot">4.2 IRCoT<a class="headerlink" href="#42-ircot" title="Permanent link">&para;</a></h3>
+<p>Trivedi et al. (2022, ACL 2023) — <em>Interleaving Retrieval with Chain-of-Thought</em> — xen kẽ hai thao tác: sinh <strong>một câu</strong> chain-of-thought (CoT), dùng chính câu đó làm query để retrieve thêm tài liệu, thêm tài liệu vào context, sinh câu CoT tiếp theo; dừng khi CoT chứa câu trả lời hoặc đạt số bước tối đa.</p>
+<div class="arithmatex">\[
+d^{(t+1)} = \text{Retrieve}\big(\text{cot}_t\big), \qquad \text{cot}_{t+1} \sim p_\theta\big(\cdot \mid q, D^{(\le t+1)}, \text{cot}_{\le t}\big).
+\]</div>
+<p>Trực giác: mỗi câu suy luận "đẩy" query về đúng vùng không gian embedding của bước tiếp theo — giống HyDE (Module 06) nhưng lặp và có trạng thái.</p>
+<!-- fig:multihop -->
+<figure>
+  <img alt="Trái: vết ReAct/IRCoT của ví dụ mục 4" loading="lazy" src="../assets/figures/08/multihop.light.svg#only-light" />
+  <img alt="Trái: vết ReAct/IRCoT của ví dụ mục 4" loading="lazy" src="../assets/figures/08/multihop.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.7 — Trái: vết ReAct/IRCoT của ví dụ mục 4.3. Phải: xác suất có đủ chuỗi tài liệu với một lần và hai bước retrieve (số minh họa của mục 4.1).</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="43-react-suy-luan-hanh-ong-voi-tool">4.3 ReAct — suy luận + hành động với tool<a class="headerlink" href="#43-react-suy-luan-hanh-ong-voi-tool" title="Permanent link">&para;</a></h3>
+<p>Yao et al. (2022, ICLR 2023) — <em>ReAct</em> — tổng quát hóa: model sinh xen kẽ <strong>Thought</strong> (suy nghĩ), <strong>Action</strong> (gọi tool: search, lookup, API…), <strong>Observation</strong> (kết quả tool trả về). Retrieval chỉ là một tool trong số nhiều. Đây là tổ tiên trực tiếp của tool calling hiện đại: các API LLM ngày nay trả về <code>tool_calls</code> có cấu trúc thay vì chuỗi "Action: …" để parse.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Thought: Khách hỏi lỗi định dạng ngày sau bản cập nhật. Cần release notes tháng 9.
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Action: search_kb(query="release notes 2026-09 export date format", source="release_notes")
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Observation: [R12] v5.8: đổi định dạng ngày mặc định trong export sang ISO 8601...
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Thought: Cần workaround cho thay đổi này.
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Action: search_kb(query="v5.8 export ISO 8601 đổi lại định dạng ngày cũ")
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>Observation: [H331] Vào Cài đặt &gt; Xuất dữ liệu &gt; Định dạng ngày để chọn lại dd/mm/yyyy.
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>Thought: Đủ thông tin. Soạn trả lời có citation [R12][H331].
+</span></code></pre></div>
+<p><strong>Trade-off.</strong> Mỗi vòng = một lượt LLM + một lần retrieve. Rủi ro: lặp vô hạn, "trôi" khỏi câu hỏi, chi phí không đoán trước (OWASP LLM06 Unbounded Consumption), và mỗi Observation là một điểm chèn prompt injection mới. Trong production: <strong>giới hạn số bước</strong> (ví dụ ≤ 4), <strong>ngân sách token</strong> mỗi ticket, và <strong>danh sách tool đóng</strong> (allowlist).</p>
+<blockquote>
+<p><strong>Liên hệ Zendesk.</strong> Phần lớn email "đa bước" trong CS thực ra là <strong>nhiều câu hỏi độc lập</strong> (Module 06 — decomposition, retrieve song song) chứ không phải multi-hop thật. Multi-hop thật xuất hiện chủ yếu ở loại "điều tra": nối triệu chứng của khách → thay đổi gần đây → known issue → workaround, hoặc nối tài khoản → hóa đơn → chính sách áp dụng. Đó là lúc ReAct/agent đáng tiền.</p>
+</blockquote>
+<hr />
+<h2 id="5-raptor-cay-tom-tat-phan-cum">5. RAPTOR: cây tóm tắt phân cụm<a class="headerlink" href="#5-raptor-cay-tom-tat-phan-cum" title="Permanent link">&para;</a></h2>
+<h3 id="51-van-e">5.1 Vấn đề<a class="headerlink" href="#51-van-e" title="Permanent link">&para;</a></h3>
+<p>Chunk nhỏ tốt cho câu hỏi chi tiết ("menu nào để đổi định dạng ngày?") nhưng tệ cho câu hỏi cần <strong>tổng hợp</strong> nhiều phần của một tài liệu dài hoặc nhiều tài liệu ("gói Enterprise khác gói Business những điểm nào về bảo mật?"). Top-<span class="arithmatex">\(k\)</span> chunk chỉ chứa vài mảnh rời rạc.</p>
+<h3 id="52-y-tuong">5.2 Ý tưởng<a class="headerlink" href="#52-y-tuong" title="Permanent link">&para;</a></h3>
+<p>Sarthi et al. (2024, ICLR) — RAPTOR — xây một <strong>cây</strong> từ dưới lên:</p>
+<ol>
+<li>Lá = các chunk (~100 token, giữ ranh giới câu), embed bằng một sentence encoder.</li>
+<li><strong>Phân cụm</strong> các embedding; với mỗi cụm, LLM viết <strong>tóm tắt</strong>; tóm tắt trở thành node ở tầng trên, được embed lại.</li>
+<li>Lặp lại cho tới khi không phân cụm được nữa.</li>
+</ol>
+<p>Khi truy vấn, cách tốt nhất trong bài là <strong>collapsed tree</strong>: trải phẳng <em>mọi</em> node (lá và tóm tắt các tầng) vào một chỉ mục, rồi retrieve theo similarity cho tới khi hết ngân sách token (bài dùng ~2.000 token). Nhờ đó câu hỏi chi tiết trúng lá, câu hỏi tổng hợp trúng node tóm tắt — "độ phân giải" tự khớp với câu hỏi. Tóm tắt trong bài nén còn khoảng 28% độ dài các con của nó.</p>
+<!-- fig:raptor-tree -->
+<figure>
+  <img alt="RAPTOR: cây tóm tắt xây từ dưới lên, và collapsed tree trải phẳng mọi node vào một chỉ mục" loading="lazy" src="../assets/figures/08/raptor-tree.light.svg#only-light" />
+  <img alt="RAPTOR: cây tóm tắt xây từ dưới lên, và collapsed tree trải phẳng mọi node vào một chỉ mục" loading="lazy" src="../assets/figures/08/raptor-tree.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.8 — RAPTOR: cây tóm tắt xây từ dưới lên, và collapsed tree trải phẳng mọi node vào một chỉ mục.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="53-toan-phan-cum-umap-gmm-bic">5.3 Toán phân cụm: UMAP + GMM + BIC<a class="headerlink" href="#53-toan-phan-cum-umap-gmm-bic" title="Permanent link">&para;</a></h3>
+<p><strong>Vì sao giảm chiều trước?</strong> Embedding có <span class="arithmatex">\(d\)</span> cỡ 768–1024. Trong không gian chiều cao, khoảng cách giữa các điểm tập trung quanh một giá trị (hiện tượng tập trung độ đo — concentration of measure), và GMM với ma trận hiệp phương sai đầy đủ có <span class="arithmatex">\(O(d^2)\)</span> tham số mỗi thành phần — không ước lượng nổi với vài trăm điểm. RAPTOR dùng <strong>UMAP</strong> giảm xuống vài chiều; tham số <code>n_neighbors</code> điều khiển cấu trúc toàn cục (giá trị lớn) hay cục bộ (giá trị nhỏ), và bài dùng hai cấp: phân cụm toàn cục trước, rồi phân cụm cục bộ trong mỗi cụm toàn cục.</p>
+<p><strong>GMM.</strong> Giả sử các điểm <span class="arithmatex">\(z_i \in \mathbb{R}^{d'}\)</span> (sau UMAP) sinh từ hỗn hợp <span class="arithmatex">\(K\)</span> Gaussian:</p>
+<div class="arithmatex">\[
+p(z) = \sum_{k=1}^{K} \pi_k\, \mathcal{N}(z \mid \mu_k, \Sigma_k), \qquad \sum_k \pi_k = 1 .
+\]</div>
+<p>EM ước lượng tham số; bước E cho <strong>xác suất thành viên</strong> (responsibility):</p>
+<div class="arithmatex">\[
+\gamma_{ik} = \frac{\pi_k\, \mathcal{N}(z_i \mid \mu_k, \Sigma_k)}{\sum_{j} \pi_j\, \mathcal{N}(z_i \mid \mu_j, \Sigma_j)} .
+\]</div>
+<p><strong>Phân cụm mềm</strong>: chunk <span class="arithmatex">\(i\)</span> thuộc mọi cụm <span class="arithmatex">\(k\)</span> có <span class="arithmatex">\(\gamma_{ik}\)</span> vượt một ngưỡng — một chunk về "SSO cho gói Enterprise" có thể nằm trong cả cụm "bảo mật" lẫn cụm "gói dịch vụ". K-means không làm được điều này.</p>
+<p><strong>Chọn <span class="arithmatex">\(K\)</span> bằng BIC.</strong> Với <span class="arithmatex">\(\hat L\)</span> là likelihood cực đại, <span class="arithmatex">\(p\)</span> số tham số tự do, <span class="arithmatex">\(n\)</span> số điểm:</p>
+<div class="arithmatex">\[
+\text{BIC}(K) = -2 \ln \hat{L} + p \ln n .
+\]</div>
+<p>Chọn <span class="arithmatex">\(K\)</span> làm BIC nhỏ nhất: số hạng đầu thưởng mô hình khớp dữ liệu, số hạng sau phạt độ phức tạp.</p>
+<p><strong>Ví dụ số.</strong> <span class="arithmatex">\(n = 200\)</span> chunk, <span class="arithmatex">\(d' = 10\)</span>, GMM hiệp phương sai đầy đủ: mỗi thành phần có <span class="arithmatex">\(10\)</span> (trung bình) <span class="arithmatex">\(+ 55\)</span> (hiệp phương sai đối xứng <span class="arithmatex">\(10 \cdot 11/2\)</span>) <span class="arithmatex">\(= 65\)</span> tham số, cộng <span class="arithmatex">\(K-1\)</span> trọng số. <span class="arithmatex">\(\ln 200 \approx 5{,}30\)</span>.</p>
+<ul>
+<li><span class="arithmatex">\(K = 3\)</span>: <span class="arithmatex">\(p = 3 \cdot 65 + 2 = 197\)</span>, phạt <span class="arithmatex">\(= 197 \cdot 5{,}30 \approx 1.044\)</span>. Giả sử <span class="arithmatex">\(-2\ln\hat L = 4.100\)</span> → BIC ≈ 5.144.</li>
+<li><span class="arithmatex">\(K = 5\)</span>: <span class="arithmatex">\(p = 5 \cdot 65 + 4 = 329\)</span>, phạt <span class="arithmatex">\(\approx 1.744\)</span>. Giả sử <span class="arithmatex">\(-2\ln\hat L = 3.300\)</span> → BIC ≈ 5.044.</li>
+<li><span class="arithmatex">\(K = 8\)</span>: <span class="arithmatex">\(p = 8 \cdot 65 + 7 = 527\)</span>, phạt <span class="arithmatex">\(\approx 2.793\)</span>. Giả sử <span class="arithmatex">\(-2\ln\hat L = 2.900\)</span> → BIC ≈ 5.693.</li>
+</ul>
+<p>Chọn <span class="arithmatex">\(K = 5\)</span> (log-likelihood là số giả định để minh họa). Ví dụ này cũng cho thấy vì sao phải giảm chiều: với <span class="arithmatex">\(d' = 768\)</span>, mỗi thành phần có ~296.000 tham số — vô nghĩa với 200 điểm.</p>
+<!-- fig:gmm-bic -->
+<figure>
+  <img alt="Trái: GMM cho phân cụm mềm (dữ liệu mô phỏng; vòng đen là điểm thuộc hơn một cụm)" loading="lazy" src="../assets/figures/08/gmm-bic.light.svg#only-light" />
+  <img alt="Trái: GMM cho phân cụm mềm (dữ liệu mô phỏng; vòng đen là điểm thuộc hơn một cụm)" loading="lazy" src="../assets/figures/08/gmm-bic.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.9 — Trái: GMM cho phân cụm mềm (dữ liệu mô phỏng; vòng đen là điểm thuộc hơn một cụm). Phải: BIC của ví dụ mục 5.3.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="54-khi-nao-dung-raptor-cho-cs">5.4 Khi nào dùng RAPTOR cho CS<a class="headerlink" href="#54-khi-nao-dung-raptor-cho-cs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Dùng</th>
+<th>Không dùng</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tài liệu sản phẩm/API dài, hỏi tổng hợp ("tóm tắt các thay đổi bảo mật từ v5 đến v6")</td>
+<td>FAQ ngắn, mỗi bài trả lời một câu hỏi — naive RAG đã tốt</td>
+</tr>
+<tr>
+<td>Tạo "bản đồ chủ đề" cho 200.000 ticket để phân tích (không phục vụ trả lời trực tiếp)</td>
+<td>Dữ liệu thay đổi hằng tuần: cây phải xây lại cụm và tóm tắt bị ảnh hưởng — tốn LLM</td>
+</tr>
+<tr>
+<td>Khách Enterprise hỏi câu tổng quan về hợp đồng/tài liệu kỹ thuật</td>
+<td>Chính sách giá/hoàn tiền: tóm tắt là <em>diễn đạt lại</em>, có thể làm mất điều kiện → citation phải trỏ về lá</td>
+</tr>
+</tbody>
+</table>
+<p>Quy tắc an toàn cho CS: node tóm tắt được dùng để <strong>tìm</strong> và <strong>định hướng</strong>, nhưng claim trong draft phải được cite về <strong>lá</strong> (văn bản gốc). Tóm tắt do LLM viết là một lớp có thể hallucinate.</p>
+<hr />
+<h2 id="6-graphrag-va-cac-bien-the">6. GraphRAG và các biến thể<a class="headerlink" href="#6-graphrag-va-cac-bien-the" title="Permanent link">&para;</a></h2>
+<h3 id="61-van-e-cau-hoi-toan-cuc">6.1 Vấn đề: câu hỏi "toàn cục"<a class="headerlink" href="#61-van-e-cau-hoi-toan-cuc" title="Permanent link">&para;</a></h3>
+<p>Câu hỏi kiểu "những chủ đề khiếu nại chính của khách Nhật trong quý này là gì?" không có <em>đoạn văn nào</em> chứa câu trả lời — câu trả lời là <strong>tổng hợp toàn bộ</strong> corpus. Vector RAG lấy top-<span class="arithmatex">\(k\)</span> đoạn gần nhất, nên chỉ thấy một góc nhỏ. Edge et al. (2024, Microsoft — "From Local to Global: A Graph RAG Approach to Query-Focused Summarization") đề xuất GraphRAG để trả lời loại câu hỏi này (query-focused summarization ở quy mô corpus).</p>
+<h3 id="62-pipeline-indexing">6.2 Pipeline indexing<a class="headerlink" href="#62-pipeline-indexing" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Chia chunk</strong> tài liệu nguồn.</li>
+<li><strong>Trích xuất bằng LLM</strong>: với mỗi chunk, LLM liệt kê <strong>thực thể</strong> (tên, loại, mô tả) và <strong>quan hệ</strong> (nguồn, đích, mô tả, độ mạnh); có thể thêm "claims". Thực thể trùng tên được gộp, mô tả được tóm tắt lại.</li>
+<li><strong>Đồ thị</strong>: node = thực thể, cạnh = quan hệ, trọng số = số lần/độ mạnh đồng xuất hiện.</li>
+<li><strong>Phát hiện cộng đồng</strong> (community detection) bằng thuật toán <strong>Leiden</strong>, đệ quy để có <strong>phân cấp</strong> cộng đồng (cấp thô → cấp mịn).</li>
+<li><strong>Tóm tắt cộng đồng</strong>: LLM viết "community report" cho mỗi cộng đồng ở mỗi cấp, từ dưới lên.</li>
+</ol>
+<h3 id="63-toan-modularity-va-leiden-muc-y-tuong">6.3 Toán: modularity và Leiden (mức ý tưởng)<a class="headerlink" href="#63-toan-modularity-va-leiden-muc-y-tuong" title="Permanent link">&para;</a></h3>
+<p><strong>Modularity</strong> đo mức một phân hoạch node thành cộng đồng có "nhiều cạnh bên trong hơn mức ngẫu nhiên". Với đồ thị vô hướng có ma trận kề <span class="arithmatex">\(A\)</span>, bậc <span class="arithmatex">\(k_i = \sum_j A_{ij}\)</span>, tổng trọng số cạnh <span class="arithmatex">\(m = \frac{1}{2}\sum_{ij} A_{ij}\)</span>, và <span class="arithmatex">\(c_i\)</span> là cộng đồng của node <span class="arithmatex">\(i\)</span>:</p>
+<div class="arithmatex">\[
+Q = \frac{1}{2m} \sum_{i,j} \left[ A_{ij} - \gamma \frac{k_i k_j}{2m} \right] \delta(c_i, c_j) .
+\]</div>
+<p>Số hạng <span class="arithmatex">\(k_i k_j / 2m\)</span> là số cạnh <em>kỳ vọng</em> giữa <span class="arithmatex">\(i\)</span> và <span class="arithmatex">\(j\)</span> nếu cạnh được nối ngẫu nhiên giữ nguyên bậc (null model). <span class="arithmatex">\(\gamma\)</span> là tham số <strong>resolution</strong>: <span class="arithmatex">\(\gamma\)</span> lớn → cộng đồng nhỏ hơn, nhiều hơn. Viết lại theo cộng đồng:</p>
+<div class="arithmatex">\[
+Q = \sum_{c} \left[ \frac{L_c}{m} - \gamma \left( \frac{K_c}{2m} \right)^2 \right],
+\]</div>
+<p>với <span class="arithmatex">\(L_c\)</span> là số cạnh trong cộng đồng <span class="arithmatex">\(c\)</span>, <span class="arithmatex">\(K_c\)</span> là tổng bậc các node của <span class="arithmatex">\(c\)</span>.</p>
+<p><strong>Ví dụ số.</strong> Đồ thị 6 node, <span class="arithmatex">\(m = 7\)</span> cạnh: tam giác {SSO, SAML, Okta} (3 cạnh), tam giác {Hóa đơn, VAT, Thanh toán} (3 cạnh), và 1 cạnh nối SAML–Thanh toán ("SSO chỉ có ở gói trả phí"). Phân hoạch thành hai tam giác: mỗi cộng đồng có <span class="arithmatex">\(L_c = 3\)</span>; tổng bậc <span class="arithmatex">\(K_c = 2+3+2 = 7\)</span> (node SAML/Thanh toán có bậc 3). Với <span class="arithmatex">\(\gamma = 1\)</span>:</p>
+<div class="arithmatex">\[
+Q = 2 \left[ \frac{3}{7} - \left(\frac{7}{14}\right)^2 \right] = 2\,[0{,}4286 - 0{,}25] \approx 0{,}357 .
+\]</div>
+<p>Nếu gộp tất cả vào một cộng đồng: <span class="arithmatex">\(Q = \frac{7}{7} - 1^2 = 0\)</span>. Phân hoạch hai cụm tốt hơn hẳn — đúng trực giác "chủ đề SSO" và "chủ đề thanh toán".</p>
+<!-- fig:modularity -->
+<figure>
+  <img alt="Đồ thị 6 node của ví dụ mục 6" loading="lazy" src="../assets/figures/08/modularity.light.svg#only-light" />
+  <img alt="Đồ thị 6 node của ví dụ mục 6" loading="lazy" src="../assets/figures/08/modularity.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.10 — Đồ thị 6 node của ví dụ mục 6.3 và modularity của phân hoạch hai cộng đồng.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Louvain → Leiden.</strong> Tối đa hóa <span class="arithmatex">\(Q\)</span> là NP-khó; Louvain là heuristic tham lam (chuyển node cục bộ để tăng <span class="arithmatex">\(Q\)</span> → gộp cộng đồng thành siêu-node → lặp). Traag, Waltman &amp; van Eck (2019, <em>Scientific Reports</em>) chỉ ra Louvain có thể tạo cộng đồng <strong>không liên thông</strong> bên trong, và đề xuất <strong>Leiden</strong> thêm pha <strong>tinh chỉnh</strong> (refinement) giữa pha di chuyển node và pha gộp, đảm bảo cộng đồng liên thông tốt, đồng thời hội tụ nhanh hơn. Áp dụng đệ quy (mỗi cộng đồng lại được chia tiếp) cho ra phân cấp mà GraphRAG dùng.</p>
+<h3 id="64-truy-van-local-vs-global">6.4 Truy vấn: local vs global<a class="headerlink" href="#64-truy-van-local-vs-global" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Global search</strong>: dùng community report ở một cấp đã chọn theo kiểu <strong>map-reduce</strong> — mỗi report (hoặc lô report) sinh một câu trả lời cục bộ kèm điểm hữu ích (map), rồi các câu trả lời tốt nhất được gộp thành câu trả lời cuối (reduce). Hợp với câu hỏi "chủ đề chính là gì?". Rất tốn token: số lượt LLM tỷ lệ với số report ở cấp được chọn.</li>
+<li><strong>Local search</strong>: từ query tìm các thực thể liên quan (qua embedding mô tả thực thể), rồi gom các chunk gốc, quan hệ, thực thể lân cận và report của cộng đồng chứa chúng. Hợp với câu hỏi về một thực thể cụ thể.</li>
+<li>Thư viện Microsoft GraphRAG còn có <strong>DRIFT search</strong> (local search có bổ sung thông tin cộng đồng) và <strong>basic search</strong> (vector RAG thường, để so sánh). Microsoft cũng giới thiệu LazyGraphRAG (2024) để giảm chi phí indexing bằng cách hoãn phần lớn công việc dùng LLM tới lúc truy vấn.</li>
+</ul>
+<p>Bài báo đánh giá trên corpus cỡ ~1 triệu token, dùng LLM-judge so sánh theo cặp về <strong>comprehensiveness</strong> (độ bao quát) và <strong>diversity</strong> (đa dạng góc nhìn), và GraphRAG global thắng vector RAG trên các tiêu chí này cho câu hỏi toàn cục.</p>
+<h3 id="65-lightrag-va-hipporag">6.5 LightRAG và HippoRAG<a class="headerlink" href="#65-lightrag-va-hipporag" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>LightRAG</strong> (Guo et al., 2024; EMNLP 2025 theo repo chính thức): cũng trích xuất đồ thị bằng LLM, nhưng bỏ bước community report đắt; truy vấn <strong>hai cấp</strong> — cấp thấp (thực thể cụ thể) và cấp cao (từ khóa chủ đề/quan hệ), kết hợp với vector retrieval; hỗ trợ <strong>cập nhật tăng dần</strong> bằng cách hợp nhất đồ thị con của tài liệu mới vào đồ thị cũ. Điểm cuối này quan trọng với dữ liệu thay đổi hằng tuần.</li>
+<li><strong>HippoRAG</strong> (Gutiérrez et al., 2024, NeurIPS) lấy cảm hứng từ trí nhớ dài hạn của hồi hải mã: LLM trích xuất bộ ba (chủ thể, quan hệ, đối tượng) thành một knowledge graph "không schema"; khi truy vấn, thực thể trong câu hỏi làm <strong>seed</strong> cho <strong>Personalized PageRank</strong> (PPR) trên đồ thị:</li>
+</ul>
+<div class="arithmatex">\[
+\mathbf{r} = (1-\alpha)\, \mathbf{e}_{\text{seed}} + \alpha\, \mathbf{P}^{\top} \mathbf{r},
+\]</div>
+<p>với <span class="arithmatex">\(\mathbf{P}\)</span> là ma trận chuyển (chuẩn hóa theo hàng), <span class="arithmatex">\(\mathbf{e}_{\text{seed}}\)</span> là phân phối khởi động tập trung vào node seed, <span class="arithmatex">\(\alpha\)</span> là xác suất "đi tiếp". Node có <span class="arithmatex">\(r\)</span> cao là node "gần" seed theo nhiều đường — cho phép multi-hop <strong>trong một bước retrieve</strong>. HippoRAG 2 (Gutiérrez et al., 2025, "From RAG to Memory") cải tiến theo hướng trí nhớ liên tục (continual) cho LLM.</p>
+<!-- fig:ppr -->
+<figure>
+  <img alt="Personalized PageRank trên một đồ thị đồ chơi với seed «SSO»: các node gần seed theo nhiều đường nhận điểm cao" loading="lazy" src="../assets/figures/08/ppr.light.svg#only-light" />
+  <img alt="Personalized PageRank trên một đồ thị đồ chơi với seed «SSO»: các node gần seed theo nhiều đường nhận điểm cao" loading="lazy" src="../assets/figures/08/ppr.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.11 — Personalized PageRank trên một đồ thị đồ chơi với seed «SSO»: các node gần seed theo nhiều đường nhận điểm cao.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="66-khi-nao-graph-ang-tien-cho-zendesk">6.6 Khi nào graph đáng tiền cho Zendesk?<a class="headerlink" href="#66-khi-nao-graph-ang-tien-cho-zendesk" title="Permanent link">&para;</a></h3>
+<p>Chi phí indexing GraphRAG ≈ (số chunk) × (lượt LLM trích xuất) + (số cộng đồng) × (lượt LLM tóm tắt). Ước lượng cho 800 bài Help Center × ~6 chunk ≈ 4.800 chunk → ~4.800 lượt trích xuất (cộng gleaning nếu bật), cộng vài trăm report: chấp nhận được. Với 200.000 ticket × vài chunk mỗi ticket → hàng trăm nghìn lượt LLM, và phải cập nhật liên tục: đắt, khó bảo trì.</p>
+<table>
+<thead>
+<tr>
+<th>Bài toán</th>
+<th>Graph có giúp?</th>
+<th>Gợi ý</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FAQ một bước</td>
+<td>Không</td>
+<td>Vector + BM25 + rerank</td>
+</tr>
+<tr>
+<td>"Tính năng X có ở gói nào, cần add-on gì, áp dụng cho khu vực nào?"</td>
+<td>Có thể — quan hệ sản phẩm/gói/tính năng</td>
+<td>Một <strong>knowledge graph có schema</strong> viết tay (bảng quan hệ) thường tốt và rẻ hơn graph trích xuất bằng LLM</td>
+</tr>
+<tr>
+<td>"Chủ đề khiếu nại chính quý này" (cho manager CS)</td>
+<td><strong>Có</strong> — đây là câu hỏi toàn cục</td>
+<td>GraphRAG global/LazyGraphRAG chạy <strong>offline</strong> trên ticket, phục vụ báo cáo, không phục vụ trả lời khách</td>
+</tr>
+<tr>
+<td>Điều tra một tài khoản</td>
+<td>Không (cần dữ liệu sống)</td>
+<td>Agent + tool API</td>
+</tr>
+</tbody>
+</table>
+<p>Quan điểm của mình: với hệ thống trả lời email, graph hiếm khi là bước đầu tiên. Dữ liệu sản phẩm–gói–tính năng là dữ liệu <strong>có cấu trúc</strong> — hãy đưa nó vào bảng/JSON và cho agent một tool tra cứu (mục 9), chính xác hơn để LLM trích xuất lại từ văn bản.</p>
+<hr />
+<h2 id="7-long-context-rag-va-cag">7. Long-context, RAG và CAG<a class="headerlink" href="#7-long-context-rag-va-cag" title="Permanent link">&para;</a></h2>
+<h3 id="71-ket-qua-nghien-cuu">7.1 Kết quả nghiên cứu<a class="headerlink" href="#71-ket-qua-nghien-cuu" title="Permanent link">&para;</a></h3>
+<p>Li et al. (2024, EMNLP Industry — "Retrieval Augmented Generation or Long-Context LLMs? A Comprehensive Study and Hybrid Approach") so sánh có hệ thống: khi đủ tài nguyên, model long-context (LC) cho chất lượng trung bình <strong>cao hơn</strong> RAG trên các benchmark đọc hiểu dài; nhưng RAG <strong>rẻ hơn rất nhiều</strong>. Họ đề xuất <strong>Self-Route</strong>: thử RAG trước, để model tự đánh giá câu hỏi có trả lời được từ các chunk đã retrieve không; nếu không, chuyển sang LC với toàn bộ tài liệu. Phần lớn câu hỏi được RAG xử lý, nên chi phí giảm mạnh mà chất lượng gần với LC.</p>
+<p>Self-Route chính là một trường hợp của mô hình định tuyến mục 1.2, với tuyến rẻ (RAG) và tuyến đắt (LC):</p>
+<div class="arithmatex">\[
+\mathbb{E}[\text{cost}] = c_{\text{RAG}} + \rho \cdot c_{\text{LC}},
+\]</div>
+<p>với <span class="arithmatex">\(\rho\)</span> là tỷ lệ câu hỏi bị chuyển. Nếu <span class="arithmatex">\(c_{\text{LC}} = 20\, c_{\text{RAG}}\)</span> và <span class="arithmatex">\(\rho = 0{,}15\)</span>: <span class="arithmatex">\(\mathbb{E}[\text{cost}] = c_{\text{RAG}}(1 + 3) = 4\,c_{\text{RAG}}\)</span> — vẫn rẻ hơn 5 lần so với LC cho mọi câu.</p>
+<!-- fig:selfroute-cost -->
+<figure>
+  <img alt="Chi phí kỳ vọng của Self-Route theo tỷ lệ chuyển ρ, với giả định cLC = 20·cRAG" loading="lazy" src="../assets/figures/08/selfroute-cost.light.svg#only-light" />
+  <img alt="Chi phí kỳ vọng của Self-Route theo tỷ lệ chuyển ρ, với giả định cLC = 20·cRAG" loading="lazy" src="../assets/figures/08/selfroute-cost.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.12 — Chi phí kỳ vọng của Self-Route theo tỷ lệ chuyển ρ, với giả định c_LC = 20·c_RAG.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="72-cag-cache-augmented-generation">7.2 CAG — Cache-Augmented Generation<a class="headerlink" href="#72-cag-cache-augmented-generation" title="Permanent link">&para;</a></h3>
+<p>Chan et al. (2024, "Don't Do RAG: When Cache-Augmented Generation is All You Need for Knowledge Tasks") đề xuất: khi kho tri thức <strong>nhỏ và ổn định</strong>, nạp toàn bộ vào context <strong>một lần</strong>, tính trước <strong>KV cache</strong>, lưu lại; mỗi câu hỏi chỉ cần nối câu hỏi vào sau cache (và cắt bỏ phần token mới sau khi trả lời để tái sử dụng cache). Không có retrieval → không có lỗi chọn tài liệu, không có latency retrieve.</p>
+<p><strong>Ước lượng bộ nhớ KV cache</strong> (công thức chi tiết ở Module 11): với <span class="arithmatex">\(n_\ell\)</span> lớp, <span class="arithmatex">\(n_{kv}\)</span> head KV, <span class="arithmatex">\(d_h\)</span> chiều mỗi head, <span class="arithmatex">\(b\)</span> byte mỗi giá trị và <span class="arithmatex">\(L\)</span> token:</p>
+<div class="arithmatex">\[
+M_{KV} = 2 \cdot n_\ell \cdot n_{kv} \cdot d_h \cdot b \cdot L .
+\]</div>
+<p><strong>Ví dụ số.</strong> Một model cỡ 8B kiểu GQA với <span class="arithmatex">\(n_\ell = 32\)</span>, <span class="arithmatex">\(n_{kv} = 8\)</span>, <span class="arithmatex">\(d_h = 128\)</span>, FP16 (<span class="arithmatex">\(b = 2\)</span>): mỗi token <span class="arithmatex">\(2 \cdot 32 \cdot 8 \cdot 128 \cdot 2 = 131.072\)</span> byte = 128 KiB. 800 bài Help Center × ~1.200 token ≈ 960.000 token — vượt context của phần lớn model và cần ~117 GiB KV cache: <strong>CAG không khả thi cho toàn bộ Help Center</strong>. Nhưng <strong>300 macro × ~250 token ≈ 75.000 token</strong> → ~9,2 GiB KV: khả thi trên một GPU datacenter, không khả thi trên RTX 4050 6 GB (đã chiếm gần hết bởi trọng số model quantized).</p>
+<!-- fig:cag-kv-memory -->
+<figure>
+  <img alt="Bộ nhớ KV cache cho các kho tri thức theo công thức mục 7" loading="lazy" src="../assets/figures/08/cag-kv-memory.light.svg#only-light" />
+  <img alt="Bộ nhớ KV cache cho các kho tri thức theo công thức mục 7" loading="lazy" src="../assets/figures/08/cag-kv-memory.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.13 — Bộ nhớ KV cache cho các kho tri thức theo công thức mục 7.2 (trục log); kho chính sách dùng giả định ~30K token.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="73-ma-tran-quyet-inh-cho-cs">7.3 Ma trận quyết định cho CS<a class="headerlink" href="#73-ma-tran-quyet-inh-cho-cs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Kho tri thức</th>
+<th>Kích thước (giả định)</th>
+<th>Tần suất thay đổi</th>
+<th>Lựa chọn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chính sách giá/hoàn tiền/SLA</td>
+<td>Vài chục trang, ~20–40K token</td>
+<td>Hàng tháng</td>
+<td><strong>CAG/prefix caching</strong> khả thi; hoặc luôn đưa đoạn chính sách liên quan vào prompt theo intent</td>
+</tr>
+<tr>
+<td>300 macro</td>
+<td>~75K token</td>
+<td>Hàng tuần</td>
+<td>Prefix cache theo nhóm intent, hoặc RAG nhẹ</td>
+</tr>
+<tr>
+<td>800 bài Help Center</td>
+<td>~1M token</td>
+<td>Hàng tuần</td>
+<td>RAG</td>
+</tr>
+<tr>
+<td>200.000 ticket lịch sử</td>
+<td>Hàng trăm triệu token</td>
+<td>Hằng ngày</td>
+<td>RAG (+ tóm tắt/QA pairs — Module 04)</td>
+</tr>
+<tr>
+<td>Dữ liệu tài khoản</td>
+<td>Sống, riêng từng khách</td>
+<td>Liên tục</td>
+<td><strong>Tool/API</strong>, không phải retrieval</td>
+</tr>
+</tbody>
+</table>
+<p>Một biến thể thực dụng của CAG mà mình dùng nhiều nhất: <strong>prefix caching</strong> của vLLM hoặc prompt caching của API (Module 11) cho phần system prompt + khối chính sách cố định theo intent. Bạn được phần lớn lợi ích của CAG (không tính lại phần context lặp lại) mà vẫn giữ RAG cho phần còn lại.</p>
+<hr />
+<h2 id="8-agentic-rag-voi-langgraph">8. Agentic RAG với LangGraph<a class="headerlink" href="#8-agentic-rag-voi-langgraph" title="Permanent link">&para;</a></h2>
+<h3 id="81-agent-trong-bai-toan-nay-nghia-la-gi">8.1 "Agent" trong bài toán này nghĩa là gì<a class="headerlink" href="#81-agent-trong-bai-toan-nay-nghia-la-gi" title="Permanent link">&para;</a></h3>
+<p>Có một dải liên tục từ cứng đến tự do:</p>
+<table>
+<thead>
+<tr>
+<th>Mức</th>
+<th>LLM quyết định gì</th>
+<th>Ví dụ</th>
+<th>Kiểm soát</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pipeline cố định</td>
+<td>Không gì (chỉ sinh văn bản)</td>
+<td>Naive RAG</td>
+<td>Tối đa</td>
+</tr>
+<tr>
+<td>Router</td>
+<td>Chọn một nhánh trong vài nhánh định sẵn</td>
+<td>Adaptive-RAG, phân loại intent</td>
+<td>Cao</td>
+</tr>
+<tr>
+<td>Vòng lặp có giới hạn</td>
+<td>Retrieve lại / sửa / dừng</td>
+<td>CRAG, Self-RAG, repair ở Module 07</td>
+<td>Cao</td>
+</tr>
+<tr>
+<td>Agent có tool trong đồ thị ràng buộc</td>
+<td>Gọi tool nào, với tham số gì, bao nhiêu lần (≤ giới hạn)</td>
+<td>ReAct trong một node của LangGraph</td>
+<td>Trung bình</td>
+</tr>
+<tr>
+<td>Agent tự do</td>
+<td>Mọi thứ</td>
+<td>"Autonomous agent"</td>
+<td>Thấp</td>
+</tr>
+</tbody>
+</table>
+<p>Với CS production, mình khuyên dừng ở mức thứ tư: <strong>đồ thị do người viết</strong> (các bước, các cổng kiểm tra, điểm dừng cho người duyệt), bên trong có <strong>một</strong> node agent tự do gọi tool đọc trong một ngân sách. Đây chính là điều LangGraph được thiết kế để làm.</p>
+<!-- fig:agent-spectrum -->
+<figure>
+  <img alt="Dải mức tự chủ của hệ thống RAG; mức được khuyến nghị cho CS là agent có tool nằm trong đồ thị ràng buộc" loading="lazy" src="../assets/figures/08/agent-spectrum.light.svg#only-light" />
+  <img alt="Dải mức tự chủ của hệ thống RAG; mức được khuyến nghị cho CS là agent có tool nằm trong đồ thị ràng buộc" loading="lazy" src="../assets/figures/08/agent-spectrum.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.14 — Dải mức tự chủ của hệ thống RAG; mức được khuyến nghị cho CS là agent có tool nằm trong đồ thị ràng buộc.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="82-langgraph-state-machine-cho-llm">8.2 LangGraph: state machine cho LLM<a class="headerlink" href="#82-langgraph-state-machine-cho-llm" title="Permanent link">&para;</a></h3>
+<p>Tính đến 10/2026, LangGraph đã ở dòng 1.x (bản 1.0 phát hành tháng 10/2025; bản mới nhất trên PyPI khi viết là 1.2.x) và là nền tảng mà agent của LangChain được xây trên đó. Các khái niệm cốt lõi:</p>
+<ul>
+<li><strong>State</strong>: một kiểu dữ liệu (thường <code>TypedDict</code> hoặc Pydantic) chứa mọi thứ đồ thị cần; mỗi node nhận state và trả về <strong>phần cập nhật</strong>; có thể khai báo <em>reducer</em> cho từng trường (ví dụ nối thêm vào list thay vì ghi đè).</li>
+<li><strong>Node</strong>: hàm Python (đồng bộ hoặc async) — gọi LLM, gọi retriever, gọi tool, chạy rule.</li>
+<li><strong>Edge</strong>: cạnh cố định hoặc <strong>cạnh điều kiện</strong> (hàm đọc state và trả về tên node tiếp theo). Đồ thị có thể có <strong>chu trình</strong> — điều mà chuỗi (chain) tuyến tính không làm được.</li>
+<li><strong>Checkpointer</strong>: lưu state sau mỗi bước theo <code>thread_id</code> → <strong>durable execution</strong> (worker crash thì chạy tiếp từ checkpoint), xem lại lịch sử, và <strong>human-in-the-loop</strong>: một node gọi <code>interrupt(...)</code> để tạm dừng; về sau ứng dụng gọi lại đồ thị với <code>Command(resume=...)</code> để tiếp tục. Production dùng checkpointer bền (ví dụ Postgres) thay cho bộ nhớ trong RAM.</li>
+</ul>
+<p>Hình thức hóa: LangGraph là một máy trạng thái <span class="arithmatex">\(\langle S, N, E, s_0 \rangle\)</span> trong đó hàm chuyển tại node <span class="arithmatex">\(n\)</span> là <span class="arithmatex">\(s \mapsto s \oplus f_n(s)\)</span> (<span class="arithmatex">\(\oplus\)</span> là phép gộp theo reducer), và cạnh điều kiện <span class="arithmatex">\(g: S \to N\)</span>. Điểm mấu chốt về an toàn: <strong>tập hành động khả dĩ bị giới hạn bởi đồ thị</strong>, không phải bởi những gì LLM "muốn" làm — đây là cách hiện thực hóa các pattern Action-Selector/Plan-Then-Execute ở Module 07.</p>
+<!-- fig:langgraph-state -->
+<figure>
+  <img alt="LangGraph như một máy trạng thái: node trả về cập nhật, reducer gộp vào state, cạnh điều kiện chọn node tiếp" loading="lazy" src="../assets/figures/08/langgraph-state.light.svg#only-light" />
+  <img alt="LangGraph như một máy trạng thái: node trả về cập nhật, reducer gộp vào state, cạnh điều kiện chọn node tiếp" loading="lazy" src="../assets/figures/08/langgraph-state.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.15 — LangGraph như một máy trạng thái: node trả về cập nhật, reducer gộp vào state, cạnh điều kiện chọn node tiếp.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="83-o-thi-agentic-rag-cho-zendesk">8.3 Đồ thị agentic RAG cho Zendesk<a class="headerlink" href="#83-o-thi-agentic-rag-cho-zendesk" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    START([Webhook: ticket mới / khách trả lời]) --&gt; LOAD[load_context&lt;br/&gt;đọc ticket, thread, org, plan&lt;br/&gt;từ Zendesk API]
+    LOAD --&gt; GUARD_IN[input_guard&lt;br/&gt;PII mask, injection classifier,&lt;br/&gt;yêu cầu gặp người, intent nhạy cảm]
+    GUARD_IN --&gt; CLASSIFY[classify&lt;br/&gt;ngôn ngữ + intent + độ phức tạp]
+    CLASSIFY --&gt;|sensitive / human_request| ESC[escalate&lt;br/&gt;internal note + tag + group&lt;br/&gt;+ Slack]
+    CLASSIFY --&gt;|ack| ACK[ack_draft]
+    CLASSIFY --&gt;|faq / multi_doc| RET[retrieve&lt;br/&gt;hybrid + rerank&lt;br/&gt;decomposition nếu multi_doc]
+    CLASSIFY --&gt;|account| AGENT[investigate_agent&lt;br/&gt;ReAct, tool CHỈ ĐỌC qua MCP&lt;br/&gt;tối đa 4 bước]
+    RET --&gt; GRADE{grade_docs&lt;br/&gt;kiểu CRAG}
+    GRADE --&gt;|correct| GEN[generate&lt;br/&gt;prompt Module 07, JSON]
+    GRADE --&gt;|ambiguous, retries &lt; 1| REWRITE[rewrite_query&lt;br/&gt;HyDE / mở rộng nguồn nội bộ]
+    REWRITE --&gt; RET
+    GRADE --&gt;|incorrect hoặc hết lượt| ESC
+    AGENT --&gt; GEN
+    GEN --&gt; VERIFY{verify&lt;br/&gt;citation, groundedness,&lt;br/&gt;policy, PII, URL}
+    VERIFY --&gt;|fail, repair &lt; 1| GEN
+    VERIFY --&gt;|fail| ESC
+    VERIFY --&gt;|pass| DECIDE{decide&lt;br/&gt;ngưỡng theo intent&lt;br/&gt;+ giai đoạn rollout}
+    ACK --&gt; DECIDE
+    DECIDE --&gt;|giai đoạn 1 hoặc rủi ro| NOTE[write_internal_note&lt;br/&gt;draft + citation + cờ verify]
+    DECIDE --&gt;|giai đoạn 2, intent rủi ro thấp,&lt;br/&gt;confidence &gt; ngưỡng| HITL[[human_approval&lt;br/&gt;interrupt nếu cấu hình yêu cầu]]
+    HITL --&gt;|approve| SEND[send_public_reply]
+    HITL --&gt;|reject / edit| NOTE
+    NOTE --&gt; END([END])
+    SEND --&gt; END
+    ESC --&gt; END</code></pre>
+<p>Vài quyết định thiết kế đáng chú ý:</p>
+<ol>
+<li><strong>Phân loại trước, agent sau.</strong> Chỉ tuyến <code>account</code> mới vào node agent có tool. Tuyến FAQ không bao giờ thấy tool — giảm chi phí và bề mặt tấn công (mục 1.2).</li>
+<li><strong>Vòng lặp có đếm.</strong> <code>rewrite_query</code> và repair đều có bộ đếm trong state; cạnh điều kiện đọc bộ đếm. Không có vòng lặp nào chỉ dừng khi "LLM thấy đủ".</li>
+<li><strong>Escalate là một node, không phải ngoại lệ.</strong> Mọi nhánh lỗi đều hội tụ về <code>escalate</code>, nơi viết internal note tóm tắt (kể cả draft một phần), đổi group/tag và thông báo — đúng yêu cầu số 2 của ticket.</li>
+<li><strong>Hành động ghi nằm ở node tất định cuối đồ thị</strong> (<code>write_internal_note</code>, <code>send_public_reply</code>, <code>escalate</code>), do code thực hiện từ các trường đã validate — LLM không có tool ghi vào Zendesk.</li>
+<li><strong>Human-in-the-loop qua <code>interrupt</code>.</strong> Ở giai đoạn 2, nếu cấu hình yêu cầu, <code>human_approval</code> dừng đồ thị; khi agent bấm duyệt trong UI nội bộ, ứng dụng resume với <code>Command(resume=...)</code>. Nhờ checkpointer, việc chờ có thể kéo dài hàng giờ mà không giữ worker.</li>
+</ol>
+<h3 id="84-code-khung-rut-gon">8.4 Code khung (rút gọn)<a class="headerlink" href="#84-code-khung-rut-gon" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># pip install langgraph   (dòng 1.x; tính đến 10/2026)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># Chỉ minh họa cấu trúc đồ thị; các hàm llm_*/retrieve/... là stub cần tự cài đặt.</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span><span class="p">,</span> <span class="n">Literal</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateGraph</span><span class="p">,</span> <span class="n">START</span><span class="p">,</span> <span class="n">END</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">interrupt</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.checkpoint.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">InMemorySaver</span>  <span class="c1"># production: checkpointer Postgres</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">TicketState</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">ticket_id</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">email</span><span class="p">:</span> <span class="nb">str</span>                 <span class="c1"># đã làm sạch + datamark (Module 07)</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span>                 <span class="c1"># org, plan, locale — từ Zendesk API</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">route</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"ack"</span><span class="p">,</span> <span class="s2">"faq"</span><span class="p">,</span> <span class="s2">"multi_doc"</span><span class="p">,</span> <span class="s2">"account"</span><span class="p">,</span> <span class="s2">"sensitive"</span><span class="p">]</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">docs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">grade</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"correct"</span><span class="p">,</span> <span class="s2">"ambiguous"</span><span class="p">,</span> <span class="s2">"incorrect"</span><span class="p">]</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">rewrites</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">repairs</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">output</span><span class="p">:</span> <span class="nb">dict</span>               <span class="c1"># JSON theo schema Module 07</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">verify_ok</span><span class="p">:</span> <span class="nb">bool</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">escalate_reasons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="k">def</span><span class="w"> </span><span class="nf">classify</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">TicketState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="n">route</span> <span class="o">=</span> <span class="n">llm_classify</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"email"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"meta"</span><span class="p">])</span>          <span class="c1"># model nhỏ, rẻ</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="n">reasons</span> <span class="o">=</span> <span class="n">rule_flags</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"email"</span><span class="p">])</span>                      <span class="c1"># rule độc lập với LLM</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="k">if</span> <span class="n">reasons</span><span class="p">:</span>                                           <span class="c1"># rule thắng LLM</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        <span class="n">route</span> <span class="o">=</span> <span class="s2">"sensitive"</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"route"</span><span class="p">:</span> <span class="n">route</span><span class="p">,</span> <span class="s2">"escalate_reasons"</span><span class="p">:</span> <span class="n">reasons</span><span class="p">,</span> <span class="s2">"rewrites"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"repairs"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">TicketState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>    <span class="n">query</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">"meta"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"query_override"</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="s2">"email"</span><span class="p">])</span>   <span class="c1"># sau rewrite_query thì dùng query mới</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"docs"</span><span class="p">:</span> <span class="n">hybrid_search_and_rerank</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="s2">"meta"</span><span class="p">])}</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">grade_docs</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">TicketState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"grade"</span><span class="p">:</span> <span class="n">crag_action</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"docs"</span><span class="p">],</span> <span class="n">t_up</span><span class="o">=</span><span class="mf">0.55</span><span class="p">,</span> <span class="n">t_low</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)}</span>  <span class="c1"># ngưỡng hiệu chuẩn ở Module 10</span>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="k">def</span><span class="w"> </span><span class="nf">rewrite_query</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">TicketState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"docs"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"rewrites"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"rewrites"</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>            <span class="s2">"meta"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">s</span><span class="p">[</span><span class="s2">"meta"</span><span class="p">],</span> <span class="s2">"query_override"</span><span class="p">:</span> <span class="n">llm_rewrite</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"email"</span><span class="p">])}}</span>
+</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>
+</span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">TicketState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"output"</span><span class="p">:</span> <span class="n">llm_generate_json</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="s2">"repairs"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"repairs"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)}</span>
+</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>
+</span><span id="__span-2-42"><a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="k">def</span><span class="w"> </span><span class="nf">verify</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">TicketState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-43"><a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>    <span class="n">ok</span><span class="p">,</span> <span class="n">issues</span> <span class="o">=</span> <span class="n">run_verifiers</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"output"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"docs"</span><span class="p">])</span>    <span class="c1"># Module 07: citation, NLI, policy</span>
+</span><span id="__span-2-44"><a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>    <span class="n">upd</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"verify_ok"</span><span class="p">:</span> <span class="n">ok</span><span class="p">}</span>
+</span><span id="__span-2-45"><a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+</span><span id="__span-2-46"><a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>        <span class="n">upd</span><span class="p">[</span><span class="s2">"repairs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">"repairs"</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>    <span class="k">return</span> <span class="n">upd</span>
+</span><span id="__span-2-48"><a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>
+</span><span id="__span-2-49"><a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="k">def</span><span class="w"> </span><span class="nf">human_approval</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">TicketState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-50"><a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a>    <span class="n">decision</span> <span class="o">=</span> <span class="n">interrupt</span><span class="p">({</span><span class="s2">"ticket_id"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"ticket_id"</span><span class="p">],</span> <span class="s2">"draft"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"output"</span><span class="p">][</span><span class="s2">"draft"</span><span class="p">]})</span>
+</span><span id="__span-2-51"><a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"verify_ok"</span><span class="p">:</span> <span class="n">decision</span> <span class="o">==</span> <span class="s2">"approve"</span><span class="p">}</span>
+</span><span id="__span-2-52"><a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>
+</span><span id="__span-2-53"><a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="c1"># --- cạnh điều kiện: đọc state, trả tên node ---</span>
+</span><span id="__span-2-54"><a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="k">def</span><span class="w"> </span><span class="nf">after_classify</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="k">return</span> <span class="p">{</span><span class="s2">"sensitive"</span><span class="p">:</span> <span class="s2">"escalate"</span><span class="p">,</span> <span class="s2">"ack"</span><span class="p">:</span> <span class="s2">"generate"</span><span class="p">,</span>
+</span><span id="__span-2-55"><a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>                                <span class="s2">"account"</span><span class="p">:</span> <span class="s2">"investigate_agent"</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"route"</span><span class="p">],</span> <span class="s2">"retrieve"</span><span class="p">)</span>
+</span><span id="__span-2-56"><a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a><span class="k">def</span><span class="w"> </span><span class="nf">after_grade</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+</span><span id="__span-2-57"><a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a>    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"grade"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"correct"</span><span class="p">:</span> <span class="k">return</span> <span class="s2">"generate"</span>
+</span><span id="__span-2-58"><a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a>    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"grade"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"ambiguous"</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="s2">"rewrites"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="s2">"rewrite_query"</span>
+</span><span id="__span-2-59"><a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a>    <span class="k">return</span> <span class="s2">"escalate"</span>
+</span><span id="__span-2-60"><a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a><span class="k">def</span><span class="w"> </span><span class="nf">after_verify</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+</span><span id="__span-2-61"><a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a>    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"verify_ok"</span><span class="p">]:</span> <span class="k">return</span> <span class="s2">"decide"</span>
+</span><span id="__span-2-62"><a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a>    <span class="k">return</span> <span class="s2">"generate"</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"repairs"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">"escalate"</span>   <span class="c1"># repairs đã +1 → cho phép 1 lần sửa</span>
+</span><span id="__span-2-63"><a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a>
+</span><span id="__span-2-64"><a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a><span class="n">g</span> <span class="o">=</span> <span class="n">StateGraph</span><span class="p">(</span><span class="n">TicketState</span><span class="p">)</span>
+</span><span id="__span-2-65"><a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">"classify"</span><span class="p">,</span> <span class="n">classify</span><span class="p">),</span> <span class="p">(</span><span class="s2">"retrieve"</span><span class="p">,</span> <span class="n">retrieve</span><span class="p">),</span> <span class="p">(</span><span class="s2">"grade_docs"</span><span class="p">,</span> <span class="n">grade_docs</span><span class="p">),</span>
+</span><span id="__span-2-66"><a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a>                 <span class="p">(</span><span class="s2">"rewrite_query"</span><span class="p">,</span> <span class="n">rewrite_query</span><span class="p">),</span> <span class="p">(</span><span class="s2">"generate"</span><span class="p">,</span> <span class="n">generate</span><span class="p">),</span> <span class="p">(</span><span class="s2">"verify"</span><span class="p">,</span> <span class="n">verify</span><span class="p">),</span>
+</span><span id="__span-2-67"><a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a>                 <span class="p">(</span><span class="s2">"investigate_agent"</span><span class="p">,</span> <span class="n">investigate_agent</span><span class="p">),</span> <span class="p">(</span><span class="s2">"decide"</span><span class="p">,</span> <span class="n">decide</span><span class="p">),</span>
+</span><span id="__span-2-68"><a id="__codelineno-2-68" name="__codelineno-2-68" href="#__codelineno-2-68"></a>                 <span class="p">(</span><span class="s2">"human_approval"</span><span class="p">,</span> <span class="n">human_approval</span><span class="p">),</span> <span class="p">(</span><span class="s2">"write_note"</span><span class="p">,</span> <span class="n">write_note</span><span class="p">),</span>
+</span><span id="__span-2-69"><a id="__codelineno-2-69" name="__codelineno-2-69" href="#__codelineno-2-69"></a>                 <span class="p">(</span><span class="s2">"send_reply"</span><span class="p">,</span> <span class="n">send_reply</span><span class="p">),</span> <span class="p">(</span><span class="s2">"escalate"</span><span class="p">,</span> <span class="n">escalate</span><span class="p">)]:</span>
+</span><span id="__span-2-70"><a id="__codelineno-2-70" name="__codelineno-2-70" href="#__codelineno-2-70"></a>    <span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+</span><span id="__span-2-71"><a id="__codelineno-2-71" name="__codelineno-2-71" href="#__codelineno-2-71"></a><span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">START</span><span class="p">,</span> <span class="s2">"classify"</span><span class="p">)</span>
+</span><span id="__span-2-72"><a id="__codelineno-2-72" name="__codelineno-2-72" href="#__codelineno-2-72"></a><span class="n">g</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s2">"classify"</span><span class="p">,</span> <span class="n">after_classify</span><span class="p">)</span>
+</span><span id="__span-2-73"><a id="__codelineno-2-73" name="__codelineno-2-73" href="#__codelineno-2-73"></a><span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"retrieve"</span><span class="p">,</span> <span class="s2">"grade_docs"</span><span class="p">)</span>
+</span><span id="__span-2-74"><a id="__codelineno-2-74" name="__codelineno-2-74" href="#__codelineno-2-74"></a><span class="n">g</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s2">"grade_docs"</span><span class="p">,</span> <span class="n">after_grade</span><span class="p">)</span>
+</span><span id="__span-2-75"><a id="__codelineno-2-75" name="__codelineno-2-75" href="#__codelineno-2-75"></a><span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"rewrite_query"</span><span class="p">,</span> <span class="s2">"retrieve"</span><span class="p">)</span>
+</span><span id="__span-2-76"><a id="__codelineno-2-76" name="__codelineno-2-76" href="#__codelineno-2-76"></a><span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"investigate_agent"</span><span class="p">,</span> <span class="s2">"generate"</span><span class="p">)</span>
+</span><span id="__span-2-77"><a id="__codelineno-2-77" name="__codelineno-2-77" href="#__codelineno-2-77"></a><span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"generate"</span><span class="p">,</span> <span class="s2">"verify"</span><span class="p">)</span>
+</span><span id="__span-2-78"><a id="__codelineno-2-78" name="__codelineno-2-78" href="#__codelineno-2-78"></a><span class="n">g</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s2">"verify"</span><span class="p">,</span> <span class="n">after_verify</span><span class="p">)</span>
+</span><span id="__span-2-79"><a id="__codelineno-2-79" name="__codelineno-2-79" href="#__codelineno-2-79"></a><span class="n">g</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s2">"decide"</span><span class="p">,</span> <span class="n">route_by_phase</span><span class="p">)</span>       <span class="c1"># → write_note | human_approval | escalate</span>
+</span><span id="__span-2-80"><a id="__codelineno-2-80" name="__codelineno-2-80" href="#__codelineno-2-80"></a><span class="n">g</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s2">"human_approval"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">"send_reply"</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"verify_ok"</span><span class="p">]</span> <span class="k">else</span> <span class="s2">"write_note"</span><span class="p">)</span>
+</span><span id="__span-2-81"><a id="__codelineno-2-81" name="__codelineno-2-81" href="#__codelineno-2-81"></a><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"write_note"</span><span class="p">,</span> <span class="s2">"send_reply"</span><span class="p">,</span> <span class="s2">"escalate"</span><span class="p">]:</span>
+</span><span id="__span-2-82"><a id="__codelineno-2-82" name="__codelineno-2-82" href="#__codelineno-2-82"></a>    <span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">END</span><span class="p">)</span>
+</span><span id="__span-2-83"><a id="__codelineno-2-83" name="__codelineno-2-83" href="#__codelineno-2-83"></a>
+</span><span id="__span-2-84"><a id="__codelineno-2-84" name="__codelineno-2-84" href="#__codelineno-2-84"></a><span class="n">app</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">checkpointer</span><span class="o">=</span><span class="n">InMemorySaver</span><span class="p">())</span>
+</span><span id="__span-2-85"><a id="__codelineno-2-85" name="__codelineno-2-85" href="#__codelineno-2-85"></a><span class="c1"># app.invoke({"ticket_id": "123", ...}, config={"configurable": {"thread_id": "zd-123"}})</span>
+</span><span id="__span-2-86"><a id="__codelineno-2-86" name="__codelineno-2-86" href="#__codelineno-2-86"></a><span class="c1"># Khi bị interrupt: app.invoke(Command(resume="approve"), config=...)  (from langgraph.types import Command)</span>
+</span></code></pre></div>
+<p><code>thread_id = "zd-&lt;ticket_id&gt;"</code> là lựa chọn tự nhiên: mỗi ticket Zendesk là một thread, khách trả lời lại → webhook mới → chạy tiếp trên cùng thread với lịch sử state. Chi tiết state schema đầy đủ, xử lý idempotency của webhook và multi-turn thuộc Module 12.</p>
+<h3 id="85-node-agent-va-tool-qua-mcp">8.5 Node agent và tool qua MCP<a class="headerlink" href="#85-node-agent-va-tool-qua-mcp" title="Permanent link">&para;</a></h3>
+<p><strong>Model Context Protocol (MCP)</strong> là giao thức mở chuẩn hóa cách ứng dụng LLM kết nối tới tool và dữ liệu. Tính đến 10/2026: Anthropic đã chuyển MCP cho <strong>Agentic AI Foundation</strong> (một directed fund thuộc Linux Foundation, công bố 12/2025); bản đặc tả mới nhất là <strong>2026-07-28</strong>, chuyển sang lõi <strong>stateless</strong> (bỏ bước handshake/session, mỗi request tự mô tả nên có thể cân bằng tải bình thường), thêm cơ chế extension chính thức (ví dụ Tasks cho tác vụ dài, MCP Apps), siết chặt phần ủy quyền, và một chính sách deprecation tối thiểu 12 tháng. Ba primitive phía server quen thuộc vẫn là <strong>tools</strong>, <strong>resources</strong>, <strong>prompts</strong>.</p>
+<p>Vì sao dùng MCP làm lớp tool thay vì hàm Python trực tiếp?</p>
+<ul>
+<li><strong>Tách biệt quyền và triển khai</strong>: MCP server "zendesk-readonly" và "billing-readonly" do team sở hữu dữ liệu vận hành, với credential và scope riêng; agent chỉ thấy tool mà server cấp.</li>
+<li><strong>Tái sử dụng</strong>: cùng server phục vụ agent CS, công cụ nội bộ cho agent người, và IDE của kỹ sư.</li>
+<li><strong>Chuẩn hóa quan sát</strong>: log/metric ở một lớp (Module 11).</li>
+</ul>
+<p>Trong LangGraph, gói <code>langchain-mcp-adapters</code> chuyển tool của MCP server thành tool LangChain:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># pip install langchain-mcp-adapters   (0.3.x tính đến 10/2026)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_mcp_adapters.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiServerMCPClient</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">client</span> <span class="o">=</span> <span class="n">MultiServerMCPClient</span><span class="p">({</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="s2">"account"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="s2">"http://account-mcp.internal/mcp"</span><span class="p">,</span> <span class="s2">"transport"</span><span class="p">:</span> <span class="s2">"streamable_http"</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>                <span class="s2">"headers"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="s2">"Bearer &lt;token-scope-readonly&gt;"</span><span class="p">}},</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">})</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">tools</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_tools</span><span class="p">()</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># Lọc allowlist phía client: chỉ nhận tool chỉ-đọc dù server có khai báo thêm</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="n">ALLOWED</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"get_account_status"</span><span class="p">,</span> <span class="s2">"get_recent_invoices"</span><span class="p">,</span> <span class="s2">"get_error_logs"</span><span class="p">,</span> <span class="s2">"search_kb"</span><span class="p">}</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">ALLOWED</span><span class="p">]</span>
+</span></code></pre></div>
+<p><strong>Thiết kế tool cho tuyến <code>account</code></strong> (ví dụ):</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Tham số</th>
+<th>Trả về</th>
+<th>Ràng buộc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get_account_status</code></td>
+<td>— (org lấy từ state, <strong>không</strong> từ LLM)</td>
+<td>trạng thái, gói, ngày gia hạn</td>
+<td>Chỉ đọc; scope = org của requester</td>
+</tr>
+<tr>
+<td><code>get_recent_invoices</code></td>
+<td><code>limit ≤ 5</code></td>
+<td>danh sách hóa đơn (đã che số thẻ)</td>
+<td>Chỉ đọc</td>
+</tr>
+<tr>
+<td><code>get_error_logs</code></td>
+<td><code>feature</code>, <code>since ≤ 7 ngày</code></td>
+<td>log lỗi đã tóm tắt</td>
+<td>Chỉ đọc; không trả PII người dùng cuối</td>
+</tr>
+<tr>
+<td><code>search_kb</code></td>
+<td><code>query</code>, <code>source</code></td>
+<td>chunk có ID</td>
+<td>Như retriever thường</td>
+</tr>
+</tbody>
+</table>
+<p>Chi tiết then chốt: <strong>định danh tenant không phải là tham số LLM điền</strong>. Tool nhận <code>org_id</code> từ state (lấy từ Zendesk API ở <code>load_context</code>), được inject phía server/adapter. Nếu LLM được phép truyền <code>org_id</code>, một email chứa "kiểm tra hóa đơn của org 4711 giúp tôi" có thể khiến agent đọc dữ liệu khách khác (OWASP LLM02 + LLM03). Kết quả tool cũng là <strong>dữ liệu không tin cậy</strong> (log lỗi có thể chứa chuỗi do người dùng nhập) — spotlight trước khi đưa lại cho LLM (Module 07).</p>
+<!-- fig:mcp-tenant -->
+<figure>
+  <img alt="orgid đi từ state qua adapter, không đi qua LLM; agent chỉ thấy các tool chỉ đọc trong allowlist" loading="lazy" src="../assets/figures/08/mcp-tenant.light.svg#only-light" />
+  <img alt="orgid đi từ state qua adapter, không đi qua LLM; agent chỉ thấy các tool chỉ đọc trong allowlist" loading="lazy" src="../assets/figures/08/mcp-tenant.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.16 — org_id đi từ state qua adapter, không đi qua LLM; agent chỉ thấy các tool chỉ đọc trong allowlist.</figcaption>
+</figure>
+<!-- /fig -->
+
+<blockquote>
+<p><strong>Liên hệ Zendesk.</strong> "Khi nào cần agent gọi tool?" — khi câu trả lời phụ thuộc <strong>trạng thái riêng của khách</strong> mà kho văn bản không thể chứa: "vì sao tài khoản tôi bị khóa", "hóa đơn tháng này sao cao hơn", "webhook của tôi không nhận được sự kiện từ hôm qua". Retrieval cho biết <em>chính sách và cách làm</em>; tool cho biết <em>chuyện gì đang xảy ra với khách này</em>. Draft tốt kết hợp cả hai: "Tài khoản của anh/chị bị tạm khóa do hóa đơn ngày 01/10 chưa thanh toán [T1]; theo chính sách, tài khoản sẽ mở lại tự động trong vòng 1 giờ sau khi thanh toán [S4]." — với <code>[T1]</code> là citation tới kết quả tool, được verify như mọi nguồn khác.</p>
+</blockquote>
+<h3 id="86-memory-hoi-thoai-va-khach-hang">8.6 Memory: hội thoại và khách hàng<a class="headerlink" href="#86-memory-hoi-thoai-va-khach-hang" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Loại</th>
+<th>Phạm vi</th>
+<th>Lưu ở đâu</th>
+<th>Ví dụ</th>
+<th>Rủi ro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ngắn hạn (thread)</td>
+<td>Một ticket</td>
+<td>Checkpointer theo <code>thread_id</code></td>
+<td>Các lượt trước, cam kết agent đã đưa, tài liệu đã dùng</td>
+<td>Thread dài → cần tóm tắt (Module 07)</td>
+</tr>
+<tr>
+<td>Dài hạn (khách/org)</td>
+<td>Nhiều ticket</td>
+<td>Store riêng có khóa theo org</td>
+<td>"Org dùng Azure AD", "đã được hứa hỗ trợ migration", ngôn ngữ ưa thích</td>
+<td>Lỗi thời; <strong>rò rỉ chéo tenant</strong>; poisoning (khách tự ghi "tôi được giảm 50%")</td>
+</tr>
+<tr>
+<td>Thủ tục</td>
+<td>Toàn hệ thống</td>
+<td>Prompt/macro/eval</td>
+<td>Cách xử lý loại ticket mới</td>
+<td>Thay đổi phải qua eval</td>
+</tr>
+</tbody>
+</table>
+<p>Quy tắc cho memory dài hạn trong CS: (1) chỉ ghi <strong>sự kiện đã xác thực</strong> (từ API hoặc từ agent người xác nhận), không ghi lời khách tự khai; (2) khóa truy cập theo org ở tầng lưu trữ, không ở prompt; (3) có <code>source</code> và <code>updated_at</code>, hết hạn tự động; (4) memory là <strong>nguồn có citation</strong> như mọi nguồn khác, không phải "kiến thức nền" vô hình của agent.</p>
+<hr />
+<h2 id="9-khi-nao-phuc-tap-hoa-la-xung-ang">9. Khi nào phức tạp hóa là xứng đáng<a class="headerlink" href="#9-khi-nao-phuc-tap-hoa-la-xung-ang" title="Permanent link">&para;</a></h2>
+<h3 id="91-khung-quyet-inh">9.1 Khung quyết định<a class="headerlink" href="#91-khung-quyet-inh" title="Permanent link">&para;</a></h3>
+<p>Một kỹ thuật nâng cao đáng đưa vào khi <strong>cả ba</strong> điều kiện đúng:</p>
+<ol>
+<li><strong>Có loại lỗi cụ thể đo được</strong> trên golden set (Module 10) mà kỹ thuật đó nhắm vào — ví dụ "38% lỗi của tuyến multi_doc là thiếu tài liệu bước 2".</li>
+<li><strong>Cải thiện có ý nghĩa thống kê</strong> trên đúng phân tầng đó (kiểm định cặp, Module 10), không làm hồi quy phân tầng khác.</li>
+<li><strong>Chi phí biên chấp nhận được</strong>: <span class="arithmatex">\(\Delta \text{quality} \times \text{giá trị} &gt; \pi_r \cdot \Delta\text{cost} + \text{chi phí bảo trì} + \text{rủi ro bảo mật tăng thêm}\)</span>.</li>
+</ol>
+<h3 id="92-ap-vao-zendesk">9.2 Áp vào Zendesk<a class="headerlink" href="#92-ap-vao-zendesk" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Loại ticket (giả định tỷ lệ)</th>
+<th>Kiến trúc đề xuất</th>
+<th>Không nên</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FAQ/how-to (~55%)</td>
+<td>Hybrid + rerank + prompt Module 07 + CRAG-lite (ngưỡng điểm rerank)</td>
+<td>Agent, GraphRAG, FLARE</td>
+</tr>
+<tr>
+<td>Nhiều câu hỏi/tổng hợp (~25%)</td>
+<td>Decomposition + retrieve song song; RAPTOR cho tài liệu dài nếu đo thấy lợi</td>
+<td>Agent tự do</td>
+</tr>
+<tr>
+<td>Điều tra tài khoản (~15%)</td>
+<td>LangGraph + node ReAct ≤ 4 bước, tool <strong>chỉ đọc</strong> qua MCP, tenant inject phía server</td>
+<td>Tool ghi; LLM tự điền org_id</td>
+</tr>
+<tr>
+<td>Nhạy cảm (~5%)</td>
+<td>Rule → escalate ngay; draft hỗ trợ cho agent</td>
+<td>Bất kỳ tự động gửi nào</td>
+</tr>
+<tr>
+<td>Báo cáo cho manager CS (offline)</td>
+<td>GraphRAG global/LazyGraphRAG hoặc RAPTOR trên ticket</td>
+<td>Chạy online trong đường trả lời khách</td>
+</tr>
+</tbody>
+</table>
+<p>Lộ trình mình khuyên: bắt đầu với naive + rerank + guardrails cho FAQ (giai đoạn 1) → thêm CRAG-lite và decomposition khi golden set chỉ ra lỗi retrieval → thêm tuyến agent cho <code>account</code> sau khi có MCP server chỉ đọc và eval cho tool calling → các kỹ thuật nặng (graph, RAPTOR) chỉ khi có bằng chứng. Tài liệu nhiều sơ đồ và bảng (PDF tích hợp, slide) là một trục phức tạp hóa riêng — truy xuất thị giác và lai văn bản–thị giác — được bàn ở <a href="../13-rag-da-phuong-thuc/">Module 13</a>; câu hỏi cần tính toán trên dữ liệu tài khoản (tool, text-to-SQL, bảo mật truy vấn) ở <a href="../14-rag-du-lieu-co-cau-truc/">Module 14</a>.</p>
+<!-- fig:architecture-by-route -->
+<figure>
+  <img alt="Kiến trúc đề xuất cho từng loại ticket theo bảng mục 9" loading="lazy" src="../assets/figures/08/architecture-by-route.light.svg#only-light" />
+  <img alt="Kiến trúc đề xuất cho từng loại ticket theo bảng mục 9" loading="lazy" src="../assets/figures/08/architecture-by-route.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 8.17 — Kiến trúc đề xuất cho từng loại ticket theo bảng mục 9.2.</figcaption>
+</figure>
+<!-- /fig -->
+
+<hr />
+<h2 id="loi-thuong-gap-cach-xu-ly">Lỗi thường gặp &amp; cách xử lý<a class="headerlink" href="#loi-thuong-gap-cach-xu-ly" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Triệu chứng</th>
+<th>Nguyên nhân gốc</th>
+<th>Cách xử lý</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chi phí/latency tăng vọt sau khi "lên agent"</td>
+<td>Mọi ticket đi qua agent; vòng lặp không giới hạn</td>
+<td>Router trước; giới hạn bước và ngân sách token mỗi ticket; đo <span class="arithmatex">\(\mathbb{E}[n]\)</span> theo tuyến</td>
+</tr>
+<tr>
+<td>Agent lặp gọi cùng một tool</td>
+<td>Không có bộ đếm/điều kiện dừng; observation không đổi</td>
+<td>Bộ đếm trong state; phát hiện lặp (cùng tool + tham số); dừng → escalate</td>
+</tr>
+<tr>
+<td>Agent đọc dữ liệu của org khác</td>
+<td><code>org_id</code> là tham số LLM điền</td>
+<td>Inject tenant từ state phía server; scope credential theo org</td>
+</tr>
+<tr>
+<td>CRAG escalate quá nhiều</td>
+<td>Ngưỡng evaluator chưa hiệu chuẩn; điểm reranker lệch theo ngôn ngữ</td>
+<td>Hiệu chuẩn <span class="arithmatex">\(\tau_{\text{up}}, \tau_{\text{low}}\)</span> theo ngôn ngữ trên golden set (Module 10)</td>
+</tr>
+<tr>
+<td>Draft trích tóm tắt RAPTOR/community report sai điều kiện chính sách</td>
+<td>Claim cite node tóm tắt do LLM viết</td>
+<td>Chỉ cite lá (văn bản gốc); tóm tắt chỉ để tìm</td>
+</tr>
+<tr>
+<td>GraphRAG index lỗi thời sau mỗi tuần</td>
+<td>Pipeline trích xuất + tóm tắt cộng đồng chạy lại toàn bộ</td>
+<td>Chỉ dùng offline cho báo cáo; hoặc LightRAG/cập nhật tăng dần; hoặc KG có schema cho dữ liệu cấu trúc</td>
+</tr>
+<tr>
+<td>FLARE kích hoạt retrieve ở mọi câu</td>
+<td><span class="arithmatex">\(\theta\)</span> quá cao; tên riêng/thuật ngữ hiếm có xác suất thấp</td>
+<td>Hạ <span class="arithmatex">\(\theta\)</span>; bỏ qua token thuộc thực thể đã có trong context</td>
+</tr>
+<tr>
+<td>Interrupt chờ người làm treo worker</td>
+<td>Không có checkpointer bền; giữ tiến trình trong lúc chờ</td>
+<td>Checkpointer Postgres; resume bằng <code>Command(resume=...)</code> từ webhook/UI</td>
+</tr>
+<tr>
+<td>Kết quả tool chứa lệnh tấn công được agent làm theo</td>
+<td>Observation coi như tin cậy</td>
+<td>Spotlight observation; tool chỉ đọc; quyết định ghi do node tất định</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tom-tat-cheat-sheet">Tóm tắt (cheat-sheet)<a class="headerlink" href="#tom-tat-cheat-sheet" title="Permanent link">&para;</a></h2>
+<ul>
+<li>RAG nâng cao = <strong>chính sách điều khiển</strong> <span class="arithmatex">\(\pi(a \mid s)\)</span>: có retrieve? retrieve gì? đủ chưa? Chi phí kỳ vọng <span class="arithmatex">\(\sum_r \pi_r n_r\)</span> → <strong>định tuyến trước, phức tạp hóa có chọn lọc</strong>.</li>
+<li><strong>Adaptive-RAG</strong>: classifier nhỏ (T5-Large) chọn A/B/C; nhãn = chiến lược rẻ nhất trả lời đúng.</li>
+<li><strong>FLARE</strong>: sinh câu tạm; retrieve nếu <span class="arithmatex">\(\min_j p(\hat y_j) &lt; \theta\)</span>; query = câu tạm che token <span class="arithmatex">\(&lt; \beta\)</span>.</li>
+<li><strong>Self-RAG</strong>: reflection tokens <code>Retrieve</code>, <code>IsRel</code>, <code>IsSup</code>, <code>IsUse</code>; retrieve khi <span class="arithmatex">\(p(\text{yes})/(p(\text{yes})+p(\text{no})) &gt; \delta\)</span>; điểm phân đoạn <span class="arithmatex">\(p(y_t) + \sum_G w^G s^G\)</span> — <span class="arithmatex">\(w\)</span> chỉnh lúc suy luận. Cần fine-tune; mượn ý tưởng nếu dùng API.</li>
+<li><strong>CRAG</strong>: evaluator nhẹ, hai ngưỡng → Correct (tinh lọc strip) / Ambiguous (kết hợp) / Incorrect (nguồn khác). Với CS: fallback = escalate, <strong>không</strong> web.</li>
+<li><strong>IRCoT/ReAct</strong>: xen kẽ suy luận và retrieve/tool; giới hạn bước, allowlist tool.</li>
+<li><strong>RAPTOR</strong>: UMAP → GMM (mềm, <span class="arithmatex">\(\gamma_{ik}\)</span>) → chọn <span class="arithmatex">\(K\)</span> bằng BIC → tóm tắt → lặp; truy vấn collapsed tree. Cite lá.</li>
+<li><strong>GraphRAG</strong>: LLM trích thực thể/quan hệ → Leiden tối đa modularity <span class="arithmatex">\(Q\)</span> → community reports → global (map-reduce) / local search. Hợp câu hỏi toàn cục, offline. LightRAG: cập nhật tăng dần; HippoRAG: PPR.</li>
+<li><strong>Long-context vs RAG</strong>: LC tốt hơn khi đủ tài nguyên, RAG rẻ hơn nhiều → Self-Route. <strong>CAG</strong> khi kho nhỏ, ổn định; <span class="arithmatex">\(M_{KV} = 2 n_\ell n_{kv} d_h b L\)</span>.</li>
+<li><strong>LangGraph</strong> (1.x): State + Node + Edge điều kiện + Checkpointer + <code>interrupt</code>/<code>Command(resume)</code>. <strong>MCP</strong> (spec 2026-07-28, stateless; thuộc Agentic AI Foundation/Linux Foundation): tools/resources/prompts; tool CS <strong>chỉ đọc</strong>, tenant inject phía server.</li>
+</ul>
+<hr />
+<h2 id="cau-hoi-tu-kiem-tra-phong-van">Câu hỏi tự kiểm tra / phỏng vấn<a class="headerlink" href="#cau-hoi-tu-kiem-tra-phong-van" title="Permanent link">&para;</a></h2>
+<p><strong>1.</strong> Phân phối tuyến 60% FAQ (1,2 lượt LLM), 30% multi_doc (2,4), 10% account (6). Tính <span class="arithmatex">\(\mathbb{E}[n]\)</span> và so với cho tất cả đi agent (6 lượt).</p>
+<details>
+<summary>Gợi ý</summary>
+<p><span class="arithmatex">\(0{,}6 \cdot 1{,}2 + 0{,}3 \cdot 2{,}4 + 0{,}1 \cdot 6 = 0{,}72 + 0{,}72 + 0{,}6 = 2{,}04\)</span>. Agent cho mọi ticket: 6 → gấp ~2,9 lần, chưa kể bề mặt tấn công tăng cho 100% ticket.</p>
+</details>
+<p><strong>2.</strong> Trong FLARE, vì sao phải che token xác suất thấp khi tạo query?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Token xác suất thấp có khả năng là phần model đang "đoán" — có thể sai. Đưa nó vào query kéo retrieval về tài liệu khớp với phỏng đoán sai (ví dụ "Okta" khi khách dùng Azure AD). Che đi giữ phần ngữ cảnh chắc chắn và để retriever tìm phần còn thiếu.</p>
+</details>
+<p><strong>3.</strong> Self-RAG: <span class="arithmatex">\(p(\text{yes}) = 0{,}15\)</span>, <span class="arithmatex">\(p(\text{no}) = 0{,}45\)</span>, <span class="arithmatex">\(\delta = 0{,}2\)</span>. Có retrieve không?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Tỷ lệ <span class="arithmatex">\(0{,}15 / 0{,}60 = 0{,}25 &gt; 0{,}2\)</span> → có retrieve. Lưu ý chuẩn hóa chỉ trên hai giá trị yes/no, nên dù <span class="arithmatex">\(p(\text{yes})\)</span> tuyệt đối nhỏ, quyết định vẫn là retrieve.</p>
+</details>
+<p><strong>4.</strong> Vì sao trọng số <span class="arithmatex">\(w^G\)</span> của Self-RAG là "núm điều chỉnh lúc suy luận" và điều đó có ích gì cho CS?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Các <span class="arithmatex">\(s^G\)</span> là xác suất model đã học; <span class="arithmatex">\(w^G\)</span> chỉ dùng khi xếp hạng ứng viên, nên đổi <span class="arithmatex">\(w\)</span> không cần huấn luyện lại. Với CS, tăng <span class="arithmatex">\(w^{\text{IsSup}}\)</span> ưu tiên câu có căn cứ hơn câu trôi chảy; có thể đặt khác nhau theo intent (chính sách vs how-to).</p>
+</details>
+<p><strong>5.</strong> CRAG: điểm <span class="arithmatex">\(e = (0{,}3;\ 0{,}1;\ -0{,}95)\)</span>, <span class="arithmatex">\(\tau_{\text{up}} = 0{,}5\)</span>, <span class="arithmatex">\(\tau_{\text{low}} = -0{,}9\)</span>. Hành động? Phiên bản CS nên làm gì?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Không điểm nào <span class="arithmatex">\(\ge 0{,}5\)</span>; không phải tất cả <span class="arithmatex">\(&lt; -0{,}9\)</span> → Ambiguous. Với CS: mở rộng nguồn nội bộ (ticket lịch sử, release notes, rewrite query) một lần; nếu vẫn không đạt Correct → draft một phần + escalate <code>insufficient_context</code>.</p>
+</details>
+<p><strong>6.</strong> Vì sao RAPTOR dùng GMM thay vì k-means, và vì sao cần UMAP trước?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>GMM cho phân cụm mềm (<span class="arithmatex">\(\gamma_{ik}\)</span>) — một chunk có thể thuộc nhiều chủ đề — và có likelihood để chọn <span class="arithmatex">\(K\)</span> bằng BIC. UMAP giảm chiều vì trong không gian 768+ chiều khoảng cách kém phân biệt và GMM hiệp phương sai đầy đủ có <span class="arithmatex">\(O(d^2)\)</span> tham số mỗi thành phần, không ước lượng nổi với vài trăm điểm.</p>
+</details>
+<p><strong>7.</strong> Viết công thức modularity và giải thích số hạng <span class="arithmatex">\(k_i k_j / 2m\)</span>. Leiden cải thiện gì so với Louvain?</p>
+<details>
+<summary>Gợi ý</summary>
+<p><span class="arithmatex">\(Q = \frac{1}{2m}\sum_{ij}[A_{ij} - \gamma k_i k_j/2m]\,\delta(c_i, c_j)\)</span>. <span class="arithmatex">\(k_ik_j/2m\)</span> là số cạnh kỳ vọng giữa <span class="arithmatex">\(i, j\)</span> trong null model nối ngẫu nhiên giữ bậc; <span class="arithmatex">\(Q\)</span> đo "nhiều cạnh trong cộng đồng hơn ngẫu nhiên". Leiden thêm pha tinh chỉnh để tránh cộng đồng không liên thông của Louvain và hội tụ nhanh hơn.</p>
+</details>
+<p><strong>8.</strong> Khi nào GraphRAG global search hợp lý trong bối cảnh Zendesk, khi nào không?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Hợp lý cho câu hỏi toàn cục trên corpus ticket (chủ đề khiếu nại, xu hướng) — chạy offline phục vụ manager. Không hợp cho trả lời email khách: tốn nhiều lượt LLM (map-reduce trên nhiều report), index phải cập nhật liên tục, community report là tóm tắt có thể sai điều kiện chính sách.</p>
+</details>
+<p><strong>9.</strong> Ước lượng KV cache để CAG 300 macro (~75.000 token) với model <span class="arithmatex">\(n_\ell = 32\)</span>, <span class="arithmatex">\(n_{kv} = 8\)</span>, <span class="arithmatex">\(d_h = 128\)</span>, FP16. Có chạy trên RTX 4050 6 GB không?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Mỗi token <span class="arithmatex">\(2 \cdot 32 \cdot 8 \cdot 128 \cdot 2 = 131.072\)</span> byte; <span class="arithmatex">\(\times 75.000 \approx 9{,}8 \cdot 10^9\)</span> byte ≈ 9,2 GiB. Không — vượt cả VRAM, chưa tính trọng số model.</p>
+</details>
+<p><strong>10.</strong> Vì sao <code>org_id</code> không được là tham số mà LLM điền khi gọi tool, và cách đúng là gì?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Email/observation có thể chứa injection khiến LLM điền org khác → đọc dữ liệu khách khác (OWASP LLM02, LLM03). Cách đúng: lấy org từ Zendesk API ở bước tất định, lưu trong state, inject phía adapter/server; credential của MCP server có scope theo org và chỉ đọc.</p>
+</details>
+<p><strong>11.</strong> Trình bày vai trò của checkpointer và <code>interrupt</code> trong luồng duyệt draft ở giai đoạn 2.</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Checkpointer lưu state theo <code>thread_id</code> sau mỗi bước. Node <code>human_approval</code> gọi <code>interrupt(payload)</code> → đồ thị dừng, state được lưu, worker giải phóng. Khi agent người duyệt trong UI, ứng dụng gọi lại đồ thị với <code>Command(resume=decision)</code> và cùng <code>thread_id</code>; giá trị resume trở thành kết quả của <code>interrupt</code> và đồ thị đi tiếp tới <code>send_reply</code> hoặc <code>write_note</code>.</p>
+</details>
+<p><strong>12.</strong> Một đồng nghiệp đề xuất "dùng Self-RAG cho toàn hệ thống vì nó tốt nhất trên benchmark". Bạn phản biện thế nào?</p>
+<details>
+<summary>Gợi ý</summary>
+<p>Self-RAG cần fine-tune generator với từ vựng mở rộng — không dùng được với API thương mại, và với self-host thì tốn công huấn luyện/bảo trì. Benchmark (QA mở, sinh tiểu sử…) khác phân phối ticket CS đa ngôn ngữ. Đề xuất: tái tạo ý tưởng bằng tín hiệu rời (reranker, verifier, judge) + trọng số hiệu chuẩn, đo trên golden set; chỉ cân nhắc fine-tune khi có bằng chứng lợi ích ở phân tầng cụ thể.</p>
+</details>
+<hr />
+<h2 id="bai-tap-thuc-hanh">Bài tập thực hành<a class="headerlink" href="#bai-tap-thuc-hanh" title="Permanent link">&para;</a></h2>
+<p><strong>Bài 1 — CRAG-lite trên tập FAQ (GPU 6GB hoặc CPU).</strong> Dùng retriever + reranker cross-encoder từ lab Module 05–06. Gán nhãn 50 câu hỏi (30 có đáp án trong kho, 20 không). Chuẩn hóa điểm rerank về <span class="arithmatex">\([0,1]\)</span>, quét lưới <span class="arithmatex">\((\tau_{\text{low}}, \tau_{\text{up}})\)</span>, vẽ tỷ lệ escalate vs tỷ lệ trả lời sai khi không escalate. Chọn cặp ngưỡng theo chi phí <span class="arithmatex">\(c_w/c_e = 10\)</span> (Module 07, mục 4.2).</p>
+<p><strong>Bài 2 — Đồ thị LangGraph (CPU; LLM nhỏ quantized qua Ollama/vLLM trên GPU 6GB, hoặc API).</strong> Cài đặt đồ thị mục 8.4 với: <code>classify</code> bằng rule + model nhỏ; <code>retrieve</code> gọi index từ lab; <code>grade_docs</code> kiểu CRAG-lite; <code>generate</code> dùng prompt Module 07; <code>verify</code> bằng bộ kiểm citation Module 07; <code>human_approval</code> bằng <code>interrupt</code>. Chạy 10 email mẫu, in đường đi qua đồ thị cho từng email, và thử resume một ticket bị interrupt sau khi khởi động lại tiến trình (dùng checkpointer SQLite/Postgres thay vì bộ nhớ). Khung đầy đủ chạy được (kể cả khi chưa cài LangGraph) có ở <a href="../labs/lab06_agentic_langgraph/">Lab 06</a>.</p>
+<p><strong>Bài 3 — MCP server chỉ đọc (CPU).</strong> Viết một MCP server nhỏ (Python SDK chính thức) với hai tool <code>get_account_status</code> và <code>get_recent_invoices</code> đọc từ file JSON giả lập 5 org. Tenant lấy từ header/metadata của request, <strong>không</strong> từ tham số tool. Kết nối vào node agent bằng <code>langchain-mcp-adapters</code>. Viết 3 email injection cố gắng đọc org khác và chứng minh chúng thất bại <em>ở tầng server</em>.</p>
+<hr />
+<h2 id="tai-lieu-tham-khao">Tài liệu tham khảo<a class="headerlink" href="#tai-lieu-tham-khao" title="Permanent link">&para;</a></h2>
+<p><em>Paper (đã kiểm tra arXiv ID):</em></p>
+<ul>
+<li>Asai, A., Wu, Z., Wang, Y., Sil, A., Hajishirzi, H. (2023). <em>Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection.</em> arXiv:2310.11511 (ICLR 2024).</li>
+<li>Yan, S.-Q., Gu, J.-C., Zhu, Y., Ling, Z.-H. (2024). <em>Corrective Retrieval Augmented Generation.</em> arXiv:2401.15884.</li>
+<li>Jeong, S., Baek, J., Cho, S., Hwang, S. J., Park, J. C. (2024). <em>Adaptive-RAG: Learning to Adapt Retrieval-Augmented Large Language Models through Question Complexity.</em> arXiv:2403.14403 (NAACL 2024).</li>
+<li>Jiang, Z. et al. (2023). <em>Active Retrieval Augmented Generation</em> (FLARE). arXiv:2305.06983 (EMNLP 2023).</li>
+<li>Trivedi, H., Balasubramanian, N., Khot, T., Sabharwal, A. (2022). <em>Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions</em> (IRCoT). arXiv:2212.10509 (ACL 2023).</li>
+<li>Yao, S. et al. (2022). <em>ReAct: Synergizing Reasoning and Acting in Language Models.</em> arXiv:2210.03629 (ICLR 2023).</li>
+<li>Sarthi, P. et al. (2024). <em>RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval.</em> arXiv:2401.18059 (ICLR 2024).</li>
+<li>Edge, D. et al. (2024). <em>From Local to Global: A Graph RAG Approach to Query-Focused Summarization.</em> arXiv:2404.16130.</li>
+<li>Traag, V. A., Waltman, L., van Eck, N. J. (2019). <em>From Louvain to Leiden: guaranteeing well-connected communities.</em> Scientific Reports 9, 5233. arXiv:1810.08473.</li>
+<li>Guo, Z. et al. (2024). <em>LightRAG: Simple and Fast Retrieval-Augmented Generation.</em> arXiv:2410.05779.</li>
+<li>Gutiérrez, B. J. et al. (2024). <em>HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models.</em> arXiv:2405.14831 (NeurIPS 2024).</li>
+<li>Gutiérrez, B. J. et al. (2025). <em>From RAG to Memory: Non-Parametric Continual Learning for Large Language Models</em> (HippoRAG 2). arXiv:2502.14802.</li>
+<li>Li, Z., Li, C., Zhang, M., Mei, Q., Bendersky, M. (2024). <em>Retrieval Augmented Generation or Long-Context LLMs? A Comprehensive Study and Hybrid Approach.</em> arXiv:2407.16833 (EMNLP 2024 Industry).</li>
+<li>Chan, B. J., Chen, C.-T., Cheng, J.-H., Huang, H.-H. (2024). <em>Don't Do RAG: When Cache-Augmented Generation is All You Need for Knowledge Tasks.</em> arXiv:2412.15605.</li>
+<li>Singh, A. et al. (2025). <em>Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG.</em> arXiv:2501.09136.</li>
+<li>Beurer-Kellner, L. et al. (2025). <em>Design Patterns for Securing LLM Agents against Prompt Injections.</em> arXiv:2506.08837.</li>
+</ul>
+<p><em>Tài liệu chính thức:</em></p>
+<ul>
+<li>Self-RAG — mã nguồn và tham số suy luận: https://github.com/AkariAsai/self-rag</li>
+<li>Microsoft GraphRAG — Query overview (local, global, DRIFT, basic): https://microsoft.github.io/graphrag/query/overview/</li>
+<li>LangGraph — Interrupts / human-in-the-loop: https://docs.langchain.com/oss/python/langgraph/interrupts</li>
+<li>LangGraph trên PyPI: https://pypi.org/project/langgraph/</li>
+<li>langchain-mcp-adapters trên PyPI: https://pypi.org/project/langchain-mcp-adapters/</li>
+<li>MCP — bài công bố đặc tả 2026-07-28: https://blog.modelcontextprotocol.io/posts/2026-07-28/</li>
+<li>Anthropic — Donating the Model Context Protocol and establishing the Agentic AI Foundation (12/2025): https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../07-generation-grounding-guardrails/" class="md-footer__link md-footer__link--prev" aria-label="Trước: 07 · Generation &amp; guardrails">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                07 · Generation & guardrails
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../09-fine-tuning-cho-rag/" class="md-footer__link md-footer__link--next" aria-label="Sau: 09 · Fine-tuning cho RAG">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                09 · Fine-tuning cho RAG
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tài liệu học tập — RAG Masterclass · 2026
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/HieNguyen08/rag-masterclass" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

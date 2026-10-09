@@ -1,0 +1,91 @@
+/* Giao diện kiểu "sách giáo khoa": chữ dễ đọc, công thức thoáng */
+:root {
+  --md-text-font-family: "Be Vietnam Pro", system-ui, sans-serif;
+}
+
+.md-typeset {
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.md-typeset h2 {
+  font-weight: 650;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  padding-bottom: 0.25em;
+  margin-top: 2.2em;
+}
+
+/* Khối "Thời lượng · Mức độ · Tiên quyết" ngay dưới tiêu đề */
+.md-typeset h1 + blockquote {
+  border-left-color: var(--md-accent-fg-color);
+  background: var(--md-code-bg-color);
+  border-radius: 4px;
+  padding: 0.4em 1em;
+}
+
+/* Công thức block có khoảng thở và cuộn ngang trên màn hình hẹp */
+.md-typeset .arithmatex {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.md-typeset div.arithmatex {
+  margin: 1.1em 0;
+}
+
+/* Bảng rộng cuộn ngang thay vì tràn */
+.md-typeset table:not([class]) {
+  font-size: 0.78rem;
+}
+
+/* Khối đáp án thu gọn */
+.md-typeset details {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  padding: 0.3em 0.9em;
+  margin: 0.6em 0 1.2em;
+  background: var(--md-code-bg-color);
+}
+.md-typeset details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--md-accent-fg-color);
+}
+
+/* Sơ đồ mermaid canh giữa */
+.md-typeset .mermaid {
+  text-align: center;
+}
+
+/* Thẻ module trên trang chủ */
+.md-typeset .grid.cards > ul > li {
+  border-radius: 8px;
+}
+
+/* Hình minh họa (SVG có bản sáng/tối riêng) */
+.md-typeset figure {
+  margin: 1.4em auto;
+  max-width: 100%;
+}
+.md-typeset figure img {
+  max-width: 100%;
+  height: auto;
+}
+.md-typeset figcaption,
+.md-typeset p.fig-caption {
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--md-default-fg-color--light);
+  max-width: 44rem;
+  margin: 0.5em auto 0;
+  text-align: center;
+  font-style: normal;
+}
+.md-typeset p.fig-caption {
+  margin-top: -0.4em;
+  margin-bottom: 1.4em;
+}

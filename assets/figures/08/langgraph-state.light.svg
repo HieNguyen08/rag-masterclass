@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="627.977143pt" height="220.32pt" viewBox="0 0 627.977143 220.32" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 220.32 
+L 627.977143 220.32 
+L 627.977143 0 
+L 0 0 
+L 0 220.32 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 21.668571 149.931429 
+L 119.108571 149.931429 
+Q 125.074286 149.931429 125.074286 143.965714 
+L 125.074286 96.24 
+Q 125.074286 90.274286 119.108571 90.274286 
+L 21.668571 90.274286 
+Q 15.702857 90.274286 15.702857 96.24 
+L 15.702857 143.965714 
+Q 15.702857 149.931429 21.668571 149.931429 
+z
+" clip-path="url(#p42c28ace2c)" style="fill: #e4e1f2; stroke: #4a3aa7; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 180.754286 149.931429 
+L 268.251429 149.931429 
+Q 274.217143 149.931429 274.217143 143.965714 
+L 274.217143 96.24 
+Q 274.217143 90.274286 268.251429 90.274286 
+L 180.754286 90.274286 
+Q 174.788571 90.274286 174.788571 96.24 
+L 174.788571 143.965714 
+Q 174.788571 149.931429 180.754286 149.931429 
+z
+" clip-path="url(#p42c28ace2c)" style="fill: #dfebf9; stroke: #2a78d6; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 329.897143 149.931429 
+L 417.394286 149.931429 
+Q 423.36 149.931429 423.36 143.965714 
+L 423.36 96.24 
+Q 423.36 90.274286 417.394286 90.274286 
+L 329.897143 90.274286 
+Q 323.931429 90.274286 323.931429 96.24 
+L 323.931429 143.965714 
+Q 323.931429 149.931429 329.897143 149.931429 
+z
+" clip-path="url(#p42c28ace2c)" style="fill: #ddf3eb; stroke: #1baf7a; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 479.04 149.931429 
+L 596.365714 149.931429 
+Q 602.331429 149.931429 602.331429 143.965714 
+L 602.331429 96.24 
+Q 602.331429 90.274286 596.365714 90.274286 
+L 479.04 90.274286 
+Q 473.074286 90.274286 473.074286 96.24 
+L 473.074286 143.965714 
+Q 473.074286 149.931429 479.04 149.931429 
+z
+" clip-path="url(#p42c28ace2c)" style="fill: #fce8e1; stroke: #eb6834; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 126.565714 120.102857 
+Q 149.931429 120.102857 171.508288 120.102857 
+" clip-path="url(#p42c28ace2c)" style="fill: none; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 166.708288 117.702857 
+L 171.508288 120.102857 
+L 166.708288 122.502857 
+z
+" clip-path="url(#p42c28ace2c)" style="fill: #52514e; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 275.708571 120.102857 
+Q 299.074286 120.102857 320.651146 120.102857 
+" clip-path="url(#p42c28ace2c)" style="fill: none; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 315.851146 117.702857 
+L 320.651146 120.102857 
+L 315.851146 122.502857 
+z
+" clip-path="url(#p42c28ace2c)" style="fill: #52514e; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 424.851429 120.102857 
+Q 448.217143 120.102857 469.794003 120.102857 
+" clip-path="url(#p42c28ace2c)" style="fill: none; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 464.994003 117.702857 
+L 469.794003 120.102857 
+L 464.994003 122.502857 
+z
+" clip-path="url(#p42c28ace2c)" style="fill: #52514e; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(55.889509 117.256123)">state s</text>
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(45.870509 128.28092)">(TypedDict)</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(210.024013 117.564482)">node n</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(191.268388 128.258732)">fₙ(s) → cập nhật</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(356.651464 117.070326)">s ⊕ fₙ(s)</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(354.201683 128.410326)">(reducer)</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(506.90242 117.219951)">cạnh điều kiện</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(503.501076 128.453638)">g(s) → node tiếp</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 535.909499 86.895333 
+Q 304.045825 -28.146707 73.38399 86.298917 
+" style="fill: none; stroke: #52514e; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 77.856105 86.312669 
+L 73.38399 86.298917 
+L 76.078261 82.729476 
+z
+" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="304.045714" y="18.188571" transform="rotate(-0 304.045714 18.188571)">chu trình được phép (rewrite, repair) — có bộ đếm trong state</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #52514e" x="15.702857" y="189.702857" transform="rotate(-0 15.702857 189.702857)">Checkpointer lưu s sau mỗi bước theo thread_id = «zd-&lt;ticket_id&gt;» → chạy tiếp sau crash, interrupt() chờ người duyệt.</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="15.702857" y="209.588571" transform="rotate(-0 15.702857 209.588571)">Tập hành động khả dĩ bị giới hạn bởi đồ thị, không phải bởi điều LLM «muốn».</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p42c28ace2c">
+   <rect x="5.76" y="5.76" width="616.457143" height="208.8"/>
+  </clipPath>
+ </defs>
+</svg>

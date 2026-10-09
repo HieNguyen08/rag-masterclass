@@ -1,0 +1,4121 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LLM & RAG từ nền tảng đến hệ thống production — xoay quanh bài toán AI tư vấn khách hàng qua Zendesk">
+      
+      
+        <meta name="author" content="HieNguyen08">
+      
+      
+        <link rel="canonical" href="https://hienguyen08.github.io/rag-masterclass/05-retrieval-sparse-dense-hybrid/">
+      
+      
+        <link rel="prev" href="../04-ingestion-va-chunking/">
+      
+      
+        <link rel="next" href="../06-query-va-reranking/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>05 · Retrieval - RAG Masterclass</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Be+Vietnam+Pro:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Be Vietnam Pro";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#module-05-retrieval-sparse-dense-ann-hybrid" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="RAG Masterclass" class="md-header__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RAG Masterclass
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              05 · Retrieval
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00-tong-quan-va-bai-toan/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần I · Nền tảng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../03-embedding-va-bieu-dien/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần II · Pipeline RAG
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../08-kien-truc-rag-nang-cao/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần III · Nâng cao
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11-production-va-quy-mo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần IV · Hệ thống
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../13-rag-da-phuong-thuc/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần V · Chuyên đề mở rộng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../labs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Thực hành
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="RAG Masterclass" class="md-nav__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    RAG Masterclass
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần I · Nền tảng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần I · Nền tảng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-tong-quan-va-bai-toan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00 · Tổng quan & bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-nen-tang-llm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 · Nền tảng LLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-gioi-han-llm-va-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 · Giới hạn LLM & RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần II · Pipeline RAG
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần II · Pipeline RAG
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-embedding-va-bieu-dien/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 · Embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-ingestion-va-chunking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 · Ingestion & chunking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 · Retrieval
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 · Retrieval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu-hoc-tap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu học tập
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-bai-toan-retrieval-inh-nghia-hinh-thuc-va-vi-tri-trong-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Bài toán retrieval: định nghĩa hình thức và vị trí trong pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Bài toán retrieval: định nghĩa hình thức và vị trí trong pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-inh-nghia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Định nghĩa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-retrieval-la-tang-recall-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Retrieval là tầng "recall-first"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-lien-he-zendesk-ba-kieu-truy-van-ien-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Liên hệ Zendesk: ba kiểu truy vấn điển hình
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-sparse-retrieval-tu-tf-idf-en-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Sparse retrieval: từ TF-IDF đến BM25
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Sparse retrieval: từ TF-IDF đến BM25">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-inverted-index-cau-truc-du-lieu-khien-sparse-retrieval-nhanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Inverted index — cấu trúc dữ liệu khiến sparse retrieval nhanh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-tf-idf-va-vi-sao-no-chua-u" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 TF-IDF và vì sao nó chưa đủ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-dan-xuat-bm25-tung-buoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Dẫn xuất BM25 từng bước
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-vi-du-so-tinh-tay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Ví dụ số tính tay
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-y-nghia-cua-k_1-va-b-oc-bang-so" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Ý nghĩa của \(k_1\) và \(b\) — đọc bằng số
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-code-minh-hoa-bm25-tu-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Code minh họa: BM25 từ đầu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#27-tokenization-tieng-viet-cho-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7 Tokenization tiếng Việt cho BM25
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#28-tokenization-tieng-nhat-cho-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8 Tokenization tiếng Nhật cho BM25
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#29-learned-sparse-va-khi-nao-bm25-thangthua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Learned sparse và khi nào BM25 thắng/thua
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-dense-retrieval-exact-knn-va-bai-toan-ann" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Dense retrieval: exact kNN và bài toán ANN
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Dense retrieval: exact kNN và bài toán ANN">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-tu-embedding-en-tim-kiem-lang-gieng-gan-nhat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Từ embedding đến tìm kiếm láng giềng gần nhất
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-exact-knn-brute-force-flat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Exact kNN (brute force / flat)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-vi-sao-can-ann-loi-nguyen-so-chieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Vì sao cần ANN: lời nguyền số chiều
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-ivf-inverted-file-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 IVF — Inverted File Index
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-product-quantization-pq-va-asymmetric-distance-computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Product Quantization (PQ) và Asymmetric Distance Computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-hnsw-hierarchical-navigable-small-world" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 HNSW — Hierarchical Navigable Small World
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-diskann-muc-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 DiskANN (mức ý tưởng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-uoc-luong-bo-nho-cho-1-trieu-vector-bai-tap-thiet-ke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Ước lượng bộ nhớ cho 1 triệu vector — bài tập thiết kế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-chon-thuat-toan-ann-bang-tong-hop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Chọn thuật toán ANN — bảng tổng hợp
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-hybrid-retrieval-ket-hop-sparse-va-dense" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Hybrid retrieval: kết hợp sparse và dense
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Hybrid retrieval: kết hợp sparse và dense">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-vi-sao-ket-hop-uoc-loi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Vì sao kết hợp được lợi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-reciprocal-rank-fusion-rrf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Reciprocal Rank Fusion (RRF)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-convex-combination-voi-chuan-hoa-iem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Convex combination với chuẩn hóa điểm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-khi-nao-cai-nao-thang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Khi nào cái nào thắng?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-code-fusion-va-hybrid-trong-postgres-qdrant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Code: fusion và hybrid trong Postgres / Qdrant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-metadata-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Metadata filtering
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Metadata filtering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-vi-sao-filter-la-bat-buoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Vì sao filter là bắt buộc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-ba-chien-luoc-va-toan-cua-chung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Ba chiến lược và toán của chúng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-giai-phap-trong-thuc-te-tinh-en-102026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Giải pháp trong thực tế (tính đến 10/2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-lien-he-zendesk-chien-luoc-theo-truong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Liên hệ Zendesk: chiến lược theo trường
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-lua-chon-vector-db-tinh-en-102026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Lựa chọn vector DB (tính đến 10/2026)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-multi-tenant-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Multi-tenant isolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap-cach-xu-ly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi thường gặp &amp; cách xử lý
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tóm tắt (cheat-sheet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-tu-kiem-tra-phong-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Câu hỏi tự kiểm tra / phỏng vấn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bai-tap-thuc-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bài tập thực hành
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-query-va-reranking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 · Query & reranking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-generation-grounding-guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 · Generation & guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần III · Nâng cao
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần III · Nâng cao
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-kien-truc-rag-nang-cao/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 · Kiến trúc nâng cao & Agentic RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-fine-tuning-cho-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 · Fine-tuning cho RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-danh-gia-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 · Đánh giá, confidence & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần IV · Hệ thống
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần IV · Hệ thống
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-production-va-quy-mo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 · Production & quy mô
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-capstone-thiet-ke-he-thong-zendesk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 · Capstone: hệ thống AI CS Zendesk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-rag-da-phuong-thuc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 · RAG đa phương thức
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-rag-du-lieu-co-cau-truc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 · RAG trên dữ liệu có cấu trúc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../labs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Thực hành
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Thực hành
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab01_bm25_dense_rrf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 · BM25, dense, RRF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab02_chunking_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 · Chunking & metric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab03_reranker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 · Reranker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab04_mini_rag_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 04 · Mini RAG API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab05_eval_escalation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 05 · Đánh giá & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab06_agentic_langgraph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 06 · Agentic RAG với LangGraph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab07_finetune_embedding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 07 · Fine-tune embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab08_ingestion_dedup_pii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 08 · Làm sạch, MinHash, PII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab09_query_rewriting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 09 · Xử lý query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/data/README_data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dữ liệu mẫu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu-hoc-tap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu học tập
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-bai-toan-retrieval-inh-nghia-hinh-thuc-va-vi-tri-trong-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Bài toán retrieval: định nghĩa hình thức và vị trí trong pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Bài toán retrieval: định nghĩa hình thức và vị trí trong pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-inh-nghia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Định nghĩa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-retrieval-la-tang-recall-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Retrieval là tầng "recall-first"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-lien-he-zendesk-ba-kieu-truy-van-ien-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Liên hệ Zendesk: ba kiểu truy vấn điển hình
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-sparse-retrieval-tu-tf-idf-en-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Sparse retrieval: từ TF-IDF đến BM25
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Sparse retrieval: từ TF-IDF đến BM25">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-inverted-index-cau-truc-du-lieu-khien-sparse-retrieval-nhanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Inverted index — cấu trúc dữ liệu khiến sparse retrieval nhanh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-tf-idf-va-vi-sao-no-chua-u" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 TF-IDF và vì sao nó chưa đủ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-dan-xuat-bm25-tung-buoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Dẫn xuất BM25 từng bước
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-vi-du-so-tinh-tay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Ví dụ số tính tay
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-y-nghia-cua-k_1-va-b-oc-bang-so" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Ý nghĩa của \(k_1\) và \(b\) — đọc bằng số
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-code-minh-hoa-bm25-tu-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Code minh họa: BM25 từ đầu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#27-tokenization-tieng-viet-cho-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7 Tokenization tiếng Việt cho BM25
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#28-tokenization-tieng-nhat-cho-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8 Tokenization tiếng Nhật cho BM25
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#29-learned-sparse-va-khi-nao-bm25-thangthua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Learned sparse và khi nào BM25 thắng/thua
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-dense-retrieval-exact-knn-va-bai-toan-ann" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Dense retrieval: exact kNN và bài toán ANN
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Dense retrieval: exact kNN và bài toán ANN">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-tu-embedding-en-tim-kiem-lang-gieng-gan-nhat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Từ embedding đến tìm kiếm láng giềng gần nhất
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-exact-knn-brute-force-flat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Exact kNN (brute force / flat)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-vi-sao-can-ann-loi-nguyen-so-chieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Vì sao cần ANN: lời nguyền số chiều
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-ivf-inverted-file-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 IVF — Inverted File Index
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-product-quantization-pq-va-asymmetric-distance-computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Product Quantization (PQ) và Asymmetric Distance Computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-hnsw-hierarchical-navigable-small-world" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 HNSW — Hierarchical Navigable Small World
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-diskann-muc-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 DiskANN (mức ý tưởng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-uoc-luong-bo-nho-cho-1-trieu-vector-bai-tap-thiet-ke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Ước lượng bộ nhớ cho 1 triệu vector — bài tập thiết kế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-chon-thuat-toan-ann-bang-tong-hop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Chọn thuật toán ANN — bảng tổng hợp
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-hybrid-retrieval-ket-hop-sparse-va-dense" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Hybrid retrieval: kết hợp sparse và dense
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Hybrid retrieval: kết hợp sparse và dense">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-vi-sao-ket-hop-uoc-loi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Vì sao kết hợp được lợi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-reciprocal-rank-fusion-rrf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Reciprocal Rank Fusion (RRF)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-convex-combination-voi-chuan-hoa-iem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Convex combination với chuẩn hóa điểm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-khi-nao-cai-nao-thang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Khi nào cái nào thắng?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-code-fusion-va-hybrid-trong-postgres-qdrant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Code: fusion và hybrid trong Postgres / Qdrant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-metadata-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Metadata filtering
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Metadata filtering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-vi-sao-filter-la-bat-buoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Vì sao filter là bắt buộc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-ba-chien-luoc-va-toan-cua-chung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Ba chiến lược và toán của chúng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-giai-phap-trong-thuc-te-tinh-en-102026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Giải pháp trong thực tế (tính đến 10/2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-lien-he-zendesk-chien-luoc-theo-truong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Liên hệ Zendesk: chiến lược theo trường
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-lua-chon-vector-db-tinh-en-102026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Lựa chọn vector DB (tính đến 10/2026)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-multi-tenant-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Multi-tenant isolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap-cach-xu-ly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi thường gặp &amp; cách xử lý
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tóm tắt (cheat-sheet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-tu-kiem-tra-phong-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Câu hỏi tự kiểm tra / phỏng vấn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bai-tap-thuc-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bài tập thực hành
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/HieNguyen08/rag-masterclass/edit/main/docs/05-retrieval-sparse-dense-hybrid.md" title="Chỉnh sửa" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="module-05-retrieval-sparse-dense-ann-hybrid">Module 05 — Retrieval: sparse, dense, ANN, hybrid<a class="headerlink" href="#module-05-retrieval-sparse-dense-ann-hybrid" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Thời lượng: ~55 phút · Mức độ: Nâng cao · Tiên quyết: Module 03 (Embedding), Module 04 (Ingestion &amp; chunking)</p>
+</blockquote>
+<p>Module 03 cho ta <em>biểu diễn</em>, Module 04 cho ta <em>đơn vị tri thức</em> (chunk có metadata). Module này trả lời câu hỏi kế tiếp: với một câu hỏi của khách hàng và vài trăm nghìn đến vài triệu chunk, <strong>làm sao lấy ra đúng vài chục chunk liên quan nhất, trong vài chục mili-giây, không lộ dữ liệu của tenant khác?</strong> Đây là tầng "candidate generation" — tầng quyết định trần chất lượng của toàn bộ hệ RAG: một đoạn tài liệu không được retrieve thì không reranker hay LLM nào cứu được.</p>
+<h2 id="muc-tieu-hoc-tap">Mục tiêu học tập<a class="headerlink" href="#muc-tieu-hoc-tap" title="Permanent link">&para;</a></h2>
+<p>Sau module này, bạn có thể:</p>
+<ol>
+<li><strong>Dẫn xuất công thức BM25</strong> từ mô hình xác suất (Binary Independence Model → trọng số Robertson–Spärck Jones → saturation → chuẩn hóa độ dài), tính tay điểm BM25 cho một tập tài liệu nhỏ, và giải thích tác dụng của <span class="arithmatex">\(k_1\)</span>, <span class="arithmatex">\(b\)</span>.</li>
+<li><strong>Thiết kế tokenization cho BM25</strong> với tiếng Việt (âm tiết vs từ ghép, bỏ dấu) và tiếng Nhật (morphological analyzer vs n-gram), nêu được trade-off.</li>
+<li><strong>Giải thích và ước lượng chi phí</strong> của exact kNN, IVF, Product Quantization (kèm ADC), HNSW và DiskANN; tính được bộ nhớ cần cho 1 triệu vector ở các cấu hình khác nhau.</li>
+<li><strong>Cài đặt và so sánh hybrid retrieval</strong>: Reciprocal Rank Fusion (giải thích hằng số <span class="arithmatex">\(k\)</span>) và convex combination với chuẩn hóa điểm; biết khi nào cái nào thắng.</li>
+<li><strong>Phân tích metadata filtering</strong> (pre-, post-, in-filter), định lượng vì sao filter có selectivity thấp làm hỏng recall của HNSW, và chọn giải pháp phù hợp.</li>
+<li><strong>Chọn vector DB và mô hình multi-tenant isolation</strong> cho bài toán Zendesk dựa trên tính năng thực tế (tính đến 10/2026).</li>
+</ol>
+<hr />
+<h2 id="1-bai-toan-retrieval-inh-nghia-hinh-thuc-va-vi-tri-trong-pipeline">1. Bài toán retrieval: định nghĩa hình thức và vị trí trong pipeline<a class="headerlink" href="#1-bai-toan-retrieval-inh-nghia-hinh-thuc-va-vi-tri-trong-pipeline" title="Permanent link">&para;</a></h2>
+<h3 id="11-inh-nghia">1.1 Định nghĩa<a class="headerlink" href="#11-inh-nghia" title="Permanent link">&para;</a></h3>
+<p>Cho kho tài liệu (sau chunking) <span class="arithmatex">\(\mathcal{C} = \{d_1, \dots, d_N\}\)</span>, một truy vấn <span class="arithmatex">\(q\)</span>, và một <strong>hàm điểm</strong> (scoring function) <span class="arithmatex">\(s(q, d) \in \mathbb{R}\)</span>. Bài toán retrieval top-<span class="arithmatex">\(k\)</span> là:</p>
+<div class="arithmatex">\[
+\text{TopK}(q) = \underset{S \subseteq \mathcal{C},\ |S| = k}{\arg\max} \sum_{d \in S} s(q, d)
+\]</div>
+<p>tức là lấy <span class="arithmatex">\(k\)</span> tài liệu có điểm cao nhất. Mọi thứ trong module này xoay quanh hai câu hỏi:</p>
+<ul>
+<li><strong>Chọn <span class="arithmatex">\(s\)</span> thế nào</strong> để điểm cao tương quan với "liên quan" (relevance)? → sparse (BM25), dense (embedding), hay kết hợp (hybrid).</li>
+<li><strong>Tính argmax thế nào cho nhanh</strong> khi <span class="arithmatex">\(N\)</span> lớn? → inverted index (sparse), ANN index (dense).</li>
+</ul>
+<p>Cần phân biệt hai loại "recall" sẽ xuất hiện suốt module:</p>
+<table>
+<thead>
+<tr>
+<th>Khái niệm</th>
+<th>Định nghĩa</th>
+<th>Đo cái gì</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Relevance recall@k</strong></td>
+<td>Tỷ lệ tài liệu thật sự liên quan (theo nhãn người) nằm trong top-<span class="arithmatex">\(k\)</span></td>
+<td>Chất lượng của hàm điểm <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
+<td><strong>ANN recall@k</strong></td>
+<td>Tỷ lệ trong top-<span class="arithmatex">\(k\)</span> <em>chính xác</em> (theo <span class="arithmatex">\(s\)</span>, tính brute-force) mà index xấp xỉ trả về</td>
+<td>Chất lượng của thuật toán tìm argmax</td>
+</tr>
+</tbody>
+</table>
+<p>ANN recall 99% vẫn có thể đi cùng relevance recall 60% nếu embedding kém, và ngược lại. Hai loại lỗi phải được đo riêng (công thức Recall@k, MRR, nDCG chi tiết ở Module 10).</p>
+<!-- fig:two-recalls -->
+<figure>
+  <img alt="Hai loại recall đo hai thứ khác nhau: hàm điểm (relevance recall) và thuật toán tìm kiếm xấp xỉ (ANN recall)" loading="lazy" src="../assets/figures/05/two-recalls.light.svg#only-light" />
+  <img alt="Hai loại recall đo hai thứ khác nhau: hàm điểm (relevance recall) và thuật toán tìm kiếm xấp xỉ (ANN recall)" loading="lazy" src="../assets/figures/05/two-recalls.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.1 — Hai loại recall đo hai thứ khác nhau: hàm điểm (relevance recall) và thuật toán tìm kiếm xấp xỉ (ANN recall).</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="12-retrieval-la-tang-recall-first">1.2 Retrieval là tầng "recall-first"<a class="headerlink" href="#12-retrieval-la-tang-recall-first" title="Permanent link">&para;</a></h3>
+<p>Pipeline nhiều tầng, chi phí tăng dần, số ứng viên giảm dần:</p>
+<pre class="mermaid"><code>flowchart LR
+    Q[Query đã xử lý&lt;br/&gt;Module 06] --&gt; S1[Sparse BM25&lt;br/&gt;top-100]
+    Q --&gt; S2[Dense ANN&lt;br/&gt;top-100]
+    S1 --&gt; F[Fusion RRF&lt;br/&gt;top-50]
+    S2 --&gt; F
+    F --&gt; R[Reranker&lt;br/&gt;cross-encoder&lt;br/&gt;top-8]
+    R --&gt; G[LLM generation&lt;br/&gt;Module 07]
+    M[(Metadata filter:&lt;br/&gt;tenant, locale,&lt;br/&gt;visibility)] -.-&gt; S1
+    M -.-&gt; S2</code></pre>
+<p>Tầng retrieval chỉ cần đảm bảo tài liệu đúng <strong>có mặt</strong> trong top-50 đến top-100; việc đưa nó lên vị trí 1–5 là của reranker (Module 06). Vì vậy khi tune tầng này, mình khuyên tối ưu <strong>Recall@50 hoặc Recall@100</strong>, không tối ưu Precision@5.</p>
+<h3 id="13-lien-he-zendesk-ba-kieu-truy-van-ien-hinh">1.3 Liên hệ Zendesk: ba kiểu truy vấn điển hình<a class="headerlink" href="#13-lien-he-zendesk-ba-kieu-truy-van-ien-hinh" title="Permanent link">&para;</a></h3>
+<p>Nhìn vào email khách hàng trong case study, truy vấn rơi vào ba nhóm, mỗi nhóm "ưa" một loại retrieval:</p>
+<ol>
+<li><strong>Truy vấn chứa định danh chính xác</strong>: mã lỗi <code>ERR_SYNC_409</code>, tên API <code>POST /v2/invoices</code>, số phiên bản <code>v3.14.2</code>, tên gói "Business Plus". Embedding thường <em>làm mờ</em> các chuỗi này (tokenizer cắt <code>ERR_SYNC_409</code> thành nhiều mảnh, vector gần với mọi lỗi đồng bộ khác). BM25 khớp chính xác → thắng.</li>
+<li><strong>Truy vấn mô tả bằng lời của khách</strong>: "tôi bấm lưu mà nó cứ quay mãi không xong", "請求書がダウンロードできない" (không tải được hóa đơn). Từ ngữ của khách khác hẳn từ ngữ của bài Help Center ("timeout khi lưu bản ghi", "PDF export"). Đây là <strong>vocabulary mismatch</strong> — dense retrieval thắng.</li>
+<li><strong>Truy vấn xuyên ngôn ngữ</strong>: khách viết tiếng Việt, nhưng tài liệu API chỉ có tiếng Anh; khách Nhật hỏi về một tính năng mà bài Help Center tiếng Nhật chưa được dịch. BM25 gần như vô dụng (không chung token), embedding đa ngữ (Module 03) là lựa chọn duy nhất.</li>
+</ol>
+<p>Vì cả ba nhóm đều xuất hiện hằng ngày trong ~1.500 ticket, <strong>hybrid là mặc định hợp lý</strong> cho bài toán này — phần 4 sẽ phân tích điều đó định lượng hơn.</p>
+<!-- fig:query-types -->
+<figure>
+  <img alt="Ba kiểu truy vấn trong email Zendesk và loại retrieval «ưa» từng kiểu" loading="lazy" src="../assets/figures/05/query-types.light.svg#only-light" />
+  <img alt="Ba kiểu truy vấn trong email Zendesk và loại retrieval «ưa» từng kiểu" loading="lazy" src="../assets/figures/05/query-types.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.2 — Ba kiểu truy vấn trong email Zendesk và loại retrieval «ưa» từng kiểu.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Ước lượng quy mô (giả định để học):</strong> ~800 bài Help Center × ~10 chunk; ~300 macro; ~200.000 ticket đã giải quyết → sau lọc và trích Q/A (Module 04) ~1–3 chunk/ticket; cộng tài liệu sản phẩm/API. Tổng: <strong>khoảng 0,3–0,7 triệu vector</strong>. Tải truy vấn: 1.500 ticket × ~3,5 lượt ≈ 5.250 lần retrieval/ngày; kể cả nhân 4 cho multi-query (Module 06) và nhân 3 cho giờ cao điểm thì vẫn <strong>dưới 1 QPS</strong>. Kết luận quan trọng: ở bài toán này, <strong>hạ tầng retrieval không phải nút thắt hiệu năng — chất lượng mới là nút thắt</strong>. Hãy tối ưu cho recall, filter đúng và đa ngôn ngữ.</p>
+<hr />
+<h2 id="2-sparse-retrieval-tu-tf-idf-en-bm25">2. Sparse retrieval: từ TF-IDF đến BM25<a class="headerlink" href="#2-sparse-retrieval-tu-tf-idf-en-bm25" title="Permanent link">&para;</a></h2>
+<h3 id="21-inverted-index-cau-truc-du-lieu-khien-sparse-retrieval-nhanh">2.1 Inverted index — cấu trúc dữ liệu khiến sparse retrieval nhanh<a class="headerlink" href="#21-inverted-index-cau-truc-du-lieu-khien-sparse-retrieval-nhanh" title="Permanent link">&para;</a></h3>
+<p>Biểu diễn mỗi tài liệu như một vector trên từ vựng <span class="arithmatex">\(V\)</span> (có thể hàng trăm nghìn chiều), hầu hết bằng 0. Thay vì lưu vector, ta lưu <strong>inverted index</strong>: với mỗi term <span class="arithmatex">\(t\)</span>, một <em>posting list</em> gồm các cặp <span class="arithmatex">\((d, \mathrm{tf}_{t,d})\)</span> của những tài liệu chứa <span class="arithmatex">\(t\)</span>.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>"hoàn_tiền" -&gt; [(d1, 3), (d2, 1), (d3, 1)]
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>"hóa_đơn"   -&gt; [(d2, 1), (d3, 2)]
+</span></code></pre></div>
+<p>Với truy vấn có <span class="arithmatex">\(|q|\)</span> term, chỉ cần duyệt <span class="arithmatex">\(|q|\)</span> posting list. Chi phí xấp xỉ <span class="arithmatex">\(\sum_{t \in q} \mathrm{df}_t\)</span> thay vì <span class="arithmatex">\(N\)</span>. Các engine hiện đại (Lucene/Elasticsearch, <code>pg_textsearch</code>, Tantivy…) còn dùng <strong>WAND / Block-Max WAND</strong>: lưu điểm tối đa có thể của mỗi khối posting để bỏ qua các khối chắc chắn không lọt top-<span class="arithmatex">\(k\)</span> — đây là lý do BM25 trên hàng chục triệu tài liệu vẫn trả về trong vài mili-giây.</p>
+<!-- fig:inverted-index -->
+<figure>
+  <img alt="Inverted index: truy vấn chỉ chạm tới posting list của các term mà nó chứa" loading="lazy" src="../assets/figures/05/inverted-index.light.svg#only-light" />
+  <img alt="Inverted index: truy vấn chỉ chạm tới posting list của các term mà nó chứa" loading="lazy" src="../assets/figures/05/inverted-index.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.3 — Inverted index: truy vấn chỉ chạm tới posting list của các term mà nó chứa.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="22-tf-idf-va-vi-sao-no-chua-u">2.2 TF-IDF và vì sao nó chưa đủ<a class="headerlink" href="#22-tf-idf-va-vi-sao-no-chua-u" title="Permanent link">&para;</a></h3>
+<p>TF-IDF cổ điển: <span class="arithmatex">\(w_{t,d} = \mathrm{tf}_{t,d} \cdot \log \frac{N}{\mathrm{df}_t}\)</span>. Hai vấn đề: (1) <strong>TF tăng tuyến tính</strong> — bài lặp "hoàn tiền" 20 lần có điểm gấp 20 lần bài nhắc 1 lần, trong khi lần nhắc thứ 20 gần như không thêm bằng chứng, cần hàm <strong>bão hòa</strong>; (2) <strong>không xử lý độ dài</strong> — tài liệu dài tự nhiên có TF cao, còn chuẩn hóa cosine lại phạt quá tay bài dài thật sự liên quan. BM25 giải quyết cả hai và <strong>có gốc xác suất</strong>, nên tham số có ý nghĩa rõ ràng.</p>
+<h3 id="23-dan-xuat-bm25-tung-buoc">2.3 Dẫn xuất BM25 từng bước<a class="headerlink" href="#23-dan-xuat-bm25-tung-buoc" title="Permanent link">&para;</a></h3>
+<p><strong>Bước 1 — Nguyên lý xếp hạng xác suất (Probability Ranking Principle).</strong> Xếp tài liệu theo <span class="arithmatex">\(P(R=1 \mid d, q)\)</span> là tối ưu (theo kỳ vọng) cho nhiều độ đo. Vì mọi phép biến đổi đơn điệu không đổi thứ tự, ta xếp theo log-odds:</p>
+<div class="arithmatex">\[
+\log \frac{P(R=1 \mid d, q)}{P(R=0 \mid d, q)} \;\stackrel{\text{rank}}{=}\; \log \frac{P(d \mid R=1, q)}{P(d \mid R=0, q)}
+\]</div>
+<p>(dùng Bayes, bỏ hạng tử <span class="arithmatex">\(P(R)\)</span> không phụ thuộc <span class="arithmatex">\(d\)</span>; ký hiệu <span class="arithmatex">\(\stackrel{\text{rank}}{=}\)</span> nghĩa là "bằng nhau về thứ tự").</p>
+<p><strong>Bước 2 — Binary Independence Model (BIM).</strong> Biểu diễn <span class="arithmatex">\(d\)</span> bằng vector nhị phân <span class="arithmatex">\(x_t \in \{0,1\}\)</span> (term <span class="arithmatex">\(t\)</span> có xuất hiện hay không), giả định các term độc lập có điều kiện theo <span class="arithmatex">\(R\)</span>. Đặt <span class="arithmatex">\(p_t = P(x_t = 1 \mid R=1)\)</span>, <span class="arithmatex">\(u_t = P(x_t=1 \mid R=0)\)</span>. Sau khi khai triển và bỏ các hạng tử không phụ thuộc <span class="arithmatex">\(d\)</span>, chỉ còn tổng trên các term <em>vừa có trong query vừa có trong tài liệu</em>:</p>
+<div class="arithmatex">\[
+\text{score}(d, q) = \sum_{t \in q \cap d} \underbrace{\log \frac{p_t (1 - u_t)}{u_t (1 - p_t)}}_{w_t}
+\]</div>
+<p><strong>Bước 3 — Trọng số Robertson–Spärck Jones (RSJ) khi không có nhãn.</strong> Ta không biết <span class="arithmatex">\(p_t\)</span>; giả định trung lập <span class="arithmatex">\(p_t = 0{,}5\)</span> (term trong query có 50% khả năng xuất hiện trong tài liệu liên quan). Với <span class="arithmatex">\(u_t\)</span>: vì đa số tài liệu là không liên quan, ước lượng bằng tỷ lệ tài liệu chứa <span class="arithmatex">\(t\)</span> trên toàn kho, có làm trơn: <span class="arithmatex">\(u_t \approx \frac{n_t + 0{,}5}{N + 1}\)</span> với <span class="arithmatex">\(n_t = \mathrm{df}_t\)</span>. Thay vào:</p>
+<div class="arithmatex">\[
+w_t^{\mathrm{RSJ}} = \log \frac{1-u_t}{u_t} = \log \frac{N - n_t + 0{,}5}{n_t + 0{,}5}
+\]</div>
+<p>Đây chính là "IDF" của BM25 — nó <strong>không phải</strong> được chọn tùy tiện mà rơi ra từ mô hình xác suất. Lưu ý: khi <span class="arithmatex">\(n_t &gt; N/2\)</span>, <span class="arithmatex">\(w_t^{\mathrm{RSJ}} &lt; 0\)</span> — một term xuất hiện ở hơn nửa kho bị coi là bằng chứng <em>chống lại</em> relevance. Lucene (và do đó Elasticsearch/OpenSearch) dùng biến thể luôn dương:</p>
+<div class="arithmatex">\[
+\mathrm{IDF}(t) = \log\left(1 + \frac{N - n_t + 0{,}5}{n_t + 0{,}5}\right)
+\]</div>
+<p><strong>Bước 4 — Đưa tần suất vào: eliteness và saturation.</strong> BIM bỏ qua TF. Robertson và cộng sự giải thích TF qua <em>eliteness</em> (tài liệu thật sự <em>nói về</em> khái niệm <span class="arithmatex">\(t\)</span>), mô hình hóa TF bằng hỗn hợp hai phân phối Poisson. Công thức chính xác quá phức tạp, nhưng hình dạng của nó có ba tính chất: bằng 0 khi <span class="arithmatex">\(\mathrm{tf}=0\)</span>, tăng đơn điệu, và <strong>tiệm cận</strong> một giá trị tối đa. Hàm đơn giản nhất có ba tính chất đó:</p>
+<div class="arithmatex">\[
+\frac{\mathrm{tf}}{\mathrm{tf} + k_1}
+\]</div>
+<p>Nhân thêm <span class="arithmatex">\((k_1 + 1)\)</span> để khi <span class="arithmatex">\(\mathrm{tf}=1\)</span> giá trị bằng đúng 1 (tiện so sánh với BIM): <span class="arithmatex">\(\frac{\mathrm{tf}\,(k_1+1)}{\mathrm{tf} + k_1}\)</span>, tiệm cận <span class="arithmatex">\(k_1 + 1\)</span> khi <span class="arithmatex">\(\mathrm{tf} \to \infty\)</span>.</p>
+<p><strong>Bước 5 — Chuẩn hóa độ dài.</strong> Tài liệu dài có TF cao "vô tội" (verbosity). Ý tưởng: chia TF cho một hệ số độ dài tương đối <span class="arithmatex">\(B = (1 - b) + b \cdot \frac{|d|}{\mathrm{avgdl}}\)</span>, với <span class="arithmatex">\(|d|\)</span> là độ dài tài liệu (số token), <span class="arithmatex">\(\mathrm{avgdl}\)</span> là độ dài trung bình, <span class="arithmatex">\(b \in [0,1]\)</span>. Thay <span class="arithmatex">\(\mathrm{tf}\)</span> bằng <span class="arithmatex">\(\mathrm{tf}/B\)</span> trong hàm saturation rồi rút gọn:</p>
+<div class="arithmatex">\[
+\frac{(\mathrm{tf}/B)(k_1 + 1)}{\mathrm{tf}/B + k_1} = \frac{\mathrm{tf}\,(k_1+1)}{\mathrm{tf} + k_1 B}
+\]</div>
+<p><strong>Kết quả — công thức BM25 đầy đủ:</strong></p>
+<div class="arithmatex">\[
+\boxed{\;\mathrm{BM25}(q, d) = \sum_{t \in q} \mathrm{IDF}(t) \cdot \frac{\mathrm{tf}_{t,d}\,(k_1 + 1)}{\mathrm{tf}_{t,d} + k_1\left(1 - b + b\,\dfrac{|d|}{\mathrm{avgdl}}\right)}\;}
+\]</div>
+<p>Với tài liệu có nhiều trường (tiêu đề, thân bài, tag), biến thể <strong>BM25F</strong> cộng TF có trọng số theo trường <em>trước</em> khi qua hàm saturation — đúng hơn là cộng điểm BM25 của từng trường (vì cộng điểm sẽ "vượt" giới hạn bão hòa).</p>
+<h3 id="24-vi-du-so-tinh-tay">2.4 Ví dụ số tính tay<a class="headerlink" href="#24-vi-du-so-tinh-tay" title="Permanent link">&para;</a></h3>
+<p>Kho gồm <span class="arithmatex">\(N = 5\)</span> chunk (độ dài tính bằng số token sau tokenization), <span class="arithmatex">\(\mathrm{avgdl} = (20+10+40+10+20)/5 = 20\)</span>. Truy vấn: "hoàn_tiền hóa_đơn" (đã tách từ). Tham số <span class="arithmatex">\(k_1 = 1{,}2\)</span>, <span class="arithmatex">\(b = 0{,}75\)</span> (mặc định của Lucene và <code>pg_textsearch</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Chunk</th>
+<th><span class="arithmatex">\(\lvert d \rvert\)</span></th>
+<th>tf(hoàn_tiền)</th>
+<th>tf(hóa_đơn)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d1 — "Chính sách hoàn tiền…"</td>
+<td>20</td>
+<td>3</td>
+<td>0</td>
+</tr>
+<tr>
+<td>d2 — "Hoàn tiền vào hóa đơn kỳ sau"</td>
+<td>10</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>d3 — "Hướng dẫn xuất hóa đơn VAT…"</td>
+<td>40</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>d4</td>
+<td>10</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>d5</td>
+<td>20</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>IDF</strong> (<span class="arithmatex">\(n_{\text{hoàn\_tiền}} = 3\)</span>, <span class="arithmatex">\(n_{\text{hóa\_đơn}} = 2\)</span>):</p>
+<ul>
+<li><span class="arithmatex">\(\mathrm{IDF}(\text{hoàn\_tiền}) = \ln\!\left(1 + \frac{5-3+0{,}5}{3+0{,}5}\right) = \ln(1{,}714) = 0{,}539\)</span></li>
+<li><span class="arithmatex">\(\mathrm{IDF}(\text{hóa\_đơn}) = \ln\!\left(1 + \frac{5-2+0{,}5}{2+0{,}5}\right) = \ln(2{,}4) = 0{,}875\)</span></li>
+</ul>
+<p>(So sánh: RSJ gốc cho "hoàn_tiền" là <span class="arithmatex">\(\ln(2{,}5/3{,}5) = -0{,}336\)</span> — âm, vì term xuất hiện ở 3/5 tài liệu. Trong kho thật, đây là chuyện xảy ra với các từ như "tài khoản" trong kho ticket của một SaaS — gần như bài nào cũng có.)</p>
+<p><strong>Hệ số độ dài</strong> <span class="arithmatex">\(K = k_1(1 - b + b\,|d|/\mathrm{avgdl})\)</span>:</p>
+<ul>
+<li>d1: <span class="arithmatex">\(1{,}2 \times (0{,}25 + 0{,}75 \times 1) = 1{,}2\)</span></li>
+<li>d2: <span class="arithmatex">\(1{,}2 \times (0{,}25 + 0{,}75 \times 0{,}5) = 0{,}75\)</span></li>
+<li>d3: <span class="arithmatex">\(1{,}2 \times (0{,}25 + 0{,}75 \times 2) = 2{,}1\)</span></li>
+</ul>
+<p><strong>Thành phần TF</strong> <span class="arithmatex">\(\frac{\mathrm{tf}(k_1+1)}{\mathrm{tf}+K}\)</span> với <span class="arithmatex">\(k_1 + 1 = 2{,}2\)</span>:</p>
+<ul>
+<li>d1, hoàn_tiền: <span class="arithmatex">\(\frac{3 \times 2{,}2}{3 + 1{,}2} = 1{,}571\)</span></li>
+<li>d2, mỗi term: <span class="arithmatex">\(\frac{1 \times 2{,}2}{1 + 0{,}75} = 1{,}257\)</span></li>
+<li>d3, hoàn_tiền: <span class="arithmatex">\(\frac{2{,}2}{1 + 2{,}1} = 0{,}710\)</span>; hóa_đơn: <span class="arithmatex">\(\frac{2 \times 2{,}2}{2 + 2{,}1} = 1{,}073\)</span></li>
+</ul>
+<p><strong>Điểm:</strong></p>
+<ul>
+<li>d1: <span class="arithmatex">\(0{,}539 \times 1{,}571 = 0{,}847\)</span></li>
+<li>d2: <span class="arithmatex">\(0{,}539 \times 1{,}257 + 0{,}875 \times 1{,}257 = 0{,}678 + 1{,}100 = 1{,}778\)</span></li>
+<li>d3: <span class="arithmatex">\(0{,}539 \times 0{,}710 + 0{,}875 \times 1{,}073 = 0{,}383 + 0{,}939 = 1{,}322\)</span></li>
+</ul>
+<p>Thứ hạng: <strong>d2 &gt; d3 &gt; d1</strong>. Quan sát: (i) d1 nhắc "hoàn tiền" 3 lần nhưng thua d2 nhắc mỗi term 1 lần — khớp <em>nhiều term khác nhau</em> quan trọng hơn lặp một term, nhờ saturation; (ii) d3 có tf(hóa_đơn)=2 nhưng bị phạt vì dài gấp đôi trung bình.</p>
+<!-- fig:bm25-example -->
+<figure>
+  <img alt="Điểm BM25 của ví dụ mục 2" loading="lazy" src="../assets/figures/05/bm25-example.light.svg#only-light" />
+  <img alt="Điểm BM25 của ví dụ mục 2" loading="lazy" src="../assets/figures/05/bm25-example.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.4 — Điểm BM25 của ví dụ mục 2.4, tách theo đóng góp của từng term.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="25-y-nghia-cua-k_1-va-b-oc-bang-so">2.5 Ý nghĩa của <span class="arithmatex">\(k_1\)</span> và <span class="arithmatex">\(b\)</span> — đọc bằng số<a class="headerlink" href="#25-y-nghia-cua-k_1-va-b-oc-bang-so" title="Permanent link">&para;</a></h3>
+<p><strong>Saturation theo <span class="arithmatex">\(k_1\)</span></strong> (cố định <span class="arithmatex">\(|d| = \mathrm{avgdl}\)</span>, nên <span class="arithmatex">\(K = k_1 = 1{,}2\)</span>):</p>
+<table>
+<thead>
+<tr>
+<th>tf</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>5</th>
+<th>10</th>
+<th>100</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\frac{2{,}2\,\mathrm{tf}}{\mathrm{tf}+1{,}2}\)</span></td>
+<td>1,000</td>
+<td>1,375</td>
+<td>1,571</td>
+<td>1,774</td>
+<td>1,964</td>
+<td>2,174</td>
+</tr>
+</tbody>
+</table>
+<p>Lần nhắc thứ 2 thêm 37,5%; từ 10 lên 100 chỉ thêm 11%. <span class="arithmatex">\(k_1\)</span> nhỏ (0,5) → bão hòa rất nhanh, gần như nhị phân; <span class="arithmatex">\(k_1\)</span> lớn (2–3) → gần tuyến tính như TF-IDF. Trong thực tế, <span class="arithmatex">\(k_1 \in [0{,}9;\ 2{,}0]\)</span>.</p>
+<p><strong>Chuẩn hóa độ dài theo <span class="arithmatex">\(b\)</span></strong> (tf = 1, <span class="arithmatex">\(k_1 = 1{,}2\)</span>):</p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(b\)</span></th>
+<th><span class="arithmatex">\(\lvert d\rvert/\mathrm{avgdl} = 0{,}5\)</span></th>
+<th><span class="arithmatex">\(= 1\)</span></th>
+<th><span class="arithmatex">\(= 2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (không chuẩn hóa)</td>
+<td>1,000</td>
+<td>1,000</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>0,75 (mặc định)</td>
+<td>1,257</td>
+<td>1,000</td>
+<td>0,710</td>
+</tr>
+<tr>
+<td>1 (chuẩn hóa hoàn toàn)</td>
+<td>1,375</td>
+<td>1,000</td>
+<td>0,647</td>
+</tr>
+</tbody>
+</table>
+<!-- fig:bm25-k1-b -->
+<figure>
+  <img alt="Trái: hàm saturation với các giá trị k₁ (điểm xanh là bảng k₁ = 1" loading="lazy" src="../assets/figures/05/bm25-k1-b.light.svg#only-light" />
+  <img alt="Trái: hàm saturation với các giá trị k₁ (điểm xanh là bảng k₁ = 1" loading="lazy" src="../assets/figures/05/bm25-k1-b.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.5 — Trái: hàm saturation với các giá trị k₁ (điểm xanh là bảng k₁ = 1.2). Phải: chuẩn hóa độ dài với các giá trị b (điểm xanh là hàng b = 0.75 của bảng).</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Khi nào chỉnh khác mặc định — liên hệ Zendesk:</strong></p>
+<ul>
+<li><strong>Chunk đã được chuẩn hóa độ dài</strong> (Module 04: fixed-size ~300–500 token) → <span class="arithmatex">\(|d|/\mathrm{avgdl} \approx 1\)</span>, <span class="arithmatex">\(b\)</span> gần như không ảnh hưởng. Đừng tốn thời gian tune <span class="arithmatex">\(b\)</span> trong trường hợp này.</li>
+<li><strong>Index cả bài Help Center nguyên văn</strong> (độ dài chênh 10 lần) → giữ <span class="arithmatex">\(b \approx 0{,}75\)</span>; nếu bài tổng quan dài luôn bị đẩy xuống, giảm <span class="arithmatex">\(b\)</span> về 0,3–0,5.</li>
+<li><strong>Trường tiêu đề / tên macro</strong> → BM25F, trọng số tiêu đề cao.</li>
+</ul>
+<p>Quy trình tune: ~200 truy vấn có nhãn (Module 10), grid search <span class="arithmatex">\(k_1 \in \{0{,}6; \dots; 2{,}0\}\)</span>, <span class="arithmatex">\(b \in \{0{,}3; \dots; 0{,}9\}\)</span>, chọn theo Recall@50 — đáng làm nhưng đừng kỳ vọng phép màu.</p>
+<h3 id="26-code-minh-hoa-bm25-tu-au">2.6 Code minh họa: BM25 từ đầu<a class="headerlink" href="#26-code-minh-hoa-bm25-tu-au" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># bm25_scratch.py — Python 3.10+, chỉ dùng thư viện chuẩn</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">bm25_index</span><span class="p">(</span><span class="n">docs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">df</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">t</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">idf</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>  <span class="c1"># IDF kiểu Lucene</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="k">return</span> <span class="n">idf</span><span class="p">,</span> <span class="p">[</span><span class="n">Counter</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">],</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">],</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">docs</span><span class="p">))</span> <span class="o">/</span> <span class="n">N</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="k">def</span><span class="w"> </span><span class="nf">bm25_topk</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">idf</span><span class="p">,</span> <span class="n">tfs</span><span class="p">,</span> <span class="n">lens</span><span class="p">,</span> <span class="n">avgdl</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">tf</span><span class="p">,</span> <span class="n">dl</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">tfs</span><span class="p">,</span> <span class="n">lens</span><span class="p">)):</span>   <span class="c1"># production: chỉ duyệt posting list</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="n">K</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">b</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">dl</span> <span class="o">/</span> <span class="n">avgdl</span><span class="p">)</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">s</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">idf</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="n">tf</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">k1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">K</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="k">if</span> <span class="n">tf</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>            <span class="n">scores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[:</span><span class="n">k</span><span class="p">]</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="c1"># Tái hiện ví dụ mục 2.4</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="n">docs</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">"hoàn_tiền"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"x"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">17</span><span class="p">,</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>        <span class="p">[</span><span class="s2">"hoàn_tiền"</span><span class="p">,</span> <span class="s2">"hóa_đơn"</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"y"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>        <span class="p">[</span><span class="s2">"hoàn_tiền"</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"hóa_đơn"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"z"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">37</span><span class="p">,</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="p">[</span><span class="s2">"w"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="s2">"v"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">20</span><span class="p">]</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="nb">print</span><span class="p">(</span><span class="n">bm25_topk</span><span class="p">([</span><span class="s2">"hoàn_tiền"</span><span class="p">,</span> <span class="s2">"hóa_đơn"</span><span class="p">],</span> <span class="o">*</span><span class="n">bm25_index</span><span class="p">(</span><span class="n">docs</span><span class="p">)))</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="c1"># -&gt; [(1, 1.778...), (2, 1.322...), (0, 0.847...)]</span>
+</span></code></pre></div>
+<p>Trong production hãy dùng engine có Block-Max WAND và cập nhật tăng dần. Nhưng tự viết một lần giúp thấy rõ điểm BM25 <strong>không có thang tuyệt đối</strong> (phụ thuộc <span class="arithmatex">\(N\)</span>, avgdl, độ dài query) — điều quan trọng khi làm hybrid ở phần 4.</p>
+<h3 id="27-tokenization-tieng-viet-cho-bm25">2.7 Tokenization tiếng Việt cho BM25<a class="headerlink" href="#27-tokenization-tieng-viet-cho-bm25" title="Permanent link">&para;</a></h3>
+<p>BM25 chỉ tốt bằng tokenization của nó. Tiếng Việt cách nhau theo <strong>âm tiết</strong>, nhưng đơn vị nghĩa là <strong>từ</strong>, và nhiều từ là từ ghép: "hoàn tiền", "hóa đơn", "đăng nhập", "gia hạn". Ba chiến lược:</p>
+<p><strong>(a) Token = âm tiết</strong> (tách theo khoảng trắng). Đơn giản, không bao giờ OOV. Nhưng mất nghĩa: "đơn" có trong "hóa đơn", "đơn hàng", "đơn giản" → truy vấn "hóa đơn" khớp cả tài liệu chỉ có "đơn giản hóa".</p>
+<p><strong>(b) Token = từ, sau word segmentation</strong> (RDRsegmenter trong VnCoreNLP, underthesea, pyvi): "hóa đơn VAT" → <code>hóa_đơn VAT</code>. Chính xác hơn, nhưng thuật ngữ miền (tên tính năng như "đồng bộ hai chiều") có thể bị tách khác nhau giữa lúc index và lúc query; phải dùng cùng bộ tách, cùng phiên bản cho cả hai phía.</p>
+<p><strong>(c) Âm tiết + bigram âm tiết (shingles).</strong> "xuất hóa đơn VAT" → {xuất, hóa, đơn, vat, xuất_hóa, hóa_đơn, đơn_vat}. Bigram "hóa_đơn" đóng vai trò gần như một từ ghép mà không cần mô hình tách từ; bigram vô nghĩa ("đơn_vat") hiếm khi gây khớp nhiễu. Chi phí: index lớn hơn ~2 lần.</p>
+<p><strong>Dấu và Unicode.</strong> Khách gõ không dấu trên mobile ("khong dang nhap duoc") → thêm <strong>trường folded</strong> bỏ dấu (kiểm tra bộ folding của engine có chuyển "đ" → "d" không), truy vấn cả hai trường, trường folded trọng số thấp hơn vì mơ hồ ("ban" = bán/bạn/bàn/bản). Chuẩn hóa NFC trước khi tokenize (Module 04), nếu không "hóa" dạng NFC và NFD là hai token khác nhau.</p>
+<p><strong>Khuyến nghị cho Zendesk:</strong> (c) + trường folded; chỉ chuyển sang (b) nếu đo thấy lợi rõ trên tập đánh giá — (c) không có rủi ro lệch tokenizer, dễ vận hành, phần "hiểu nghĩa" đã có dense gánh.</p>
+<p>Với Postgres: không có cấu hình full-text tiếng Việt/Nhật sẵn, nên <strong>tokenize trong ứng dụng</strong> rồi index bằng cấu hình <code>simple</code>. <code>ts_rank</code> của Postgres không phải BM25 (không có IDF theo kho); cần BM25 thật thì dùng extension như <code>pg_textsearch</code> (Tiger Data, bản 1.0 ra 04/2026, PostgreSQL 17/18, index <code>USING bm25</code>, toán tử <code>&lt;@&gt;</code>, giấy phép PostgreSQL) hoặc <code>pg_search</code> của ParadeDB (AGPL).</p>
+<h3 id="28-tokenization-tieng-nhat-cho-bm25">2.8 Tokenization tiếng Nhật cho BM25<a class="headerlink" href="#28-tokenization-tieng-nhat-cho-bm25" title="Permanent link">&para;</a></h3>
+<p>Tiếng Nhật <strong>không có khoảng trắng</strong> và trộn kanji, hiragana, katakana, Latin. Hai trường phái:</p>
+<p><strong>(a) Morphological analyzer</strong> dựa trên từ điển: MeCab, Kuromoji (plugin <code>analysis-kuromoji</code> của Elasticsearch), Sudachi (plugin <code>elasticsearch-sudachi</code>, có ba chế độ tách từ ngắn đến dài). "請求書をダウンロードできません" → 請求書 / を / ダウンロード / でき / ませ / ん. Token có nghĩa, precision cao, bỏ được trợ từ; nhưng từ mới, tên sản phẩm katakana bị tách sai nếu thiếu từ điển người dùng.</p>
+<p><strong>(b) Character bigram</strong> (ví dụ <code>CJKBigramFilter</code> của Lucene): 請求 / 求書 / 書を / … Không bao giờ OOV, recall cao; nhưng index lớn, nhiều khớp nhiễu.</p>
+<p><strong>Thực hành tốt:</strong> index <strong>hai trường</strong> (morphological cho precision + bigram làm lưới an toàn cho recall); luôn <strong>NFKC</strong> trước ("ＡＰＩ" → "API", katakana half-width → full-width) — email Nhật rất hay lẫn hai dạng.</p>
+<!-- fig:tokenization-vi-ja -->
+<figure>
+  <img alt="Các chiến lược tokenization cho BM25 với tiếng Việt và tiếng Nhật" loading="lazy" src="../assets/figures/05/tokenization-vi-ja.light.svg#only-light" />
+  <img alt="Các chiến lược tokenization cho BM25 với tiếng Việt và tiếng Nhật" loading="lazy" src="../assets/figures/05/tokenization-vi-ja.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.6 — Các chiến lược tokenization cho BM25 với tiếng Việt và tiếng Nhật.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p>Tính đến 10/2026: Qdrant có tokenizer <code>multilingual</code> cho full-text index (charabia, dùng vaporetto cho tiếng Nhật); Milvus 2.6 có tokenizer Lindera (IPADIC), ICU và bộ nhận diện ngôn ngữ để tự chọn analyzer. Tài liệu của các hệ này không nêu hỗ trợ tách từ tiếng Việt riêng — với tiếng Việt, tokenization ở tầng ứng dụng vẫn là đường chắc chắn nhất. Với email lẫn ngôn ngữ (tiếng Nhật + log tiếng Anh), luôn giữ một trường fallback (ICU hoặc khoảng trắng + bigram) để không mất mã lỗi ASCII.</p>
+<h3 id="29-learned-sparse-va-khi-nao-bm25-thangthua">2.9 Learned sparse và khi nào BM25 thắng/thua<a class="headerlink" href="#29-learned-sparse-va-khi-nao-bm25-thangthua" title="Permanent link">&para;</a></h3>
+<p>Learned sparse (SPLADE, phần sparse của BGE-M3 — Module 03) học trọng số term và <em>mở rộng</em> term, vẫn dùng inverted index; về hạ tầng chúng là sparse vector (Qdrant/Milvus, <code>sparsevec</code> của pgvector) và mọi thứ về fusion ở phần 4 áp dụng nguyên vẹn.</p>
+<p><strong>BM25 thắng khi:</strong> truy vấn có định danh, mã lỗi, phiên bản, tên riêng; miền chuyên biệt; cần giải thích được. BEIR (Thakur et al., 2021) cho thấy BM25 là baseline zero-shot khó đánh bại trên nhiều miền ngoài phân phối huấn luyện của dense retriever. <strong>BM25 thua khi:</strong> đồng nghĩa/diễn đạt lại, xuyên ngôn ngữ, truy vấn dài nhiễu, lỗi chính tả.</p>
+<p><strong>Liên hệ Zendesk:</strong> đừng đưa <em>nguyên văn email</em> vào BM25 — chữ ký, quoted reply, câu lịch sự sẽ khớp hàng nghìn ticket có chữ ký tương tự. Dùng query đã trích xuất/viết lại (Module 06), và giữ nguyên văn các định danh (mã lỗi, mã đơn, tên gói) thành một truy vấn BM25 riêng.</p>
+<hr />
+<h2 id="3-dense-retrieval-exact-knn-va-bai-toan-ann">3. Dense retrieval: exact kNN và bài toán ANN<a class="headerlink" href="#3-dense-retrieval-exact-knn-va-bai-toan-ann" title="Permanent link">&para;</a></h2>
+<h3 id="31-tu-embedding-en-tim-kiem-lang-gieng-gan-nhat">3.1 Từ embedding đến tìm kiếm láng giềng gần nhất<a class="headerlink" href="#31-tu-embedding-en-tim-kiem-lang-gieng-gan-nhat" title="Permanent link">&para;</a></h3>
+<p>Với bi-encoder (Module 03), mỗi chunk được mã hóa offline thành <span class="arithmatex">\(\mathbf{x}_i \in \mathbb{R}^D\)</span>, truy vấn thành <span class="arithmatex">\(\mathbf{q} \in \mathbb{R}^D\)</span>, và <span class="arithmatex">\(s(q, d_i) = \langle \mathbf{q}, \mathbf{x}_i \rangle\)</span> (inner product) hoặc cosine. Nếu các vector đã chuẩn hóa <span class="arithmatex">\(\|\cdot\| = 1\)</span> thì ba độ đo tương đương về thứ tự, vì <span class="arithmatex">\(\|\mathbf{q} - \mathbf{x}\|^2 = 2 - 2\cos(\mathbf{q}, \mathbf{x})\)</span> (Module 03). Từ đây, retrieval dense chính là bài toán <strong>k-Nearest Neighbor (kNN)</strong> trong không gian <span class="arithmatex">\(D\)</span> chiều.</p>
+<h3 id="32-exact-knn-brute-force-flat">3.2 Exact kNN (brute force / flat)<a class="headerlink" href="#32-exact-knn-brute-force-flat" title="Permanent link">&para;</a></h3>
+<p>Tính <span class="arithmatex">\(\langle \mathbf{q}, \mathbf{x}_i\rangle\)</span> với mọi <span class="arithmatex">\(i\)</span>, giữ top-<span class="arithmatex">\(k\)</span> bằng heap kích thước <span class="arithmatex">\(k\)</span>.</p>
+<ul>
+<li><strong>Thời gian:</strong> <span class="arithmatex">\(O(ND + N \log k)\)</span> — một phép nhân ma trận–vector <span class="arithmatex">\(\mathbf{X}\mathbf{q}\)</span>, thân thiện SIMD/GPU, bị giới hạn bởi <strong>băng thông bộ nhớ</strong> (đọc toàn bộ <span class="arithmatex">\(\mathbf{X}\)</span> mỗi truy vấn). Ví dụ <span class="arithmatex">\(N = 10^6\)</span>, <span class="arithmatex">\(D = 1024\)</span>, fp16 → 2 GB; CPU ~20 GB/s hiệu dụng (ước lượng thô) → ~100 ms; GPU → vài ms.</li>
+<li><strong>Bộ nhớ:</strong> <span class="arithmatex">\(N \cdot D \cdot \text{bytes}\)</span>; <strong>ANN recall = 100%</strong> theo định nghĩa.</li>
+</ul>
+<p><strong>Khi nào exact là lựa chọn đúng:</strong> <span class="arithmatex">\(N\)</span> nhỏ (dưới ~100k vector, latency vài ms trên CPU), khi tập ứng viên đã bị <strong>filter thu hẹp</strong> (ví dụ chỉ tài liệu của một tenant nhỏ: vài nghìn vector — quét hết nhanh hơn và chính xác hơn dùng HNSW), và <strong>luôn luôn</strong> làm ground truth để đo ANN recall. Qdrant và pgvector đều có cơ chế tự chuyển sang quét đầy đủ khi filter quá chặt (Qdrant có ngưỡng <code>full_scan_threshold</code>), và bạn nên hiểu vì sao (mục 5).</p>
+<p><strong>Liên hệ Zendesk:</strong> với 0,3–0,7 triệu vector và &lt; 1 QPS, exact search gần như đủ; mình vẫn khuyên HNSW cho latency ổn định khi multi-query (Module 06) nhân số truy vấn, nhưng giữ một đường "exact" để đo ANN recall định kỳ.</p>
+<h3 id="33-vi-sao-can-ann-loi-nguyen-so-chieu">3.3 Vì sao cần ANN: lời nguyền số chiều<a class="headerlink" href="#33-vi-sao-can-ann-loi-nguyen-so-chieu" title="Permanent link">&para;</a></h3>
+<p>Cây k-d/ball tree hiệu quả ở chiều thấp, nhưng ở <span class="arithmatex">\(D\)</span> hàng trăm khoảng cách giữa các điểm <strong>tập trung</strong> quanh trung bình (tỷ số xa nhất/gần nhất tiến về 1), các mặt cắt không loại được nhánh nào và cây suy biến thành quét toàn bộ. ANN đánh đổi <em>một chút recall</em> lấy tốc độ nhanh hơn hàng chục đến hàng trăm lần. Ba họ chính: <strong>phân vùng</strong> (IVF), <strong>nén</strong> (PQ, scalar/binary quantization), <strong>đồ thị</strong> (HNSW, Vamana/DiskANN). Bài tổng quan về thư viện Faiss (Douze et al., 2024) là tài liệu tham khảo tốt cho cả ba họ.</p>
+<!-- fig:distance-concentration -->
+<figure>
+  <img alt="Lời nguyền số chiều (mô phỏng): tỷ số khoảng cách xa nhất / gần nhất tiến về 1 khi D tăng, nên cây phân hoạch mất tác dụng" loading="lazy" src="../assets/figures/05/distance-concentration.light.svg#only-light" />
+  <img alt="Lời nguyền số chiều (mô phỏng): tỷ số khoảng cách xa nhất / gần nhất tiến về 1 khi D tăng, nên cây phân hoạch mất tác dụng" loading="lazy" src="../assets/figures/05/distance-concentration.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.7 — Lời nguyền số chiều (mô phỏng): tỷ số khoảng cách xa nhất / gần nhất tiến về 1 khi D tăng, nên cây phân hoạch mất tác dụng.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="34-ivf-inverted-file-index">3.4 IVF — Inverted File Index<a class="headerlink" href="#34-ivf-inverted-file-index" title="Permanent link">&para;</a></h3>
+<p><strong>Ý tưởng:</strong> k-means chia không gian thành <span class="arithmatex">\(n_{\text{list}}\)</span> cụm; mỗi vector thuộc cụm có tâm gần nhất (như posting list theo vùng không gian). Khi truy vấn, chỉ quét các vector trong <span class="arithmatex">\(n_{\text{probe}}\)</span> cụm có tâm gần <span class="arithmatex">\(\mathbf{q}\)</span> nhất.</p>
+<p><strong>Độ phức tạp một truy vấn</strong> (giả định cụm cân bằng, mỗi cụm <span class="arithmatex">\(\approx N / n_{\text{list}}\)</span> vector):</p>
+<div class="arithmatex">\[
+\text{cost}_{\text{IVF}} \approx \underbrace{n_{\text{list}} \cdot D}_{\text{so với tâm}} + \underbrace{n_{\text{probe}} \cdot \frac{N}{n_{\text{list}}} \cdot D}_{\text{quét các cụm}}
+\]</div>
+<p>Cực tiểu theo <span class="arithmatex">\(n_{\text{list}}\)</span> (đạo hàm bằng 0): <span class="arithmatex">\(n_{\text{list}}^* = \sqrt{n_{\text{probe}} \cdot N}\)</span>. Vì vậy quy tắc kinh nghiệm là <span class="arithmatex">\(n_{\text{list}}\)</span> cỡ <span class="arithmatex">\(\sqrt{N}\)</span> đến vài lần <span class="arithmatex">\(\sqrt{N}\)</span>. pgvector khuyến nghị <code>lists = rows/1000</code> cho tới 1 triệu dòng, <code>sqrt(rows)</code> khi trên 1 triệu, và <code>probes</code> khởi điểm khoảng <span class="arithmatex">\(\sqrt{\text{lists}}\)</span>.</p>
+<p><strong>Ví dụ số:</strong> <span class="arithmatex">\(N = 10^6\)</span>, <span class="arithmatex">\(n_{\text{list}} = 1024\)</span>, <span class="arithmatex">\(n_{\text{probe}} = 16\)</span> → so sánh <span class="arithmatex">\(1024 + 16 \times 977 \approx 16.650\)</span> vector thay vì <span class="arithmatex">\(10^6\)</span>: ít hơn ~60 lần. Đổi lại, nếu láng giềng thật của <span class="arithmatex">\(\mathbf{q}\)</span> nằm ở cụm gần thứ 17 → bị bỏ sót. Đây là <strong>lỗi biên</strong> (boundary effect): điểm nằm gần ranh giới Voronoi giữa nhiều cụm.</p>
+<!-- fig:ivf -->
+<figure>
+  <img alt="Trái: IVF trên dữ liệu 2D mô phỏng — chỉ quét các cụm được probe" loading="lazy" src="../assets/figures/05/ivf.light.svg#only-light" />
+  <img alt="Trái: IVF trên dữ liệu 2D mô phỏng — chỉ quét các cụm được probe" loading="lazy" src="../assets/figures/05/ivf.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.8 — Trái: IVF trên dữ liệu 2D mô phỏng — chỉ quét các cụm được probe. Phải: chi phí truy vấn theo n_list, cực tiểu tại √(n_probe·N).</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Bộ nhớ:</strong> gần bằng flat + tâm cụm (<span class="arithmatex">\(n_{\text{list}} \cdot D\)</span>) — overhead rất nhỏ, ưu điểm lớn nhất so với HNSW. <strong>Nhược điểm:</strong> phải <strong>train</strong> k-means trên dữ liệu đại diện; phân phối dịch chuyển (sản phẩm mới, ngôn ngữ mới) làm cụm lệch → recall giảm âm thầm (pgvector khuyên chỉ tạo IVFFlat <em>sau khi</em> bảng đã có dữ liệu); cụm không cân bằng làm latency dao động; recall thấp hơn HNSW ở cùng latency khi dữ liệu nằm trong RAM. <strong>Dùng khi:</strong> bộ nhớ là ràng buộc chính, kết hợp PQ (IVF-PQ) cho hàng trăm triệu vector, hoặc trên GPU.</p>
+<h3 id="35-product-quantization-pq-va-asymmetric-distance-computation">3.5 Product Quantization (PQ) và Asymmetric Distance Computation<a class="headerlink" href="#35-product-quantization-pq-va-asymmetric-distance-computation" title="Permanent link">&para;</a></h3>
+<p><strong>Vấn đề:</strong> 1 triệu vector 1024-d fp32 = 4 GB; một tỷ = 4 TB. Cần <strong>nén</strong> vector mà vẫn ước lượng được khoảng cách.</p>
+<p><strong>Ý tưởng (Jégou, Douze, Schmid, TPAMI 2011):</strong> chia vector <span class="arithmatex">\(D\)</span> chiều thành <span class="arithmatex">\(m\)</span> đoạn con <span class="arithmatex">\(D/m\)</span> chiều. Với mỗi đoạn <span class="arithmatex">\(j\)</span>, chạy k-means riêng để có <strong>codebook</strong> <span class="arithmatex">\(\mathcal{C}^{(j)}\)</span> gồm <span class="arithmatex">\(K^* = 2^{n_{\text{bits}}}\)</span> tâm (thường 256, tức 1 byte). Mỗi vector được mã hóa bằng <span class="arithmatex">\(m\)</span> chỉ số:</p>
+<div class="arithmatex">\[
+\mathbf{x} = [\mathbf{x}^{(1)}, \dots, \mathbf{x}^{(m)}] \;\mapsto\; (i_1, \dots, i_m),\qquad i_j = \arg\min_{c}\ \|\mathbf{x}^{(j)} - \mathbf{c}^{(j)}_c\|^2
+\]</div>
+<p>Vector tái tạo <span class="arithmatex">\(\hat{\mathbf{x}} = [\mathbf{c}^{(1)}_{i_1}, \dots, \mathbf{c}^{(m)}_{i_m}]\)</span>. Gọi là "product" vì tập vector tái tạo được là tích Descartes <span class="arithmatex">\(\mathcal{C}^{(1)} \times \dots \times \mathcal{C}^{(m)}\)</span>: với <span class="arithmatex">\(m = 64\)</span>, <span class="arithmatex">\(K^* = 256\)</span> là <span class="arithmatex">\(2^{512}\)</span> "tâm" ảo, trong khi chỉ phải lưu <span class="arithmatex">\(K^* D\)</span> số thực. <strong>Nén:</strong> <span class="arithmatex">\(D = 1024\)</span> fp32 (4096 byte) → <span class="arithmatex">\(m = 64\)</span> byte, <strong>gấp 64 lần</strong>.</p>
+<p><strong>Asymmetric Distance Computation (ADC):</strong> không nén <span class="arithmatex">\(\mathbf{q}\)</span>; tính trước bảng tra cho mỗi đoạn</p>
+<div class="arithmatex">\[
+T_j[c] = \|\mathbf{q}^{(j)} - \mathbf{c}^{(j)}_c\|^2,\qquad j = 1..m,\ c = 1..K^*
+\]</div>
+<p>(chi phí <span class="arithmatex">\(O(K^* D)\)</span>, một lần mỗi truy vấn). Sau đó khoảng cách tới mọi vector nén chỉ là <strong><span class="arithmatex">\(m\)</span> phép tra bảng và cộng</strong>:</p>
+<div class="arithmatex">\[
+\|\mathbf{q} - \mathbf{x}\|^2 \;\approx\; \|\mathbf{q} - \hat{\mathbf{x}}\|^2 \;=\; \sum_{j=1}^{m} T_j[i_j]
+\]</div>
+<p>(đẳng thức thứ hai đúng chính xác vì bình phương khoảng cách Euclid tách được theo các nhóm chiều rời nhau). Với <span class="arithmatex">\(m = 64\)</span>, <span class="arithmatex">\(D = 1024\)</span>: ít hơn 16 lần phép toán và đọc ít hơn 64 lần bộ nhớ. ADC chính xác hơn SDC (nén cả query) vì chỉ một phía chịu lỗi lượng tử hóa.</p>
+<p><strong>Ví dụ số tính tay.</strong> <span class="arithmatex">\(D = 4\)</span>, <span class="arithmatex">\(m = 2\)</span>, <span class="arithmatex">\(K^* = 4\)</span>. Codebook đoạn 1: <span class="arithmatex">\((1;0)\)</span>, <span class="arithmatex">\((0;1)\)</span>, <span class="arithmatex">\((0{,}5;0{,}5)\)</span>, <span class="arithmatex">\((1;1)\)</span>. Codebook đoạn 2: <span class="arithmatex">\((0{,}5;1)\)</span>, <span class="arithmatex">\((1;0)\)</span>, <span class="arithmatex">\((0;0{,}5)\)</span>, <span class="arithmatex">\((0{,}5;0{,}5)\)</span>.</p>
+<ul>
+<li><span class="arithmatex">\(\mathbf{x} = (1;\ 0{,}2;\ 0{,}5;\ 0{,}9)\)</span>: đoạn 1 có khoảng cách² tới 4 tâm <span class="arithmatex">\(= 0{,}04;\ 1{,}64;\ 0{,}34;\ 0{,}64\)</span> → mã 0; đoạn 2: <span class="arithmatex">\(0{,}01;\ 1{,}06;\ 0{,}41;\ 0{,}16\)</span> → mã 0. Vậy <span class="arithmatex">\(\mathbf{x} \mapsto (0, 0)\)</span>.</li>
+<li><span class="arithmatex">\(\mathbf{y} = (0{,}4;\ 0{,}6;\ 0{,}6;\ 0{,}4) \mapsto (2, 3)\)</span> (tính tương tự).</li>
+<li>Truy vấn <span class="arithmatex">\(\mathbf{q} = (0{,}8;\ 0{,}1;\ 0{,}6;\ 0{,}7)\)</span>: <span class="arithmatex">\(T_1 = [0{,}05;\ 1{,}45;\ 0{,}25;\ 0{,}85]\)</span>, <span class="arithmatex">\(T_2 = [0{,}10;\ 0{,}65;\ 0{,}40;\ 0{,}05]\)</span>.</li>
+<li>ADC: <span class="arithmatex">\(d(\mathbf{q},\mathbf{x}) \approx T_1[0] + T_2[0] = 0{,}15\)</span> (thật <span class="arithmatex">\(0{,}10\)</span>); <span class="arithmatex">\(d(\mathbf{q},\mathbf{y}) \approx T_1[2] + T_2[3] = 0{,}30\)</span> (thật <span class="arithmatex">\(0{,}50\)</span>).</li>
+</ul>
+<p>Giá trị lệch nhưng <strong>thứ tự được bảo toàn</strong> — đó là điều retrieval cần. Để sửa đảo thứ tự giữa các ứng viên sát nhau, dùng <strong>rescoring</strong>: lấy top-<span class="arithmatex">\(4k\)</span> theo PQ rồi tính lại bằng vector gốc.</p>
+<!-- fig:pq-adc -->
+<figure>
+  <img alt="Product Quantization và ADC; bảng tra T₁, T₂ và hai khoảng cách lấy đúng từ ví dụ số tính tay" loading="lazy" src="../assets/figures/05/pq-adc.light.svg#only-light" />
+  <img alt="Product Quantization và ADC; bảng tra T₁, T₂ và hai khoảng cách lấy đúng từ ví dụ số tính tay" loading="lazy" src="../assets/figures/05/pq-adc.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.9 — Product Quantization và ADC; bảng tra T₁, T₂ và hai khoảng cách lấy đúng từ ví dụ số tính tay.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p>PQ tốt nhất khi các đoạn con gần độc lập và phương sai phân bố đều, nên thường áp một phép <strong>xoay</strong> trực giao trước (OPQ học phép xoay này). RaBitQ (Gao &amp; Long, 2024) dùng phép xoay ngẫu nhiên và mã khoảng 1 bit/chiều với <strong>cận sai số lý thuyết</strong>; tính đến 10/2026 đã có trong Faiss và Milvus 2.6 (IVF_RABITQ).</p>
+<table>
+<thead>
+<tr>
+<th>Phương pháp (<span class="arithmatex">\(D = 1024\)</span>)</th>
+<th>Byte/vector</th>
+<th>Nén</th>
+<th>Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fp32</td>
+<td>4096</td>
+<td>1×</td>
+<td>gốc</td>
+</tr>
+<tr>
+<td>fp16 (<code>halfvec</code> trong pgvector)</td>
+<td>2048</td>
+<td>2×</td>
+<td>gần như không mất recall</td>
+</tr>
+<tr>
+<td>Scalar int8</td>
+<td>1024</td>
+<td>4×</td>
+<td>phổ biến nhất trong vector DB</td>
+</tr>
+<tr>
+<td>Binary (1 bit/chiều)</td>
+<td>128</td>
+<td>32×</td>
+<td>Hamming, cần rescoring (Module 03)</td>
+</tr>
+<tr>
+<td>PQ <span class="arithmatex">\(m=64\)</span>, 8 bit</td>
+<td>64</td>
+<td>64×</td>
+<td>cần rescoring</td>
+</tr>
+</tbody>
+</table>
+<h3 id="36-hnsw-hierarchical-navigable-small-world">3.6 HNSW — Hierarchical Navigable Small World<a class="headerlink" href="#36-hnsw-hierarchical-navigable-small-world" title="Permanent link">&para;</a></h3>
+<p>HNSW (Malkov &amp; Yashunin, arXiv 1603.09320, công bố trên IEEE TPAMI) là thuật toán ANN mặc định của gần như mọi vector DB hiện nay.</p>
+<p><strong>Trực giác.</strong> (1) <em>Tìm kiếm tham lam trên đồ thị:</em> mỗi điểm nối với vài láng giềng gần; từ một điểm vào, liên tục nhảy sang láng giềng gần <span class="arithmatex">\(\mathbf{q}\)</span> hơn cho tới khi không cải thiện được. Chỉ có cạnh ngắn thì phải nhảy rất nhiều bước và dễ kẹt ở cực tiểu địa phương. (2) <em>Small world:</em> trộn cạnh dài (bay nhanh tới đúng vùng) với cạnh ngắn (tinh chỉnh) để số bước tăng chậm, cỡ logarit. (3) <em>Phân tầng như skip list:</em> đặt cạnh dài và ngắn ở các <strong>tầng</strong> khác nhau. Mỗi điểm nhận tầng tối đa ngẫu nhiên</p>
+<div class="arithmatex">\[
+\ell = \big\lfloor -\ln(U) \cdot m_L \big\rfloor,\qquad U \sim \mathrm{Uniform}(0, 1),\qquad m_L = 1 / \ln M
+\]</div>
+<p>nên <span class="arithmatex">\(P(\ell \ge L) = M^{-L}\)</span>. Với <span class="arithmatex">\(N = 10^6\)</span>, <span class="arithmatex">\(M = 16\)</span>: tầng 0 có <span class="arithmatex">\(10^6\)</span> điểm, tầng 1 ~62.500, tầng 2 ~3.900, tầng 3 ~244, tầng 4 ~15, tầng 5 ~1 → khoảng <span class="arithmatex">\(\log_{16} 10^6 \approx 5\)</span> tầng. Tầng trên thưa nên cạnh tự nhiên dài.</p>
+<!-- fig:hnsw -->
+<figure>
+  <img alt="Trái: sơ đồ HNSW trên dữ liệu mô phỏng — tìm tham lam ở tầng thưa, điểm dừng làm điểm vào tầng dưới" loading="lazy" src="../assets/figures/05/hnsw.light.svg#only-light" />
+  <img alt="Trái: sơ đồ HNSW trên dữ liệu mô phỏng — tìm tham lam ở tầng thưa, điểm dừng làm điểm vào tầng dưới" loading="lazy" src="../assets/figures/05/hnsw.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.10 — Trái: sơ đồ HNSW trên dữ liệu mô phỏng — tìm tham lam ở tầng thưa, điểm dừng làm điểm vào tầng dưới. Phải: số điểm kỳ vọng ở mỗi tầng với N = 10⁶, M = 16.</figcaption>
+</figure>
+<!-- /fig -->
+
+<pre class="mermaid"><code>flowchart TB
+    subgraph L2["Tầng 2 (rất thưa)"]
+        A2((E)) --- B2((P))
+    end
+    subgraph L1["Tầng 1"]
+        A1((E)) --- C1((K)) --- B1((P)) --- D1((T))
+    end
+    subgraph L0["Tầng 0 (mọi điểm)"]
+        A0((E)) --- X0((a)) --- C0((K)) --- Y0((b)) --- B0((P)) --- Z0((c)) --- D0((T)) --- Q0(("gần q nhất"))
+    end
+    A2 -.xuống tầng.-&gt; A1
+    B2 -.xuống tầng.-&gt; B1
+    B1 -.xuống tầng.-&gt; B0</code></pre>
+<p><strong>Tìm kiếm:</strong> từ điểm vào ở tầng cao nhất, ở mỗi tầng <span class="arithmatex">\(L, \dots, 1\)</span> đi tham lam tới điểm gần <span class="arithmatex">\(\mathbf{q}\)</span> nhất rồi dùng nó làm điểm vào tầng dưới. Ở tầng 0 chạy <strong>beam search</strong> với danh sách động kích thước <span class="arithmatex">\(ef_{\text{search}} \ge k\)</span>: mở rộng ứng viên gần nhất, thêm láng giềng vào tập kết quả <span class="arithmatex">\(W\)</span> nếu gần hơn phần tử xa nhất của <span class="arithmatex">\(W\)</span>, dừng khi ứng viên gần nhất còn lại xa hơn phần tử xa nhất của <span class="arithmatex">\(W\)</span>; trả top-<span class="arithmatex">\(k\)</span> của <span class="arithmatex">\(W\)</span>.</p>
+<p><strong>Chèn:</strong> sinh tầng <span class="arithmatex">\(\ell\)</span>; đi tham lam xuống tầng <span class="arithmatex">\(\ell + 1\)</span>; từ tầng <span class="arithmatex">\(\ell\)</span> về 0, beam search với kích thước <span class="arithmatex">\(ef_{\text{construction}}\)</span> lấy ứng viên rồi chọn tối đa <span class="arithmatex">\(M\)</span> láng giềng (tầng 0 thường <span class="arithmatex">\(M_0 = 2M\)</span>) bằng <strong>heuristic chọn láng giềng</strong>: chỉ giữ ứng viên nếu nó gần điểm mới hơn là gần bất kỳ láng giềng đã chọn. Heuristic này giữ láng giềng "trải đều các hướng", giúp đồ thị điều hướng tốt khi dữ liệu có cụm dày — rất hay gặp với ticket (hàng nghìn ticket "quên mật khẩu" gần như trùng nhau).</p>
+<p><strong>Tham số</strong> (mặc định tính đến 10/2026):</p>
+<table>
+<thead>
+<tr>
+<th>Tham số</th>
+<th>pgvector / Qdrant</th>
+<th>Mặc định</th>
+<th>Tăng lên thì</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(M\)</span></td>
+<td><code>m</code> / <code>m</code></td>
+<td>16 / 16</td>
+<td>recall ↑, RAM ↑ tuyến tính, build chậm hơn</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(ef_{\text{construction}}\)</span></td>
+<td><code>ef_construction</code> / <code>ef_construct</code></td>
+<td>64 / 100</td>
+<td>đồ thị tốt hơn, build chậm hơn; không đổi RAM/latency truy vấn</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(ef_{\text{search}}\)</span></td>
+<td><code>hnsw.ef_search</code> / <code>hnsw_ef</code></td>
+<td>40 (pgvector)</td>
+<td>recall ↑, latency ↑ — <strong>núm vặn duy nhất chỉnh lúc chạy</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Độ phức tạp (thực nghiệm):</strong> tìm kiếm khoảng <span class="arithmatex">\(O\big((\log N + ef_{\text{search}}) \cdot M \cdot D\big)\)</span>; xây dựng khoảng <span class="arithmatex">\(O(N \log N \cdot ef_{\text{construction}} \cdot M \cdot D)\)</span> — với <span class="arithmatex">\(10^6\)</span> vector 1024-d: vài phút đến vài chục phút trên CPU nhiều lõi.</p>
+<p><strong>Bộ nhớ đồ thị.</strong> Tầng 0: <span class="arithmatex">\(2M\)</span> id × 4 byte; các tầng trên: kỳ vọng <span class="arithmatex">\(\sum_{L \ge 1} M^{-L} = 1/(M-1)\)</span> tầng, mỗi tầng <span class="arithmatex">\(M\)</span> id:</p>
+<div class="arithmatex">\[
+\text{bytes}_{\text{graph}}/\text{điểm} \;\approx\; 4 \cdot 2M + 4 \cdot \frac{M}{M-1} \;\approx\; 8M + 4
+\]</div>
+<p><span class="arithmatex">\(M = 16\)</span> → ~132 byte/điểm (cộng overhead cài đặt, ước lượng ×1,1–1,5). So với vector 1024-d fp32 chỉ thêm ~3%; nhưng với vector binary (128 byte), đồ thị <strong>lớn hơn cả vector</strong>.</p>
+<p><strong>Latency (ước lượng):</strong> <span class="arithmatex">\(ef_{\text{search}} = 100\)</span>, <span class="arithmatex">\(M_0 = 32\)</span> → vài nghìn phép tính khoảng cách, mỗi phép 1024-d cỡ 100–200 ns với SIMD → ~0,5–2 ms, nhanh hơn exact trên CPU 50–200 lần.</p>
+<p><strong>Nhược điểm:</strong> cần nằm trong RAM (truy cập ngẫu nhiên); <strong>xóa</strong> khó — đa số hệ chỉ đánh dấu xóa, đồ thị xuống cấp dần, cần optimize/vacuum định kỳ (với yêu cầu xóa dữ liệu ở Module 04, phải kiểm tra vector đã biến mất khỏi <em>kết quả</em>); filter làm hỏng điều hướng (mục 5).</p>
+<p><strong>Tune:</strong> cố định <span class="arithmatex">\(M = 16\)</span>, <span class="arithmatex">\(ef_{\text{construction}} = 128\text{–}200\)</span>; quét <span class="arithmatex">\(ef_{\text{search}} \in \{40, 64, 100, 200, 400\}\)</span>, đo ANN recall@k so với exact trên ~1.000 truy vấn thật, chọn điểm "khuỷu tay" đạt mục tiêu (ví dụ ≥ 0,98). Sau điểm bão hòa, gấp đôi <span class="arithmatex">\(ef\)</span> chỉ thêm vài phần nghìn recall mà gần gấp đôi latency. ANN-Benchmarks (Aumüller et al., 2018) chuẩn hóa cách vẽ đường cong recall–QPS này.</p>
+<h3 id="37-diskann-muc-y-tuong">3.7 DiskANN (mức ý tưởng)<a class="headerlink" href="#37-diskann-muc-y-tuong" title="Permanent link">&para;</a></h3>
+<p><strong>Vấn đề:</strong> HNSW cần toàn bộ đồ thị + vector trong RAM. Một tỷ vector 768-d fp32 ≈ 3 TB RAM — không kinh tế.</p>
+<p><strong>Ý tưởng (Subramanya et al., NeurIPS 2019):</strong></p>
+<ol>
+<li>Đồ thị <strong>một tầng</strong> (thuật toán xây Vamana) với đường kính nhỏ nhờ quy tắc cắt tỉa có tham số <span class="arithmatex">\(\alpha &gt; 1\)</span> — chủ động giữ lại một số cạnh dài, để mỗi truy vấn chỉ cần ít bước nhảy (mỗi bước là một lần đọc SSD).</li>
+<li><strong>Vector đầy đủ + danh sách láng giềng nằm trên SSD</strong>, xếp cạnh nhau để một lần đọc block lấy được cả hai.</li>
+<li><strong>Vector nén PQ nằm trong RAM</strong> để định hướng việc duyệt đồ thị; chỉ đọc vector đầy đủ từ SSD để rescoring.</li>
+</ol>
+<p>Kết quả: tỷ vector trên một máy, latency vài ms. Filtered-DiskANN (Gollapudi et al., WWW 2023) đưa nhãn filter vào cấu trúc đồ thị; Milvus và nhiều hệ khác có index kiểu DiskANN; Qdrant 1.16 có chế độ inline storage cho HNSW trên đĩa theo tinh thần tương tự.</p>
+<!-- fig:diskann -->
+<figure>
+  <img alt="DiskANN: vector nén trong RAM để định hướng, vector đầy đủ và danh sách láng giềng nằm cạnh nhau trên SSD" loading="lazy" src="../assets/figures/05/diskann.light.svg#only-light" />
+  <img alt="DiskANN: vector nén trong RAM để định hướng, vector đầy đủ và danh sách láng giềng nằm cạnh nhau trên SSD" loading="lazy" src="../assets/figures/05/diskann.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.11 — DiskANN: vector nén trong RAM để định hướng, vector đầy đủ và danh sách láng giềng nằm cạnh nhau trên SSD.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Liên hệ Zendesk:</strong> với &lt; 1 triệu vector, DiskANN là quá mức cần thiết.</p>
+<h3 id="38-uoc-luong-bo-nho-cho-1-trieu-vector-bai-tap-thiet-ke">3.8 Ước lượng bộ nhớ cho 1 triệu vector — bài tập thiết kế<a class="headerlink" href="#38-uoc-luong-bo-nho-cho-1-trieu-vector-bai-tap-thiet-ke" title="Permanent link">&para;</a></h3>
+<p>Giả định <span class="arithmatex">\(N = 10^6\)</span>, HNSW <span class="arithmatex">\(M = 16\)</span> (~132 byte đồ thị/điểm, làm tròn 150 byte để tính overhead), payload metadata ~200 byte/điểm (tenant_id, locale, product, updated_at, visibility, doc_id… — ước lượng).</p>
+<table>
+<thead>
+<tr>
+<th>Cấu hình</th>
+<th>Vector</th>
+<th>Đồ thị HNSW</th>
+<th>Payload</th>
+<th>Tổng (ước lượng)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>768-d fp32</td>
+<td>3,07 GB</td>
+<td>0,15 GB</td>
+<td>0,2 GB</td>
+<td>~3,4 GB</td>
+</tr>
+<tr>
+<td>1024-d fp32</td>
+<td>4,10 GB</td>
+<td>0,15 GB</td>
+<td>0,2 GB</td>
+<td>~4,5 GB</td>
+</tr>
+<tr>
+<td>1024-d fp16</td>
+<td>2,05 GB</td>
+<td>0,15 GB</td>
+<td>0,2 GB</td>
+<td>~2,4 GB</td>
+</tr>
+<tr>
+<td>1024-d int8 trong RAM + fp32 trên đĩa (rescoring)</td>
+<td>1,02 GB</td>
+<td>0,15 GB</td>
+<td>0,2 GB</td>
+<td>~1,4 GB RAM + 4,1 GB đĩa</td>
+</tr>
+<tr>
+<td>1024-d binary trong RAM + fp16 trên đĩa</td>
+<td>0,13 GB</td>
+<td>0,15 GB</td>
+<td>0,2 GB</td>
+<td>~0,5 GB RAM + 2,05 GB đĩa</td>
+</tr>
+<tr>
+<td>1024-d IVF-PQ <span class="arithmatex">\(m=64\)</span> (không đồ thị)</td>
+<td>0,064 GB</td>
+<td>— (tâm cụm ~4 MB)</td>
+<td>0,2 GB</td>
+<td>~0,3 GB</td>
+</tr>
+</tbody>
+</table>
+<p>Công thức chung:</p>
+<div class="arithmatex">\[
+\text{RAM} \approx N \cdot \Big(D \cdot \text{bytes}_{\text{vec}} + (8M + 4)\cdot\gamma + \text{bytes}_{\text{payload}}\Big)
+\]</div>
+<p>với <span class="arithmatex">\(\gamma \approx 1{,}1\text{–}1{,}5\)</span> là hệ số overhead cài đặt (ước lượng).</p>
+<!-- fig:memory-1m -->
+<figure>
+  <img alt="Bảng ước lượng bộ nhớ mục 3" loading="lazy" src="../assets/figures/05/memory-1m.light.svg#only-light" />
+  <img alt="Bảng ước lượng bộ nhớ mục 3" loading="lazy" src="../assets/figures/05/memory-1m.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.12 — Bảng ước lượng bộ nhớ mục 3.8 dưới dạng cột chồng.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Khuyến nghị cho Zendesk (0,3–0,7 triệu vector):</strong> 1024-d <strong>fp16, hoặc int8 + rescoring</strong>, HNSW <span class="arithmatex">\(M = 16\)</span>. Tổng RAM dưới 3 GB — một máy chủ nhỏ thừa sức; hãy ưu tiên <strong>dư địa cho re-index blue/green</strong> (cần gấp đôi tài nguyên trong lúc chuyển đổi, xem Module 11) hơn là ép bộ nhớ.</p>
+<p><strong>Giới hạn chiều trong pgvector</strong> (tính đến 10/2026, nhánh 0.8.x): index HNSW/IVFFlat hỗ trợ kiểu <code>vector</code> tới 2.000 chiều, <code>halfvec</code> tới 4.000, <code>bit</code> tới 64.000, <code>sparsevec</code> tới 1.000 phần tử khác 0. Một model embedding 4096-d (một số model dựa trên LLM) buộc phải dùng <code>halfvec</code> hoặc cắt chiều Matryoshka.</p>
+<h3 id="39-chon-thuat-toan-ann-bang-tong-hop">3.9 Chọn thuật toán ANN — bảng tổng hợp<a class="headerlink" href="#39-chon-thuat-toan-ann-bang-tong-hop" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Tiêu chí</th>
+<th>Flat (exact)</th>
+<th>IVF</th>
+<th>IVF-PQ</th>
+<th>HNSW</th>
+<th>DiskANN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ANN recall</td>
+<td>100%</td>
+<td>cao, tùy <code>nprobe</code></td>
+<td>thấp hơn, cần rescoring</td>
+<td>rất cao</td>
+<td>cao</td>
+</tr>
+<tr>
+<td>Latency @1M (CPU, định hướng)</td>
+<td>~10–100 ms</td>
+<td>~1–10 ms</td>
+<td>~1 ms</td>
+<td>~0,5–2 ms</td>
+<td>~vài ms (SSD)</td>
+</tr>
+<tr>
+<td>Bộ nhớ</td>
+<td>vector</td>
+<td>vector + rất nhỏ</td>
+<td>rất nhỏ</td>
+<td>vector + đồ thị</td>
+<td>nhỏ trong RAM, phần lớn trên SSD</td>
+</tr>
+<tr>
+<td>Với filter rất chặt</td>
+<td>tốt nhất</td>
+<td>tốt</td>
+<td>tốt</td>
+<td><strong>kém</strong> nếu không có kỹ thuật riêng</td>
+<td>cần biến thể Filtered</td>
+</tr>
+<tr>
+<td>Quy mô phù hợp</td>
+<td>&lt; 100k, ground truth</td>
+<td>bộ nhớ hạn chế, GPU</td>
+<td><span class="arithmatex">\(10^8\)</span>–<span class="arithmatex">\(10^9\)</span></td>
+<td>mặc định <span class="arithmatex">\(10^5\)</span>–<span class="arithmatex">\(10^8\)</span></td>
+<td><span class="arithmatex">\(10^8\)</span>–<span class="arithmatex">\(10^{10}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>(Các dải latency là <strong>định hướng</strong>, phụ thuộc mạnh vào dữ liệu, phần cứng và tham số — luôn đo lại trên dữ liệu của bạn.)</p>
+<p><strong>Liên hệ Zendesk — chốt phần dense:</strong> HNSW (<span class="arithmatex">\(M = 16\)</span>, <span class="arithmatex">\(ef_{\text{construction}} \approx 128\)</span>), fp16 hoặc int8 + rescoring, tune <span class="arithmatex">\(ef_{\text{search}}\)</span> để ANN recall@100 ≥ 0,98; job hằng tuần "exact vs ANN" trên 500 truy vấn mẫu để phát hiện index xuống cấp.</p>
+<hr />
+<h2 id="4-hybrid-retrieval-ket-hop-sparse-va-dense">4. Hybrid retrieval: kết hợp sparse và dense<a class="headerlink" href="#4-hybrid-retrieval-ket-hop-sparse-va-dense" title="Permanent link">&para;</a></h2>
+<h3 id="41-vi-sao-ket-hop-uoc-loi">4.1 Vì sao kết hợp được lợi<a class="headerlink" href="#41-vi-sao-ket-hop-uoc-loi" title="Permanent link">&para;</a></h3>
+<p>BM25 và dense mắc lỗi ở <strong>những chỗ khác nhau</strong> (mục 1.3). Gọi <span class="arithmatex">\(r_S\)</span>, <span class="arithmatex">\(r_D\)</span> là xác suất tài liệu đúng nằm trong top-<span class="arithmatex">\(k\)</span> của sparse và dense. Nếu lỗi độc lập, xác suất nó nằm trong <em>hợp</em> hai danh sách là <span class="arithmatex">\(1 - (1-r_S)(1-r_D)\)</span>: với <span class="arithmatex">\(r_S = 0{,}70\)</span>, <span class="arithmatex">\(r_D = 0{,}80\)</span> là <span class="arithmatex">\(0{,}94\)</span>. Thực tế lỗi tương quan dương (câu khó thì cả hai cùng trượt) nên mức tăng nhỏ hơn, nhưng hiếm khi bằng 0. Câu hỏi còn lại là <strong>xếp hạng hợp nhất</strong>: theo <strong>thứ hạng</strong> (RRF) hay theo <strong>điểm</strong> (convex combination).</p>
+<!-- fig:hybrid-union -->
+<figure>
+  <img alt="Trái: lợi ích của hợp hai danh sách khi lỗi độc lập" loading="lazy" src="../assets/figures/05/hybrid-union.light.svg#only-light" />
+  <img alt="Trái: lợi ích của hợp hai danh sách khi lỗi độc lập" loading="lazy" src="../assets/figures/05/hybrid-union.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.13 — Trái: lợi ích của hợp hai danh sách khi lỗi độc lập. Phải: khi hai biến «trượt» tương quan dương ρ, lợi ích giảm dần (mô hình Bernoulli có tương quan).</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="42-reciprocal-rank-fusion-rrf">4.2 Reciprocal Rank Fusion (RRF)<a class="headerlink" href="#42-reciprocal-rank-fusion-rrf" title="Permanent link">&para;</a></h3>
+<p><strong>Định nghĩa (Cormack, Clarke, Büttcher, SIGIR 2009).</strong> Với tập danh sách xếp hạng <span class="arithmatex">\(\mathcal{R}\)</span> và <span class="arithmatex">\(\mathrm{rank}_r(d)\)</span> là thứ hạng (từ 1) của <span class="arithmatex">\(d\)</span> trong danh sách <span class="arithmatex">\(r\)</span>:</p>
+<div class="arithmatex">\[
+\mathrm{RRF}(d) = \sum_{r \in \mathcal{R}} \frac{w_r}{k + \mathrm{rank}_r(d)}
+\]</div>
+<p>với <span class="arithmatex">\(w_r = 1\)</span> ở bản gốc; tài liệu vắng mặt trong <span class="arithmatex">\(r\)</span> đóng góp 0.</p>
+<p><strong>Trực giác.</strong> Chỉ dùng thứ hạng nên không cần biết điểm BM25 (không có thang, mục 2.6) và cosine (thường dồn trong khoảng hẹp) so với nhau thế nào — không cần hiệu chuẩn. Hàm <span class="arithmatex">\(1/(k + \text{rank})\)</span> có "đuôi dày": tài liệu đứng thứ 10 ở <em>cả hai</em> danh sách có thể thắng tài liệu đứng đầu <em>một</em> danh sách. RRF thưởng <strong>sự đồng thuận</strong>.</p>
+<p><strong>Vai trò của <span class="arithmatex">\(k\)</span>:</strong></p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(k\)</span></th>
+<th>rank 1</th>
+<th>rank 2</th>
+<th>rank 10</th>
+<th>rank 50</th>
+<th>rank1 / rank10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>1,000</td>
+<td>0,500</td>
+<td>0,100</td>
+<td>0,020</td>
+<td>10×</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0,333</td>
+<td>0,250</td>
+<td>0,083</td>
+<td>0,019</td>
+<td>4×</td>
+</tr>
+<tr>
+<td>60</td>
+<td>0,0164</td>
+<td>0,0161</td>
+<td>0,0143</td>
+<td>0,0091</td>
+<td>1,15×</td>
+</tr>
+</tbody>
+</table>
+<p><span class="arithmatex">\(k\)</span> nhỏ → "ai đứng đầu một danh sách thì thắng"; <span class="arithmatex">\(k\)</span> lớn → gần như đếm phiếu. <strong>Vì sao 60?</strong> Bài gốc chọn <span class="arithmatex">\(k = 60\)</span> qua thử nghiệm sơ bộ và ghi nhận kết quả không quá nhạy với <span class="arithmatex">\(k\)</span>; trực giác là <span class="arithmatex">\(k\)</span> cỡ vài chục làm giảm ảnh hưởng của những vị trí đầu "ăn may" ở một hệ đơn lẻ. Đây là <strong>mặc định hợp lý, không phải hằng số vũ trụ</strong>.</p>
+<p>Cảnh báo thực tế (tính đến 10/2026): Elasticsearch (retriever <code>rrf</code>) và OpenSearch (<code>score-ranker-processor</code>, từ 2.19) mặc định <code>rank_constant = 60</code>, nhưng <strong>Qdrant mặc định <span class="arithmatex">\(k = 2\)</span></strong> (chỉnh được từ 1.16, weighted RRF qua <code>weights</code> từ 1.17). Elasticsearch còn có <code>rank_window_size</code> mặc định chỉ 10. Cùng tên "RRF" nhưng hành vi khác — luôn đặt tham số tường minh.</p>
+<p><strong>Ví dụ số.</strong> Truy vấn "ERR_SYNC_409 khi đồng bộ hóa đơn". BM25 top-4: [A, B, C, D]; dense top-4: [C, A, E, F]; <span class="arithmatex">\(k = 60\)</span>:</p>
+<table>
+<thead>
+<tr>
+<th>Tài liệu</th>
+<th>rank BM25</th>
+<th>rank dense</th>
+<th>RRF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>2</td>
+<td><span class="arithmatex">\(1/61 + 1/62 = 0{,}03252\)</span></td>
+</tr>
+<tr>
+<td>C</td>
+<td>3</td>
+<td>1</td>
+<td><span class="arithmatex">\(1/63 + 1/61 = 0{,}03227\)</span></td>
+</tr>
+<tr>
+<td>B</td>
+<td>2</td>
+<td>—</td>
+<td><span class="arithmatex">\(1/62 = 0{,}01613\)</span></td>
+</tr>
+<tr>
+<td>E</td>
+<td>—</td>
+<td>3</td>
+<td><span class="arithmatex">\(1/63 = 0{,}01587\)</span></td>
+</tr>
+<tr>
+<td>D, F</td>
+<td>4 / —</td>
+<td>— / 4</td>
+<td><span class="arithmatex">\(1/64 = 0{,}01563\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>A và C (có mặt ở cả hai) bỏ xa phần còn lại; D và F hòa nên cần quy tắc phá hòa ổn định (ví dụ theo <code>doc_id</code>).</p>
+<!-- fig:rrf-k -->
+<figure>
+  <img alt="Trái: trọng số 1/(k + rank) theo k" loading="lazy" src="../assets/figures/05/rrf-k.light.svg#only-light" />
+  <img alt="Trái: trọng số 1/(k + rank) theo k" loading="lazy" src="../assets/figures/05/rrf-k.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.14 — Trái: trọng số 1/(k + rank) theo k. Phải: điểm RRF của ví dụ mục 4.2, tách theo nguồn đóng góp.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="43-convex-combination-voi-chuan-hoa-iem">4.3 Convex combination với chuẩn hóa điểm<a class="headerlink" href="#43-convex-combination-voi-chuan-hoa-iem" title="Permanent link">&para;</a></h3>
+<div class="arithmatex">\[
+s_{\text{hyb}}(q, d) = \alpha\, \tilde{s}_D(q, d) + (1 - \alpha)\, \tilde{s}_S(q, d),\qquad \alpha \in [0, 1]
+\]</div>
+<p>với <span class="arithmatex">\(\tilde{s}\)</span> là điểm đã chuẩn hóa; tài liệu vắng mặt ở một hệ nhận 0 cho hệ đó (xấp xỉ). Chuẩn hóa là chỗ dễ hỏng nhất:</p>
+<ul>
+<li><strong>Min-max theo truy vấn</strong> <span class="arithmatex">\(\tilde{s} = (s - s_{\min})/(s_{\max} - s_{\min})\)</span>: đơn giản, nhưng luôn biến tài liệu tốt nhất thành 1 <em>dù danh sách toàn rác</em>; nhạy outlier.</li>
+<li><strong>Theo phân phối</strong> (z-score): DBSF của Qdrant (từ 1.11) chuẩn hóa theo trung bình và độ lệch chuẩn (<span class="arithmatex">\(\mu \pm 3\sigma\)</span>).</li>
+<li><strong>Theo cận lý thuyết</strong> (Bruch et al.): cosine dùng <span class="arithmatex">\([-1, 1]\)</span>, BM25 dùng cận dưới 0 — ổn định hơn vì không phụ thuộc ứng viên tệ nhất.</li>
+</ul>
+<p><strong>Ví dụ số</strong> (tiếp ví dụ trên). BM25: A = 12, B = 9, C = 4, D = 3 → min-max: 1; 0,667; 0,111; 0. Cosine: C = 0,82, A = 0,78, E = 0,75, F = 0,70 → C = 1, A = 0,667, E = 0,417, F = 0.</p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(\alpha\)</span></th>
+<th>Xếp hạng (điểm)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0,3</td>
+<td>A (0,90) &gt; B (0,47) &gt; C (0,38) &gt; E (0,13)</td>
+</tr>
+<tr>
+<td>0,5</td>
+<td>A (0,83) &gt; C (0,56) &gt; B (0,33) &gt; E (0,21)</td>
+</tr>
+<tr>
+<td>0,8</td>
+<td>C (0,82) &gt; A (0,73) &gt; E (0,33) &gt; B (0,13)</td>
+</tr>
+</tbody>
+</table>
+<p>Khác RRF, convex <strong>dùng được độ lớn chênh lệch điểm</strong> (A khớp mã lỗi hiếm nên BM25 bỏ xa C); cái giá là phải tune <span class="arithmatex">\(\alpha\)</span>.</p>
+<!-- fig:convex-alpha -->
+<figure>
+  <img alt="Điểm hybrid của từng tài liệu trong ví dụ mục 4" loading="lazy" src="../assets/figures/05/convex-alpha.light.svg#only-light" />
+  <img alt="Điểm hybrid của từng tài liệu trong ví dụ mục 4" loading="lazy" src="../assets/figures/05/convex-alpha.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.15 — Điểm hybrid của từng tài liệu trong ví dụ mục 4.3 khi α thay đổi; ba đường chấm là ba hàng của bảng.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="44-khi-nao-cai-nao-thang">4.4 Khi nào cái nào thắng?<a class="headerlink" href="#44-khi-nao-cai-nao-thang" title="Permanent link">&para;</a></h3>
+<p>Bruch, Gai, Ingber (arXiv 2210.11934, ACM TOIS) phân tích có hệ thống: convex combination <em>được tune</em> thường thắng RRF cả trong và ngoài miền, chỉ cần <strong>rất ít dữ liệu có nhãn</strong> để tune <span class="arithmatex">\(\alpha\)</span>; còn RRF không "miễn tham số" như hay nghĩ — nó nhạy với <span class="arithmatex">\(k\)</span> và bỏ mất thông tin độ lớn điểm.</p>
+<table>
+<thead>
+<tr>
+<th>Tình huống</th>
+<th>Chọn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chưa có tập đánh giá</td>
+<td><strong>RRF</strong> (<span class="arithmatex">\(k = 60\)</span>, đặt tường minh)</td>
+</tr>
+<tr>
+<td>Có 100–300 truy vấn có nhãn</td>
+<td><strong>Convex</strong> tune <span class="arithmatex">\(\alpha\)</span> theo Recall@50, hoặc weighted RRF</td>
+</tr>
+<tr>
+<td>Hợp nhất &gt; 2 nguồn (BM25 + dense + multi-query, Module 06)</td>
+<td>RRF</td>
+</tr>
+<tr>
+<td>Có cross-encoder rerank phía sau (Module 06)</td>
+<td>Khác biệt thu hẹp đáng kể — fusion chỉ quyết định ai lọt top-50</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Liên hệ Zendesk:</strong> khởi đầu RRF <span class="arithmatex">\(k = 60\)</span> với top-100 mỗi bên (BM25 âm tiết + bigram cho tiếng Việt, morphological + bigram cho tiếng Nhật; dense đa ngữ). Khi có golden set (Module 10), thử weighted RRF/convex và <strong>tune theo ngôn ngữ</strong> — giả thuyết cần kiểm chứng: BM25 tiếng Nhật thường yếu hơn do tokenization, nên trọng số dense cho tiếng Nhật có thể cần cao hơn. Đừng tốn nhiều tuần tối ưu fusion trước khi có reranker.</p>
+<h3 id="45-code-fusion-va-hybrid-trong-postgres-qdrant">4.5 Code: fusion và hybrid trong Postgres / Qdrant<a class="headerlink" href="#45-code-fusion-va-hybrid-trong-postgres-qdrant" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># fusion.py — thuần Python</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">rrf</span><span class="p">(</span><span class="n">ranked_lists</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="sd">"""ranked_lists: list các danh sách doc_id đã sắp xếp giảm dần độ liên quan."""</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="ow">or</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">ranked_lists</span><span class="p">)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">score</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">lst</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">ranked_lists</span><span class="p">):</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">doc_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>            <span class="n">score</span><span class="p">[</span><span class="n">doc_id</span><span class="p">]</span> <span class="o">+=</span> <span class="n">w</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="n">rank</span><span class="p">)</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[:</span><span class="n">top_n</span><span class="p">]</span>  <span class="c1"># phá hòa theo doc_id</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="k">def</span><span class="w"> </span><span class="nf">convex</span><span class="p">(</span><span class="n">dense</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">sparse</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">mm</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="c1"># min-max theo truy vấn</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>        <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="nb">max</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="k">return</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">lo</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="p">)</span> <span class="k">if</span> <span class="n">hi</span> <span class="o">&gt;</span> <span class="n">lo</span> <span class="k">else</span> <span class="mf">1.0</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">nd</span><span class="p">,</span> <span class="n">ns</span> <span class="o">=</span> <span class="n">mm</span><span class="p">(</span><span class="n">dense</span><span class="p">),</span> <span class="n">mm</span><span class="p">(</span><span class="n">sparse</span><span class="p">)</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">fused</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">nd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">ns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">nd</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">|</span> <span class="n">ns</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fused</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[:</span><span class="n">top_n</span><span class="p">]</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="nb">print</span><span class="p">(</span><span class="n">rrf</span><span class="p">([[</span><span class="s2">"A"</span><span class="p">,</span> <span class="s2">"B"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"D"</span><span class="p">],</span> <span class="p">[</span><span class="s2">"C"</span><span class="p">,</span> <span class="s2">"A"</span><span class="p">,</span> <span class="s2">"E"</span><span class="p">,</span> <span class="s2">"F"</span><span class="p">]])[:</span><span class="mi">2</span><span class="p">])</span>   <span class="c1"># A, C</span>
+</span></code></pre></div>
+<p><strong>Hybrid trong Postgres</strong> (pgvector + <code>pg_textsearch</code>; cú pháp theo README tính đến 10/2026, kiểm tra lại phiên bản bạn cài):</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">-- $1: embedding truy vấn, $2: truy vấn đã tokenize, $3: tenant_id</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">SET</span><span class="w"> </span><span class="n">hnsw</span><span class="p">.</span><span class="n">ef_search</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">SET</span><span class="w"> </span><span class="n">hnsw</span><span class="p">.</span><span class="n">iterative_scan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">relaxed_order</span><span class="p">;</span><span class="w">   </span><span class="c1">-- pgvector &gt;= 0.8: quét tiếp khi filter loại bớt kết quả</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">WITH</span><span class="w"> </span><span class="n">dense</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">row_number</span><span class="p">()</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">dist</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">r</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">embedding</span><span class="w"> </span><span class="o">&lt;=&gt;</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">chunks</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="k">WHERE</span><span class="w"> </span><span class="n">tenant_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">3</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">visibility</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'public'</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="n">t</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">),</span><span class="w"> </span><span class="n">sparse</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">row_number</span><span class="p">()</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">r</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">content_tok</span><span class="w"> </span><span class="o">&lt;@&gt;</span><span class="w"> </span><span class="err">$</span><span class="mi">2</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">chunks</span><span class="w">      </span><span class="c1">-- điểm âm, sắp tăng dần</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="k">WHERE</span><span class="w"> </span><span class="n">tenant_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">3</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">visibility</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'public'</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">        </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="n">t</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">)</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">COALESCE</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="p">(</span><span class="mi">60</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dense</span><span class="p">.</span><span class="n">r</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="k">COALESCE</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="p">(</span><span class="mi">60</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sparse</span><span class="p">.</span><span class="n">r</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rrf</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="k">FROM</span><span class="w"> </span><span class="n">dense</span><span class="w"> </span><span class="k">FULL</span><span class="w"> </span><span class="k">OUTER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">sparse</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">rrf</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</span></code></pre></div>
+<p><strong>Hybrid trong Qdrant</strong> (Query API, <code>qdrant-client</code>; filter đặt ở mỗi prefetch):</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">qdrant_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">QdrantClient</span><span class="p">,</span> <span class="n">models</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">QdrantClient</span><span class="p">(</span><span class="s2">"http://localhost:6333"</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">f</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Filter</span><span class="p">(</span><span class="n">must</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">models</span><span class="o">.</span><span class="n">FieldCondition</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">"tenant_id"</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">MatchValue</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s2">"acme"</span><span class="p">)),</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">models</span><span class="o">.</span><span class="n">FieldCondition</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">"visibility"</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">MatchAny</span><span class="p">(</span><span class="nb">any</span><span class="o">=</span><span class="p">[</span><span class="s2">"public"</span><span class="p">,</span> <span class="s2">"agent"</span><span class="p">])),</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">])</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">hits</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">query_points</span><span class="p">(</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">collection_name</span><span class="o">=</span><span class="s2">"kb_chunks"</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">prefetch</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="n">models</span><span class="o">.</span><span class="n">Prefetch</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">SparseVector</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="n">sp_idx</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">sp_val</span><span class="p">),</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>                        <span class="n">using</span><span class="o">=</span><span class="s2">"bm25"</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="n">models</span><span class="o">.</span><span class="n">Prefetch</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">dense_vec</span><span class="p">,</span> <span class="n">using</span><span class="o">=</span><span class="s2">"dense"</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="p">],</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">query</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">FusionQuery</span><span class="p">(</span><span class="n">fusion</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">Fusion</span><span class="o">.</span><span class="n">RRF</span><span class="p">),</span>   <span class="c1"># hoặc Fusion.DBSF</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Lưu ý: sparse vector BM25 trong Qdrant cần bật modifier IDF trên collection; nếu không, bạn đang dùng TF thuần.</p>
+<hr />
+<h2 id="5-metadata-filtering">5. Metadata filtering<a class="headerlink" href="#5-metadata-filtering" title="Permanent link">&para;</a></h2>
+<h3 id="51-vi-sao-filter-la-bat-buoc">5.1 Vì sao filter là bắt buộc<a class="headerlink" href="#51-vi-sao-filter-la-bat-buoc" title="Permanent link">&para;</a></h3>
+<p>Mỗi truy vấn Zendesk đều kèm điều kiện <code>tenant_id</code>, <code>visibility</code>, <code>product</code>, <code>version</code>, <code>updated_at</code> — vừa là yêu cầu <strong>đúng đắn</strong> vừa là yêu cầu <strong>bảo mật</strong>. Gọi <strong>selectivity</strong> <span class="arithmatex">\(s\)</span> là tỷ lệ tài liệu thỏa filter; ví dụ một tenant có 5.000 chunk riêng trên 500.000 → <span class="arithmatex">\(s = 0{,}01\)</span>.</p>
+<h3 id="52-ba-chien-luoc-va-toan-cua-chung">5.2 Ba chiến lược và toán của chúng<a class="headerlink" href="#52-ba-chien-luoc-va-toan-cua-chung" title="Permanent link">&para;</a></h3>
+<p><strong>(a) Post-filtering:</strong> ANN lấy top-<span class="arithmatex">\(k'\)</span> rồi bỏ kết quả không thỏa. Kỳ vọng còn <span class="arithmatex">\(s \cdot k'\)</span>; muốn đủ <span class="arithmatex">\(k\)</span> cần <span class="arithmatex">\(k' \approx k/s\)</span> — với <span class="arithmatex">\(k = 50\)</span>, <span class="arithmatex">\(s = 0{,}01\)</span> là 5.000. Nếu không tăng <span class="arithmatex">\(k'\)</span>, hệ trả về thiếu hoặc <strong>rỗng</strong> — lỗi im lặng nguy hiểm (LLM trả lời "không có thông tin" hoặc tệ hơn, bịa).</p>
+<p><strong>(b) Pre-filtering:</strong> lấy tập thỏa filter trước (payload index, B-tree, bitmap), rồi tìm trong đó. Tập nhỏ (<span class="arithmatex">\(sN\)</span> = 5.000) → <strong>quét exact</strong> là tối ưu, dưới 1 ms. Tập lớn (<span class="arithmatex">\(s = 0{,}5\)</span>) → quét exact đắt, mà HNSW lại xây trên toàn bộ dữ liệu.</p>
+<p><strong>(c) In-filter (lọc trong lúc duyệt HNSW):</strong> chỉ nhận nút thỏa filter. Vấn đề là <strong>tính liên thông</strong>: với <span class="arithmatex">\(M_0\)</span> láng giềng mỗi nút và giả định độc lập, xác suất một nút <em>không có</em> láng giềng hợp lệ là <span class="arithmatex">\((1 - s)^{M_0}\)</span>:</p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(s\)</span></th>
+<th><span class="arithmatex">\(M_0 = 16\)</span></th>
+<th><span class="arithmatex">\(M_0 = 32\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0,5</td>
+<td>≈ 0,00002</td>
+<td>≈ 0</td>
+</tr>
+<tr>
+<td>0,1</td>
+<td>0,185</td>
+<td>0,034</td>
+</tr>
+<tr>
+<td>0,01</td>
+<td>0,851</td>
+<td>0,725</td>
+</tr>
+</tbody>
+</table>
+<p>Với <span class="arithmatex">\(s = 0{,}01\)</span>, ~72% nút không có láng giềng hợp lệ — đồ thị con tan rã, beam search kẹt, recall sụp. Nếu cho đi qua nút không hợp lệ thì phải duyệt cỡ <span class="arithmatex">\(1/s\)</span> lần nhiều nút hơn.</p>
+<!-- fig:filter-selectivity -->
+<figure>
+  <img alt="Trái: post-filter cần k′ ≈ k/s ứng viên" loading="lazy" src="../assets/figures/05/filter-selectivity.light.svg#only-light" />
+  <img alt="Trái: post-filter cần k′ ≈ k/s ứng viên" loading="lazy" src="../assets/figures/05/filter-selectivity.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.16 — Trái: post-filter cần k′ ≈ k/s ứng viên. Phải: xác suất một nút HNSW mất hết láng giềng hợp lệ, (1 − s)^M₀.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="53-giai-phap-trong-thuc-te-tinh-en-102026">5.3 Giải pháp trong thực tế (tính đến 10/2026)<a class="headerlink" href="#53-giai-phap-trong-thuc-te-tinh-en-102026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Query planner theo cardinality</strong> (Qdrant và nhiều hệ khác): ước lượng <span class="arithmatex">\(sN\)</span> từ payload index; nhỏ → pre-filter + exact, lớn → HNSW có filter. Vì vậy phải <strong>index mọi trường dùng để filter</strong>.</li>
+<li><strong>Filterable HNSW</strong> (Qdrant): thêm cạnh theo từng giá trị của trường được index (<code>payload_m</code>) để đồ thị con vẫn liên thông; tạo payload index <strong>trước</strong> khi nạp dữ liệu.</li>
+<li><strong>ACORN</strong> (Patel et al., SIGMOD 2024, arXiv 2403.04871): khi láng giềng trực tiếp bị loại thì xét "láng giềng của láng giềng"; Qdrant hỗ trợ theo từng truy vấn từ 1.16.</li>
+<li><strong>Iterative index scans</strong> (pgvector ≥ 0.8): <code>hnsw.iterative_scan = strict_order | relaxed_order</code> quét tiếp thay vì trả thiếu, giới hạn bởi <code>hnsw.max_scan_tuples</code> (mặc định 20.000).</li>
+<li><strong>Phân vùng vật lý:</strong> partition/partial index (pgvector), collection/shard theo tenant, partition key (Milvus) — đồ thị riêng nên hết vấn đề selectivity.</li>
+</ul>
+<h3 id="54-lien-he-zendesk-chien-luoc-theo-truong">5.4 Liên hệ Zendesk: chiến lược theo trường<a class="headerlink" href="#54-lien-he-zendesk-chien-luoc-theo-truong" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Trường</th>
+<th>Selectivity</th>
+<th>Chiến lược</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tenant_id</code> (ticket riêng)</td>
+<td>rất thấp (0,1–2%)</td>
+<td>phân vùng hoặc tenant index; tenant nhỏ → exact</td>
+</tr>
+<tr>
+<td><code>visibility</code></td>
+<td>cao</td>
+<td>filter trong đồ thị bình thường</td>
+</tr>
+<tr>
+<td><code>product</code>, <code>version</code></td>
+<td>thấp–trung bình</td>
+<td>payload index + planner; cân nhắc boost thay vì filter</td>
+</tr>
+<tr>
+<td><code>updated_at</code> / <code>valid_until</code></td>
+<td>cao</td>
+<td>filter range; chính sách giá hết hạn → lọc cứng</td>
+</tr>
+<tr>
+<td><code>locale</code></td>
+<td>trung bình</td>
+<td><strong>không</strong> lọc cứng</td>
+</tr>
+</tbody>
+</table>
+<p>Lọc cứng theo ngôn ngữ email sẽ loại mất tài liệu tiếng Anh — mà nhiều tài liệu API chỉ có tiếng Anh. Để embedding đa ngữ làm việc, rồi <em>ưu tiên</em> cùng ngôn ngữ ở tầng rerank/chọn context (Module 06).</p>
+<hr />
+<h2 id="6-lua-chon-vector-db-tinh-en-102026">6. Lựa chọn vector DB (tính đến 10/2026)<a class="headerlink" href="#6-lua-chon-vector-db-tinh-en-102026" title="Permanent link">&para;</a></h2>
+<p>Tiêu chí theo thứ tự: hybrid gốc; filter đúng ở selectivity thấp; multi-tenancy; tokenization đa ngữ; vận hành; đội ngũ đã quen gì.</p>
+<table>
+<thead>
+<tr>
+<th>Hệ</th>
+<th>Dense ANN</th>
+<th>Sparse/BM25</th>
+<th>Fusion có sẵn</th>
+<th>Filter / tenant</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Postgres + pgvector</strong> (0.8.x)</td>
+<td>HNSW, IVFFlat; <code>halfvec</code>, <code>bit</code>, <code>sparsevec</code></td>
+<td>extension: <code>pg_textsearch</code> (PostgreSQL License), <code>pg_search</code> (AGPL); <code>ts_rank</code> không phải BM25</td>
+<td>tự viết SQL (mục 4.5)</td>
+<td>iterative scan, partial index, partition, <strong>Row-Level Security</strong></td>
+</tr>
+<tr>
+<td><strong>Qdrant</strong> (1.16+)</td>
+<td>HNSW, quantization scalar/binary/PQ, inline storage</td>
+<td>sparse + modifier IDF; full-text tokenizer <code>multilingual</code></td>
+<td><code>prefetch</code> + RRF (<span class="arithmatex">\(k\)</span>=2 mặc định), weighted RRF, DBSF, formula</td>
+<td>filterable HNSW, ACORN, <code>is_tenant</code>, tiered multitenancy</td>
+</tr>
+<tr>
+<td><strong>Milvus</strong> (2.6.x)</td>
+<td>HNSW, IVF, DiskANN, IVF_RABITQ, GPU</td>
+<td>BM25 tích hợp (từ 2.5); Lindera, ICU, nhận diện ngôn ngữ</td>
+<td>RRF, weighted</td>
+<td>partition key, scalar index</td>
+</tr>
+<tr>
+<td><strong>Elasticsearch</strong> (9.x)</td>
+<td>HNSW kNN, quantization</td>
+<td>BM25 Lucene; kuromoji, sudachi</td>
+<td><code>rrf</code> (60), <code>linear</code> (minmax/l2_norm), <code>text_similarity_reranker</code></td>
+<td>filter trong kNN, DLS</td>
+</tr>
+<tr>
+<td><strong>OpenSearch</strong></td>
+<td>HNSW (Lucene/Faiss)</td>
+<td>BM25 Lucene</td>
+<td><code>hybrid</code> + normalization processor; RRF từ 2.19</td>
+<td>filter, DLS</td>
+</tr>
+<tr>
+<td><strong>Weaviate</strong></td>
+<td>HNSW, flat, dynamic</td>
+<td>BM25F</td>
+<td><code>relativeScoreFusion</code> (mặc định từ 1.24), <code>rankedFusion</code>; <code>alpha</code> mặc định 0,75</td>
+<td>multi-tenancy theo shard</td>
+</tr>
+<tr>
+<td><strong>Vespa</strong></td>
+<td>HNSW, multi-vector</td>
+<td>BM25 + ranking phong phú</td>
+<td>rank profile nhiều pha, có RRF</td>
+<td>filter tích hợp sâu</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Khuyến nghị:</strong></p>
+<ul>
+<li><strong>Giai đoạn 1–2, &lt; 1 triệu chunk:</strong> <strong>Postgres + pgvector + extension BM25</strong>. Ticket, metadata, ACL, trạng thái ingestion đã ở Postgres; một transaction cập nhật cả chunk lẫn vector; RLS cho tenant; hiệu năng thừa cho &lt; 1 QPS.</li>
+<li><strong>Filter phức tạp, nhiều tenant lớn, multi-stage trong một lời gọi:</strong> <strong>Qdrant</strong>.</li>
+<li><strong>Đã có cụm Elasticsearch/OpenSearch</strong> và đội vận hành quen: dùng luôn, tận dụng analyzer tiếng Nhật.</li>
+<li><strong>Tránh</strong> BM25 ở một hệ và vector ở hệ khác khi chưa có pipeline đồng bộ chắc chắn — chunk đã xóa ở bên này vẫn còn bên kia là nguồn bug rất khó tìm.</li>
+</ul>
+<hr />
+<h2 id="7-multi-tenant-isolation">7. Multi-tenant isolation<a class="headerlink" href="#7-multi-tenant-isolation" title="Permanent link">&para;</a></h2>
+<p><strong>Phạm vi dữ liệu.</strong> Help Center public, release notes: toàn cục. Macro, hướng dẫn nội bộ: toàn cục nhưng <code>visibility=agent</code> (chỉ dùng cho draft, không trích nguyên văn cho khách). Q/A trích từ ticket <strong>đã ẩn danh hóa</strong> (Module 04): toàn cục. Ticket nguyên văn, cấu hình, hợp đồng/SLA riêng: <strong>chỉ của đúng tổ chức đó</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Mức cô lập</th>
+<th>Cách làm</th>
+<th>Ưu</th>
+<th>Nhược</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logic</td>
+<td>một collection, <code>tenant_id</code> + filter bắt buộc</td>
+<td>rẻ, đơn giản</td>
+<td>phụ thuộc việc <em>không bao giờ quên</em> filter; selectivity thấp</td>
+</tr>
+<tr>
+<td>Phân vùng</td>
+<td>partition/shard/partial index theo tenant</td>
+<td>recall tốt, xóa tenant dễ</td>
+<td>nhiều phân vùng nhỏ → overhead</td>
+</tr>
+<tr>
+<td>Vật lý</td>
+<td>collection/DB riêng</td>
+<td>cô lập mạnh nhất, dễ audit</td>
+<td>chi phí tăng theo số tenant</td>
+</tr>
+</tbody>
+</table>
+<p>Thực tế hay dùng <strong>lai</strong>: tenant nhỏ ở chung, tenant lớn tách riêng (Qdrant 1.16 gọi là "tiered multitenancy").</p>
+<!-- fig:tenant-isolation -->
+<figure>
+  <img alt="Ba mức cô lập multi-tenant; mỗi màu là dữ liệu của một tenant" loading="lazy" src="../assets/figures/05/tenant-isolation.light.svg#only-light" />
+  <img alt="Ba mức cô lập multi-tenant; mỗi màu là dữ liệu của một tenant" loading="lazy" src="../assets/figures/05/tenant-isolation.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 5.17 — Ba mức cô lập multi-tenant; mỗi màu là dữ liệu của một tenant.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Nguyên tắc bắt buộc:</strong></p>
+<ol>
+<li><strong>Filter tenant do server áp</strong>: <code>tenant_id</code> lấy từ organization của requester trên ticket, ở tầng service đã xác thực; hàm retrieval <strong>từ chối chạy</strong> nếu thiếu. Không bao giờ để LLM tự điền <code>tenant_id</code> vào tool call — đường tấn công prompt injection (Module 07).</li>
+<li><strong>Nhiều lớp:</strong> filter truy vấn + RLS hoặc collection theo tenant + <strong>kiểm tra lại sau retrieval</strong> (mọi chunk phải có <code>tenant_id ∈ {tenant hiện tại, global}</code>, vi phạm → chặn và cảnh báo).</li>
+<li><strong>Cache có tenant trong khóa</strong> (embedding/semantic/retrieval cache — Module 11).</li>
+<li><strong>Test cô lập trong CI:</strong> hai tenant giả với chuỗi "bẫy" duy nhất; truy vấn từ A không bao giờ thấy chuỗi của B.</li>
+<li><strong>Xóa theo tenant</strong> phải chứng minh được: phân vùng giúp xóa sạch; với filter logic, xóa xong phải kiểm tra không còn trong kết quả.</li>
+</ol>
+<hr />
+<h2 id="loi-thuong-gap-cach-xu-ly">Lỗi thường gặp &amp; cách xử lý<a class="headerlink" href="#loi-thuong-gap-cach-xu-ly" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Triệu chứng</th>
+<th>Nguyên nhân gốc</th>
+<th>Cách xử lý</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Truy vấn có mã lỗi <code>ERR_SYNC_409</code> trả về bài lỗi đồng bộ chung chung</td>
+<td>Chỉ dùng dense; tokenizer embedding làm mờ định danh</td>
+<td>Thêm BM25 (hybrid); giữ nguyên văn định danh làm truy vấn sparse riêng</td>
+</tr>
+<tr>
+<td>Truy vấn tiếng Việt "hóa đơn" khớp bài "đơn giản hóa quy trình"</td>
+<td>BM25 tokenize theo âm tiết, không có bigram/từ ghép</td>
+<td>Index thêm bigram âm tiết hoặc tách từ; đo lại Recall@50</td>
+</tr>
+<tr>
+<td>Khách gõ không dấu không tìm được gì</td>
+<td>Chỉ có trường có dấu</td>
+<td>Thêm trường folded (xử lý cả "đ" → "d") với trọng số thấp hơn</td>
+</tr>
+<tr>
+<td>Retrieval trả về 0–3 kết quả cho tenant nhỏ</td>
+<td>Post-filtering với selectivity thấp</td>
+<td>Pre-filter + quét exact cho tập nhỏ; pgvector <code>iterative_scan</code>; phân vùng theo tenant</td>
+</tr>
+<tr>
+<td>Recall giảm dần sau vài tháng dù không đổi model</td>
+<td>HNSW tích tụ tombstone sau nhiều xóa/cập nhật; IVF cụm lệch</td>
+<td>Job đo ANN recall vs exact hằng tuần; optimize/rebuild định kỳ; re-train IVF</td>
+</tr>
+<tr>
+<td>Hybrid kém hơn dense đơn thuần</td>
+<td>Cộng điểm thô BM25 + cosine không chuẩn hóa; hoặc RRF với <span class="arithmatex">\(k\)</span> không như bạn nghĩ (Qdrant mặc định 2)</td>
+<td>Dùng RRF với <span class="arithmatex">\(k\)</span> tường minh, hoặc chuẩn hóa rồi tune <span class="arithmatex">\(\alpha\)</span> trên tập có nhãn</td>
+</tr>
+<tr>
+<td>Lọc <code>locale=ja</code> nên không thấy tài liệu API chỉ có tiếng Anh</td>
+<td>Filter cứng ngôn ngữ</td>
+<td>Bỏ filter locale; ưu tiên cùng ngôn ngữ ở tầng rerank/chọn context</td>
+</tr>
+<tr>
+<td>Agent thấy đoạn ticket của công ty khác trong draft</td>
+<td>Filter tenant bị quên ở một đường code hoặc do LLM điền</td>
+<td>Filter bắt buộc ở tầng service, RLS, kiểm tra sau retrieval, test cô lập trong CI</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tom-tat-cheat-sheet">Tóm tắt (cheat-sheet)<a class="headerlink" href="#tom-tat-cheat-sheet" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Hai loại recall:</strong> relevance recall (chất lượng hàm điểm) ≠ ANN recall (chất lượng index). Đo riêng; tầng retrieval tối ưu <strong>Recall@50–100</strong>.</li>
+<li><strong>BM25:</strong> <span class="arithmatex">\(\sum_{t} \mathrm{IDF}(t)\,\frac{\mathrm{tf}(k_1+1)}{\mathrm{tf} + k_1(1 - b + b|d|/\mathrm{avgdl})}\)</span>, IDF từ trọng số RSJ; <span class="arithmatex">\(k_1 \approx 1{,}2\)</span> điều khiển bão hòa TF, <span class="arithmatex">\(b \approx 0{,}75\)</span> điều khiển chuẩn hóa độ dài.</li>
+<li><strong>IVF:</strong> k-means <span class="arithmatex">\(n_{\text{list}} \sim \sqrt{N}\)</span>, quét <span class="arithmatex">\(n_{\text{probe}}\)</span> cụm; bộ nhớ thấp; cần train.</li>
+<li><strong>PQ + ADC:</strong> <span class="arithmatex">\(m\)</span> đoạn × codebook 256 tâm → <span class="arithmatex">\(m\)</span> byte/vector; khoảng cách = <span class="arithmatex">\(\sum_j T_j[i_j]\)</span>; luôn rescoring.</li>
+<li><strong>HNSW:</strong> tầng <span class="arithmatex">\(\ell = \lfloor -\ln U / \ln M\rfloor\)</span>; tìm kiếm <span class="arithmatex">\(\approx O((\log N + ef)\,M\,D)\)</span>; đồ thị ≈ <span class="arithmatex">\((8M+4)\)</span> byte/điểm; <span class="arithmatex">\(ef_{\text{search}}\)</span> là núm vặn lúc chạy.</li>
+<li><strong>Bộ nhớ:</strong> <span class="arithmatex">\(N(D\cdot\text{bytes} + (8M+4)\gamma + \text{payload})\)</span>; 1M × 1024-d fp16 + HNSW ≈ 2,4 GB.</li>
+<li><strong>RRF:</strong> <span class="arithmatex">\(\sum_r 1/(k + \mathrm{rank}_r)\)</span>; <span class="arithmatex">\(k=60\)</span> là mặc định của bài gốc, ES, OpenSearch; Qdrant mặc định <span class="arithmatex">\(k=2\)</span>. Thưởng đồng thuận, không cần chuẩn hóa.</li>
+<li><strong>Convex:</strong> <span class="arithmatex">\(\alpha \tilde{s}_D + (1-\alpha)\tilde{s}_S\)</span>; cần chuẩn hóa và tune <span class="arithmatex">\(\alpha\)</span>, thường thắng RRF khi có ít dữ liệu nhãn (Bruch et al.).</li>
+<li><strong>Filter:</strong> post-filter cần <span class="arithmatex">\(k' \approx k/s\)</span>; in-graph HNSW gãy khi <span class="arithmatex">\((1-s)^{M_0}\)</span> lớn; giải pháp: planner + pre-filter exact, filterable HNSW, ACORN, iterative scan, phân vùng.</li>
+<li><strong>Tenant:</strong> filter do server áp, RLS/collection riêng, kiểm tra sau retrieval, cache có tenant trong khóa, test cô lập trong CI.</li>
+<li><strong>Zendesk:</strong> 0,3–0,7M vector, &lt; 1 QPS → chất lượng là nút thắt, không phải hạ tầng. Mặc định: Postgres + pgvector + BM25 extension, hybrid RRF top-100 mỗi bên → top-50 cho reranker.</li>
+</ul>
+<hr />
+<h2 id="cau-hoi-tu-kiem-tra-phong-van">Câu hỏi tự kiểm tra / phỏng vấn<a class="headerlink" href="#cau-hoi-tu-kiem-tra-phong-van" title="Permanent link">&para;</a></h2>
+<p><strong>1. Vì sao IDF của BM25 có dạng <span class="arithmatex">\(\log\frac{N - n_t + 0{,}5}{n_t + 0{,}5}\)</span> mà không phải <span class="arithmatex">\(\log\frac{N}{n_t}\)</span>?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Nó rơi ra từ Binary Independence Model: trọng số RSJ <span class="arithmatex">\(\log\frac{p_t(1-u_t)}{u_t(1-p_t)}\)</span> với giả định <span class="arithmatex">\(p_t = 0{,}5\)</span> khi không có nhãn và <span class="arithmatex">\(u_t \approx (n_t + 0{,}5)/(N+1)\)</span>. Số 0,5 là làm trơn. Khi <span class="arithmatex">\(n_t &gt; N/2\)</span> trọng số âm, nên Lucene dùng <span class="arithmatex">\(\log(1 + \cdot)\)</span> để luôn dương. Với <span class="arithmatex">\(n_t \ll N\)</span> hai công thức xấp xỉ nhau.</p>
+</details>
+<p><strong>2. Một chunk nhắc "hoàn tiền" 10 lần có điểm BM25 gấp bao nhiêu lần chunk nhắc 1 lần (cùng độ dài trung bình, <span class="arithmatex">\(k_1 = 1{,}2\)</span>)? Vì sao thiết kế như vậy?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p><span class="arithmatex">\(\frac{2{,}2 \cdot 10}{10 + 1{,}2} = 1{,}964\)</span> so với <span class="arithmatex">\(1{,}0\)</span> → chưa tới 2 lần. Saturation phản ánh trực giác "eliteness": vài lần nhắc đã đủ chứng tỏ tài liệu nói về chủ đề; lặp thêm gần như không thêm bằng chứng, và chống spam từ khóa.</p>
+</details>
+<p><strong>3. Tính bộ nhớ RAM cho 2 triệu vector 768-d, fp16, HNSW <span class="arithmatex">\(M = 32\)</span>, payload 200 byte.</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Vector: <span class="arithmatex">\(2\cdot10^6 \times 768 \times 2 = 3{,}07\)</span> GB. Đồ thị: <span class="arithmatex">\((8 \times 32 + 4) = 260\)</span> byte × 2·10⁶ = 0,52 GB (× overhead 1,2 ≈ 0,62 GB). Payload: 0,4 GB. Tổng ≈ 4,1 GB (ước lượng), cộng dư địa ×2 khi re-index blue/green.</p>
+</details>
+<p><strong>4. Giải thích ADC trong PQ và vì sao nó nhanh.</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Query giữ nguyên; tính trước <span class="arithmatex">\(m\)</span> bảng <span class="arithmatex">\(T_j[c] = \|q^{(j)} - c^{(j)}_c\|^2\)</span> (chi phí <span class="arithmatex">\(K^* D\)</span> một lần). Khoảng cách tới mỗi vector nén là tổng <span class="arithmatex">\(m\)</span> giá trị tra bảng thay vì <span class="arithmatex">\(D\)</span> phép nhân-cộng, đọc <span class="arithmatex">\(m\)</span> byte thay vì <span class="arithmatex">\(4D\)</span> byte. Chính xác hơn SDC vì chỉ database chịu lỗi lượng tử hóa.</p>
+</details>
+<p><strong>5. Vì sao HNSW mất recall khi filter có selectivity 1%? Nêu ba cách khắc phục.</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Xác suất một nút không có láng giềng nào thỏa filter là <span class="arithmatex">\((1-s)^{M_0} \approx 0{,}72\)</span> với <span class="arithmatex">\(M_0 = 32\)</span>: đồ thị con bị đứt, beam search kẹt; nếu đi qua nút không hợp lệ thì chi phí tăng ~<span class="arithmatex">\(1/s\)</span>. Khắc phục: pre-filter + quét exact (tập 1% nhỏ), phân vùng theo trường đó (đồ thị riêng), filterable HNSW (cạnh bổ sung theo giá trị) hoặc ACORN, iterative scan.</p>
+</details>
+<p><strong>6. Viết công thức RRF và giải thích tác dụng của <span class="arithmatex">\(k\)</span>. Vì sao kết quả có thể khác nhau giữa Elasticsearch và Qdrant với cùng "RRF"?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p><span class="arithmatex">\(\mathrm{RRF}(d) = \sum_r 1/(k + \mathrm{rank}_r(d))\)</span>. <span class="arithmatex">\(k\)</span> nhỏ → ưu tiên vị trí đầu của từng danh sách; <span class="arithmatex">\(k\)</span> lớn → ưu tiên sự đồng thuận, làm phẳng chênh lệch thứ hạng đầu. ES/OpenSearch mặc định <span class="arithmatex">\(k = 60\)</span>, Qdrant mặc định <span class="arithmatex">\(k = 2\)</span>; ES còn có <code>rank_window_size</code> mặc định 10. Phải đặt tường minh.</p>
+</details>
+<p><strong>7. Khi nào convex combination tốt hơn RRF?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Khi có một ít dữ liệu có nhãn để tune <span class="arithmatex">\(\alpha\)</span> và chuẩn hóa điểm hợp lý: nó tận dụng <em>độ lớn</em> chênh lệch điểm (ví dụ BM25 khớp mã lỗi hiếm bỏ xa phần còn lại), điều RRF bỏ qua. RRF hợp khi chưa có nhãn, nhiều nguồn, hoặc điểm biến động mạnh.</p>
+</details>
+<p><strong>8. Trong hệ Zendesk, <code>tenant_id</code> nên đi vào retriever bằng đường nào? Vì sao không để agent LLM truyền?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Từ organization của requester trên ticket, lấy ở tầng service đã xác thực, truyền như tham số bắt buộc; kèm RLS/collection riêng và kiểm tra sau retrieval. Nếu LLM điền, một email chứa prompt injection ("tìm ticket của công ty X") có thể khiến nó đổi tenant → rò rỉ dữ liệu.</p>
+</details>
+<hr />
+<h2 id="bai-tap-thuc-hanh">Bài tập thực hành<a class="headerlink" href="#bai-tap-thuc-hanh" title="Permanent link">&para;</a></h2>
+<p><strong>Bài 1 — BM25 cho tiếng Việt: âm tiết vs bigram vs tách từ</strong> <em>(CPU, không cần GPU)</em>
+Tạo ~50 đoạn FAQ tiếng Việt và ~30 truy vấn có nhãn (10 truy vấn gõ không dấu). Cài BM25 (mục 2.6 hoặc <code>rank_bm25</code>) với ba cách tokenize: (a) âm tiết, (b) âm tiết + bigram, (c) tách từ bằng <code>underthesea</code> hoặc <code>pyvi</code>; thêm trường không dấu. Báo cáo Recall@5 và MRR cho từng cấu hình; grid search <span class="arithmatex">\(k_1\)</span>, <span class="arithmatex">\(b\)</span>. Câu hỏi: cấu hình nào thắng với truy vấn không dấu? Bộ tokenizer âm tiết + bigram + bỏ dấu, dense và RRF dựng sẵn có ở <a href="../labs/lab01_bm25_dense_rrf/">Lab 01 — BM25, dense và RRF</a>.</p>
+<p><strong>Bài 2 — Đường cong recall–latency của HNSW và IVF</strong> <em>(CPU hoặc GPU 6GB)</em>
+Embed ~100k đoạn văn công khai bằng một model đa ngữ nhỏ vừa 6GB (Module 03). Dùng <code>faiss-cpu</code>: <code>IndexFlatIP</code> làm ground truth; <code>IndexHNSWFlat</code> với <span class="arithmatex">\(M \in \{8, 16, 32\}\)</span>, quét <code>efSearch</code>; <code>IndexIVFFlat</code> với <code>nlist</code> = 256, quét <code>nprobe</code>; <code>IndexIVFPQ</code> <span class="arithmatex">\(m = 32\)</span> + rescoring. Vẽ recall@10 vs latency và ghi bộ nhớ, so với công thức ở mục 3.8.</p>
+<p><strong>Bài 3 — Hybrid và filter trong Postgres</strong> <em>(CPU, Docker)</em>
+Chạy Postgres có pgvector (và <code>pg_textsearch</code> nếu cài được; nếu không, BM25 tính trong Python). Tạo bảng <code>chunks(tenant_id, locale, visibility, content_tok, embedding)</code> với 3 tenant, một tenant chỉ chiếm 1% dữ liệu. (a) Cài truy vấn RRF như mục 4.5, so Recall@20 với từng hệ đơn lẻ; (b) cho tenant 1%, so sánh số kết quả trả về khi <code>hnsw.iterative_scan = off</code> và <code>relaxed_order</code>; (c) viết test chứng minh tenant A không bao giờ thấy chuỗi "bẫy" của tenant B.</p>
+<hr />
+<h2 id="tai-lieu-tham-khao">Tài liệu tham khảo<a class="headerlink" href="#tai-lieu-tham-khao" title="Permanent link">&para;</a></h2>
+<p><strong>Sparse retrieval</strong></p>
+<ul>
+<li>Robertson, S., Zaragoza, H. (2009). <em>The Probabilistic Relevance Framework: BM25 and Beyond</em>. Foundations and Trends in Information Retrieval 3(4). https://www.emerald.com/ftinr/article/4/1-2/1/1326508/The-Probabilistic-Relevance-Framework-BM25-and</li>
+<li>Apache Lucene — <code>BM25Similarity</code> (mặc định <span class="arithmatex">\(k_1 = 1{,}2\)</span>, <span class="arithmatex">\(b = 0{,}75\)</span>; công thức IDF). https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html</li>
+<li>Thakur, N. et al. (2021). <em>BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models</em>. arXiv:2104.08663. https://arxiv.org/abs/2104.08663</li>
+<li>Vu, T. et al. (2018). <em>VnCoreNLP: A Vietnamese Natural Language Processing Toolkit</em>. arXiv:1801.01331. https://arxiv.org/abs/1801.01331</li>
+<li>Elasticsearch — Japanese (kuromoji) analysis plugin. https://www.elastic.co/docs/reference/elasticsearch/plugins/analysis-kuromoji ; Sudachi plugin: https://github.com/WorksApplications/elasticsearch-sudachi</li>
+<li><code>pg_textsearch</code> (BM25 cho PostgreSQL). https://github.com/timescale/pg_textsearch</li>
+</ul>
+<p><strong>ANN</strong></p>
+<ul>
+<li>Malkov, Y., Yashunin, D. (2016/2018). <em>Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs</em>. arXiv:1603.09320. https://arxiv.org/abs/1603.09320</li>
+<li>Jégou, H., Douze, M., Schmid, C. (2011). <em>Product Quantization for Nearest Neighbor Search</em>. IEEE TPAMI. https://inria.hal.science/inria-00514462</li>
+<li>Douze, M. et al. (2024). <em>The Faiss library</em>. arXiv:2401.08281. https://arxiv.org/abs/2401.08281</li>
+<li>Subramanya, S. J. et al. (2019). <em>DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node</em>. NeurIPS 2019. https://suhasjs.github.io/files/diskann_neurips19.pdf</li>
+<li>Gao, J., Long, C. (2024). <em>RaBitQ: Quantizing High-Dimensional Vectors with a Theoretical Error Bound for Approximate Nearest Neighbor Search</em>. arXiv:2405.12497. https://arxiv.org/abs/2405.12497</li>
+<li>Aumüller, M., Bernhardsson, E., Faithfull, A. (2018). <em>ANN-Benchmarks: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms</em>. arXiv:1807.05614. https://arxiv.org/abs/1807.05614</li>
+</ul>
+<p><strong>Hybrid &amp; fusion</strong></p>
+<ul>
+<li>Cormack, G., Clarke, C., Büttcher, S. (2009). <em>Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods</em>. SIGIR 2009. https://dblp.org/rec/conf/sigir/CormackCB09.html</li>
+<li>Bruch, S., Gai, S., Ingber, A. (2022). <em>An Analysis of Fusion Functions for Hybrid Retrieval</em>. arXiv:2210.11934. https://arxiv.org/abs/2210.11934</li>
+</ul>
+<p><strong>Filtering</strong></p>
+<ul>
+<li>Patel, L. et al. (2024). <em>ACORN: Performant and Predicate-Agnostic Search Over Vector Embeddings and Structured Data</em>. arXiv:2403.04871. https://arxiv.org/abs/2403.04871</li>
+<li>Gollapudi, S. et al. (2023). <em>Filtered-DiskANN: Graph Algorithms for Approximate Nearest Neighbor Search with Filters</em>. WWW 2023. https://dl.acm.org/doi/fullHtml/10.1145/3543507.3583552</li>
+</ul>
+<p><strong>Tài liệu chính thức (truy cập 10/2026)</strong></p>
+<ul>
+<li>pgvector (HNSW, IVFFlat, iterative index scans, giới hạn chiều). https://github.com/pgvector/pgvector</li>
+<li>Qdrant — Hybrid Queries (RRF, DBSF, weighted RRF). https://qdrant.tech/documentation/search/hybrid-queries/ ; Indexing (payload index, <code>is_tenant</code>, filterable HNSW, tokenizer). https://qdrant.tech/documentation/manage-data/indexing/ ; Qdrant 1.16 (ACORN, tiered multitenancy). https://qdrant.tech/blog/qdrant-1.16.x/</li>
+<li>Milvus — Full Text Search (BM25). https://milvus.io/docs/v2.5.x/full_text_search_with_milvus.md ; Multilingual full-text search 2.6. https://milvus.io/blog/how-milvus-26-powers-hybrid-multilingual-search-at-scale.md</li>
+<li>Elasticsearch — Retrievers (<code>rrf</code>, <code>linear</code>, <code>text_similarity_reranker</code>). https://www.elastic.co/docs/reference/elasticsearch/rest-apis/retrievers</li>
+<li>OpenSearch — Reciprocal rank fusion. https://docs.opensearch.org/latest/vector-search/ai-search/hybrid-search/rrf/</li>
+<li>Weaviate — Hybrid search. https://docs.weaviate.io/weaviate/concepts/search/hybrid-search</li>
+<li>Vespa — Hybrid Text Search Tutorial. https://docs.vespa.ai/en/learn/tutorials/hybrid-search.html</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../04-ingestion-va-chunking/" class="md-footer__link md-footer__link--prev" aria-label="Trước: 04 · Ingestion &amp; chunking">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                04 · Ingestion & chunking
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../06-query-va-reranking/" class="md-footer__link md-footer__link--next" aria-label="Sau: 06 · Query &amp; reranking">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                06 · Query & reranking
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tài liệu học tập — RAG Masterclass · 2026
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/HieNguyen08/rag-masterclass" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

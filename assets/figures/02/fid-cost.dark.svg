@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="602.546087pt" height="241.92pt" viewBox="0 0 602.546087 241.92" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 241.92 
+L 602.546087 241.92 
+L 602.546087 0 
+L 0 0 
+L 0 241.92 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 35.812174 206.107826 
+L 186.073043 206.107826 
+L 186.073043 55.846957 
+L 35.812174 55.846957 
+z
+" clip-path="url(#pa63b78e11c)" style="fill: #643836; stroke: #e66767; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 256.194783 206.107826 
+L 406.455652 206.107826 
+L 406.455652 55.846957 
+L 256.194783 55.846957 
+L 256.194783 206.107826 
+z
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #5a5955; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 256.194783 85.89913 
+L 286.246957 85.89913 
+L 286.246957 55.846957 
+L 256.194783 55.846957 
+z
+" clip-path="url(#pa63b78e11c)" style="fill: #104b0f; stroke: #008300; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 286.246957 115.951304 
+L 316.29913 115.951304 
+L 316.29913 85.89913 
+L 286.246957 85.89913 
+z
+" clip-path="url(#pa63b78e11c)" style="fill: #104b0f; stroke: #008300; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 316.29913 146.003478 
+L 346.351304 146.003478 
+L 346.351304 115.951304 
+L 316.29913 115.951304 
+z
+" clip-path="url(#pa63b78e11c)" style="fill: #104b0f; stroke: #008300; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 346.351304 176.055652 
+L 376.403478 176.055652 
+L 376.403478 146.003478 
+L 346.351304 146.003478 
+z
+" clip-path="url(#pa63b78e11c)" style="fill: #104b0f; stroke: #008300; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 376.403478 206.107826 
+L 406.455652 206.107826 
+L 406.455652 176.055652 
+L 376.403478 176.055652 
+z
+" clip-path="url(#pa63b78e11c)" style="fill: #104b0f; stroke: #008300; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 65.864348 206.107826 
+L 65.864348 55.846957 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 35.812174 176.055652 
+L 186.073043 176.055652 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 95.916522 206.107826 
+L 95.916522 55.846957 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 35.812174 146.003478 
+L 186.073043 146.003478 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 125.968696 206.107826 
+L 125.968696 55.846957 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 35.812174 115.951304 
+L 186.073043 115.951304 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_7">
+    <path d="M 156.02087 206.107826 
+L 156.02087 55.846957 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_8">
+    <path d="M 35.812174 85.89913 
+L 186.073043 85.89913 
+" clip-path="url(#pa63b78e11c)" style="fill: none; stroke: #262624; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #f2f1ec" x="110.942609" y="35.812174" transform="rotate(-0 110.942609 35.812174)">Nối k tài liệu rồi encode</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #f2f1ec" x="110.942609" y="228.646957" transform="rotate(-0 110.942609 228.646957)">chi phí ∝ (kℓ)²</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #f2f1ec" x="331.325217" y="35.812174" transform="rotate(-0 331.325217 35.812174)">FiD: encode từng (x, zⱼ) riêng</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #f2f1ec" x="331.325217" y="228.646957" transform="rotate(-0 331.325217 228.646957)">chi phí ∝ k·ℓ²</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #f2f1ec" x="446.525217" y="85.89913" transform="rotate(-0 446.525217 85.89913)">Ví dụ k = 100, ℓ = 250:</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(446.525217 124.888773)">(kℓ)² = 6,25·10⁸</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(446.525217 137.554398)">k·ℓ² = 6,25·10⁶</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #f2f1ec" transform="translate(446.525217 150.947804)">→ rẻ hơn 100 lần</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #c3c2b7" transform="translate(446.525217 183.346942)">sau đó decoder</text>
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #c3c2b7" transform="translate(446.525217 193.021075)">cross-attend lên mọi</text>
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #c3c2b7" transform="translate(446.525217 203.181489)">trạng thái ẩn đã nối</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #c3c2b7" x="110.942609" y="50.838261" transform="rotate(-0 110.942609 50.838261)">(minh họa k = 5)</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #c3c2b7" x="331.325217" y="50.838261" transform="rotate(-0 331.325217 50.838261)">(minh họa k = 5)</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pa63b78e11c">
+   <rect x="5.76" y="5.76" width="591.026087" height="230.4"/>
+  </clipPath>
+ </defs>
+</svg>

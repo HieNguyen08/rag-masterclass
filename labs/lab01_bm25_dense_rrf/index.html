@@ -1,0 +1,2418 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LLM & RAG từ nền tảng đến hệ thống production — xoay quanh bài toán AI tư vấn khách hàng qua Zendesk">
+      
+      
+        <meta name="author" content="HieNguyen08">
+      
+      
+        <link rel="canonical" href="https://hienguyen08.github.io/rag-masterclass/labs/lab01_bm25_dense_rrf/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../lab02_chunking_metrics/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Lab 01 · BM25, dense, RRF - RAG Masterclass</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Be+Vietnam+Pro:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Be Vietnam Pro";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-01-bm25-dense-retrieval-va-reciprocal-rank-fusion" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="RAG Masterclass" class="md-header__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RAG Masterclass
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 01 · BM25, dense, RRF
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../00-tong-quan-va-bai-toan/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần I · Nền tảng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-embedding-va-bieu-dien/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần II · Pipeline RAG
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../08-kien-truc-rag-nang-cao/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần III · Nâng cao
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../11-production-va-quy-mo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần IV · Hệ thống
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../13-rag-da-phuong-thuc/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần V · Chuyên đề mở rộng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Thực hành
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="RAG Masterclass" class="md-nav__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    RAG Masterclass
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần I · Nền tảng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần I · Nền tảng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-tong-quan-va-bai-toan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00 · Tổng quan & bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-nen-tang-llm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 · Nền tảng LLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-gioi-han-llm-va-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 · Giới hạn LLM & RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần II · Pipeline RAG
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần II · Pipeline RAG
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-embedding-va-bieu-dien/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 · Embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-ingestion-va-chunking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 · Ingestion & chunking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-retrieval-sparse-dense-hybrid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 · Retrieval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-query-va-reranking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 · Query & reranking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07-generation-grounding-guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 · Generation & guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần III · Nâng cao
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần III · Nâng cao
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-kien-truc-rag-nang-cao/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 · Kiến trúc nâng cao & Agentic RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-fine-tuning-cho-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 · Fine-tuning cho RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-danh-gia-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 · Đánh giá, confidence & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần IV · Hệ thống
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần IV · Hệ thống
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../11-production-va-quy-mo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 · Production & quy mô
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../12-capstone-thiet-ke-he-thong-zendesk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 · Capstone: hệ thống AI CS Zendesk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13-rag-da-phuong-thuc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 · RAG đa phương thức
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../14-rag-du-lieu-co-cau-truc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 · RAG trên dữ liệu có cấu trúc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Thực hành
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Thực hành
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 · BM25, dense, RRF
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 · BM25, dense, RRF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lien-he-ly-thuyet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Liên hệ lý thuyết
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-chuan-bi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Chuẩn bị
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tu-email-en-query-lam-sach-truoc-khi-truy-hoi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Từ email đến query: làm sạch trước khi truy hồi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-bm25-va-bo-tach-tu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. BM25 và bộ tách từ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. BM25 và bộ tách từ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-nhac-lai-cong-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Nhắc lại công thức
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-vi-sao-can-tach-tu-rieng-cho-tieng-viet-va-tieng-nhat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Vì sao cần tách từ riêng cho tiếng Việt và tiếng Nhật
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-retriever-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Retriever BM25
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-dense-retrieval-voi-multilingual-e5-small" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Dense retrieval với multilingual-e5-small
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-reciprocal-rank-fusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Reciprocal Rank Fusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-anh-gia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Đánh giá
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ket-qua-mong-oi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Kết quả mong đợi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-bai-tap-mo-rong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Bài tập mở rộng
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab02_chunking_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 · Chunking & metric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab03_reranker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 · Reranker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab04_mini_rag_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 04 · Mini RAG API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab05_eval_escalation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 05 · Đánh giá & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab06_agentic_langgraph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 06 · Agentic RAG với LangGraph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab07_finetune_embedding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 07 · Fine-tune embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab08_ingestion_dedup_pii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 08 · Làm sạch, MinHash, PII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab09_query_rewriting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 09 · Xử lý query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data/README_data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dữ liệu mẫu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lien-he-ly-thuyet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Liên hệ lý thuyết
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-chuan-bi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Chuẩn bị
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tu-email-en-query-lam-sach-truoc-khi-truy-hoi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Từ email đến query: làm sạch trước khi truy hồi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-bm25-va-bo-tach-tu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. BM25 và bộ tách từ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. BM25 và bộ tách từ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-nhac-lai-cong-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Nhắc lại công thức
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-vi-sao-can-tach-tu-rieng-cho-tieng-viet-va-tieng-nhat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Vì sao cần tách từ riêng cho tiếng Việt và tiếng Nhật
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-retriever-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Retriever BM25
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-dense-retrieval-voi-multilingual-e5-small" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Dense retrieval với multilingual-e5-small
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-reciprocal-rank-fusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Reciprocal Rank Fusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-anh-gia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Đánh giá
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ket-qua-mong-oi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Kết quả mong đợi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-bai-tap-mo-rong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Bài tập mở rộng
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/HieNguyen08/rag-masterclass/edit/main/docs/labs/lab01_bm25_dense_rrf.md" title="Chỉnh sửa" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="lab-01-bm25-dense-retrieval-va-reciprocal-rank-fusion">Lab 01 — BM25, dense retrieval và Reciprocal Rank Fusion<a class="headerlink" href="#lab-01-bm25-dense-retrieval-va-reciprocal-rank-fusion" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Thời lượng: ~15 phút · Mức độ: Cơ bản–Trung bình · Tiên quyết: Module 03, Module 05 · GPU: không bắt buộc (dense chạy CPU được)</p>
+</blockquote>
+<h2 id="muc-tieu">Mục tiêu<a class="headerlink" href="#muc-tieu" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Xây retriever BM25 cho corpus Việt/Anh/Nhật với một bộ tách từ đơn giản tự viết (âm tiết + bigram + bỏ dấu; bigram ký tự cho tiếng Nhật).</li>
+<li>Xây dense retriever với <code>intfloat/multilingual-e5-small</code> và dùng đúng tiền tố <code>query:</code> / <code>passage:</code>.</li>
+<li>Cài đặt Reciprocal Rank Fusion (RRF) và giải thích vì sao nó không cần chuẩn hóa điểm.</li>
+<li>Đo Hit@1, Hit@5, MRR@5 theo từng ngôn ngữ, rồi chỉ ra trường hợp BM25 thua và dense bù vào.</li>
+</ul>
+<h2 id="lien-he-ly-thuyet">Liên hệ lý thuyết<a class="headerlink" href="#lien-he-ly-thuyet" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Khái niệm trong lab</th>
+<th>Module</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BM25: TF bão hòa (<span class="arithmatex">\(k_1\)</span>), chuẩn hóa độ dài (<span class="arithmatex">\(b\)</span>), IDF</td>
+<td>Module 05</td>
+</tr>
+<tr>
+<td>Tách từ tiếng Việt (âm tiết và từ ghép), tiếng Nhật (n-gram)</td>
+<td>Module 05</td>
+</tr>
+<tr>
+<td>Bi-encoder, cosine trên vector đã chuẩn hóa, tiền tố instruction</td>
+<td>Module 03</td>
+</tr>
+<tr>
+<td>Hybrid retrieval, RRF, <span class="arithmatex">\(k=60\)</span></td>
+<td>Module 05</td>
+</tr>
+<tr>
+<td>Làm sạch email (quoted reply, chữ ký) trước khi tạo query</td>
+<td>Module 04</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-chuan-bi">1. Chuẩn bị<a class="headerlink" href="#1-chuan-bi" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>labs
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python<span class="w"> </span>data/generate_data.py
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python<span class="w"> </span>lab01_bm25_dense_rrf.py<span class="w"> </span>--no-dense<span class="w">    </span><span class="c1"># chỉ BM25, chạy ngay</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>lab01_bm25_dense_rrf.py<span class="w">               </span><span class="c1"># BM25 + dense + RRF (tải ~470 MB model lần đầu)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>python<span class="w"> </span>lab01_bm25_dense_rrf.py<span class="w"> </span>--show<span class="w"> </span>E-009<span class="w">  </span><span class="c1"># soi chi tiết một email</span>
+</span></code></pre></div>
+<h2 id="2-tu-email-en-query-lam-sach-truoc-khi-truy-hoi">2. Từ email đến query: làm sạch trước khi truy hồi<a class="headerlink" href="#2-tu-email-en-query-lam-sach-truoc-khi-truy-hoi" title="Permanent link">&para;</a></h2>
+<p>Email thật có quoted reply và chữ ký. Nếu đưa nguyên email vào retriever, các từ trong chữ ký ("Kế toán", tên công ty) và trong đoạn trích dẫn của chính support sẽ nhiễu điểm. <code>common.py</code> cắt theo quy tắc đơn giản: dừng ở dòng header trích dẫn hoặc dòng chào cuối thư, bỏ mọi dòng bắt đầu bằng <code>&gt;</code>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># common.py (rút gọn)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">_QUOTE_HEADER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="sa">r</span><span class="s2">"^(On .+wrote:|Vào .+đã viết:|\d</span><span class="si">{4}</span><span class="s2">年\d{1,2}月\d{1,2}日.*:|-----Original Message-----|From: .+)$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">_SIGNATURE_START</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="sa">r</span><span class="s2">"^(Trân trọng|Thân mến|Best regards|Kind regards|Regards|Thanks,?|"</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="sa">r</span><span class="s2">"よろしくお願いいたします|--\s*|---+)\s*[,.。]?\s*$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">clean_email</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">kept</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">s</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="k">if</span> <span class="n">_QUOTE_HEADER</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>      <span class="c1"># từ đây trở xuống là thư cũ</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="k">break</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"&gt;"</span><span class="p">):</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>            <span class="k">continue</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="k">if</span> <span class="n">_SIGNATURE_START</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>   <span class="c1"># chữ ký thường nằm sau lời chào</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>            <span class="k">break</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="n">kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">kept</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="n">body</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="k">def</span><span class="w"> </span><span class="nf">email_query</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="n">subject</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^((re|fw|fwd|tl)\s*:\s*)+"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">email</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"subject"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">clean_email</span><span class="p">(</span><span class="n">email</span><span class="p">[</span><span class="s1">'body'</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Quy tắc này cố tình đơn giản (Module 04 bàn bản đầy đủ: mô hình phân loại dòng, xử lý reply nằm trên/dưới, disclaimer nhiều ngôn ngữ).</p>
+<h2 id="3-bm25-va-bo-tach-tu">3. BM25 và bộ tách từ<a class="headerlink" href="#3-bm25-va-bo-tach-tu" title="Permanent link">&para;</a></h2>
+<h3 id="31-nhac-lai-cong-thuc">3.1 Nhắc lại công thức<a class="headerlink" href="#31-nhac-lai-cong-thuc" title="Permanent link">&para;</a></h3>
+<p>Với query <span class="arithmatex">\(q\)</span> gồm các term <span class="arithmatex">\(t\)</span>, tài liệu <span class="arithmatex">\(d\)</span> có độ dài <span class="arithmatex">\(|d|\)</span>, độ dài trung bình <span class="arithmatex">\(\text{avgdl}\)</span>, <span class="arithmatex">\(f(t,d)\)</span> là số lần <span class="arithmatex">\(t\)</span> xuất hiện trong <span class="arithmatex">\(d\)</span>:</p>
+<div class="arithmatex">\[
+\text{BM25}(q,d)=\sum_{t\in q}\text{IDF}(t)\cdot\frac{f(t,d)\,(k_1+1)}{f(t,d)+k_1\left(1-b+b\,\frac{|d|}{\text{avgdl}}\right)}
+\]</div>
+<p><code>rank_bm25.BM25Okapi</code> dùng <span class="arithmatex">\(\text{IDF}(t)=\ln\frac{N-n_t+0.5}{n_t+0.5}\)</span> (<span class="arithmatex">\(N\)</span> số tài liệu, <span class="arithmatex">\(n_t\)</span> số tài liệu chứa <span class="arithmatex">\(t\)</span>); term xuất hiện ở hơn nửa corpus cho IDF âm, nên thư viện thay bằng một giá trị sàn nhỏ (<span class="arithmatex">\(\varepsilon \cdot\)</span> IDF trung bình). Lab dùng <span class="arithmatex">\(k_1=1.2\)</span>, <span class="arithmatex">\(b=0.75\)</span>.</p>
+<p>Ví dụ số: <span class="arithmatex">\(k_1=1.2\)</span>, <span class="arithmatex">\(b=0.75\)</span>, tài liệu dài đúng bằng trung bình (<span class="arithmatex">\(|d|/\text{avgdl}=1\)</span>). Phần TF bằng <span class="arithmatex">\(\frac{f\cdot 2.2}{f+1.2}\)</span>: <span class="arithmatex">\(f=1 \to 1.0\)</span>; <span class="arithmatex">\(f=2 \to 1.375\)</span>; <span class="arithmatex">\(f=10 \to 1.96\)</span>. Lặp từ 10 lần chỉ được gần gấp đôi điểm so với 1 lần: đó là <strong>bão hòa TF</strong>. Nếu tài liệu dài gấp đôi trung bình, mẫu số thành <span class="arithmatex">\(f+1.2\cdot 1.75=f+2.1\)</span>, nên <span class="arithmatex">\(f=1\)</span> chỉ còn <span class="arithmatex">\(2.2/3.1 = 0.71\)</span>.</p>
+<h3 id="32-vi-sao-can-tach-tu-rieng-cho-tieng-viet-va-tieng-nhat">3.2 Vì sao cần tách từ riêng cho tiếng Việt và tiếng Nhật<a class="headerlink" href="#32-vi-sao-can-tach-tu-rieng-cho-tieng-viet-va-tieng-nhat" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Tiếng Việt viết cách theo <strong>âm tiết</strong>, không theo từ: "mật khẩu" là 2 token "mật", "khẩu". Token "khẩu" đứng một mình gần như vô nghĩa. Thêm <strong>bigram âm tiết</strong> (<code>mật_khẩu</code>) là cách rẻ để xấp xỉ từ ghép mà không cần bộ tách từ như underthesea/pyvi.</li>
+<li>Khách gõ <strong>không dấu</strong> ("doi the thanh toan"). Token <code>doi</code> không khớp <code>đổi</code>. Ta thêm bản bỏ dấu (<code>fold="add"</code>) vào cả tài liệu lẫn query.</li>
+<li>Tiếng Nhật không có khoảng trắng: <code>\w+</code> sẽ nuốt cả câu thành một token. Ta cắt mỗi đoạn CJK thành <strong>bigram ký tự</strong> ("パスワード" → "パス", "スワ", "ワー", "ード").</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># common.py (rút gọn — bản đầy đủ trong file)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">strip_accents</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"đ"</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"Đ"</span><span class="p">,</span> <span class="s2">"D"</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s2">"NFD"</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">category</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"Mn"</span><span class="p">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="s2">"add"</span><span class="p">,</span> <span class="n">bigrams</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_stopwords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s2">"NFC"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>          <span class="c1"># NFC: tránh 2 cách mã hóa dấu</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">_CJK_RUN</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>     <span class="c1"># tách đoạn CJK khỏi chữ Latin</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">tokens</span><span class="p">,</span> <span class="n">syll</span><span class="p">,</span> <span class="n">syll_folded</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">flush</span><span class="p">():</span>                                               <span class="c1"># sinh bigram cho chuỗi âm tiết liền nhau</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="k">if</span> <span class="n">bigrams</span><span class="p">:</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>            <span class="n">base</span> <span class="o">=</span> <span class="n">syll_folded</span> <span class="k">if</span> <span class="n">fold</span> <span class="o">==</span> <span class="s2">"only"</span> <span class="k">else</span> <span class="n">syll</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>            <span class="n">bg</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">base</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>            <span class="n">tokens</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bg</span><span class="p">)</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>            <span class="k">if</span> <span class="n">fold</span> <span class="o">==</span> <span class="s2">"add"</span><span class="p">:</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>                <span class="n">bg_f</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">syll_folded</span><span class="p">,</span> <span class="n">syll_folded</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>                <span class="n">tokens</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bg_f</span><span class="p">,</span> <span class="n">bg</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span> <span class="o">!=</span> <span class="n">o</span><span class="p">)</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>        <span class="n">syll</span><span class="o">.</span><span class="n">clear</span><span class="p">();</span> <span class="n">syll_folded</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">_TOKEN</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>        <span class="k">if</span> <span class="n">_CJK_RUN</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">tok</span><span class="p">):</span>                            <span class="c1"># tiếng Nhật: bigram ký tự</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>            <span class="n">flush</span><span class="p">()</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>            <span class="n">tokens</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">tok</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">[</span><span class="n">tok</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)])</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>            <span class="k">continue</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>        <span class="k">if</span> <span class="n">remove_stopwords</span> <span class="ow">and</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">STOPWORDS</span><span class="p">:</span>              <span class="c1"># stopword làm đứt chuỗi bigram</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>            <span class="n">flush</span><span class="p">();</span> <span class="k">continue</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>        <span class="n">folded</span> <span class="o">=</span> <span class="n">strip_accents</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>        <span class="k">if</span> <span class="n">fold</span> <span class="o">==</span> <span class="s2">"only"</span><span class="p">:</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folded</span><span class="p">)</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>            <span class="k">if</span> <span class="n">fold</span> <span class="o">==</span> <span class="s2">"add"</span> <span class="ow">and</span> <span class="n">folded</span> <span class="o">!=</span> <span class="n">tok</span><span class="p">:</span>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folded</span><span class="p">)</span>
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>        <span class="n">syll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok</span> <span class="k">if</span> <span class="n">fold</span> <span class="o">!=</span> <span class="s2">"only"</span> <span class="k">else</span> <span class="n">folded</span><span class="p">)</span>
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>        <span class="n">syll_folded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folded</span><span class="p">)</span>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>    <span class="n">flush</span><span class="p">()</span>
+</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>    <span class="k">return</span> <span class="n">tokens</span>
+</span></code></pre></div>
+<p>Thử nhanh:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&gt;&gt;&gt; tokenize("Đặt lại mật khẩu đăng nhập của tôi")
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>['đặt','dat','lại','lai','mật','mat','khẩu','khau','đăng','dang','nhập','nhap',
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a> 'đặt_lại','lại_mật','mật_khẩu','khẩu_đăng','đăng_nhập',
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a> 'dat_lai','lai_mat','mat_khau','khau_dang','dang_nhap']
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>&gt;&gt;&gt; tokenize("quen mat khau")
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>['quen','mat','khau','quen_mat','mat_khau']          # khớp được 'mat_khau' của tài liệu
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>&gt;&gt;&gt; tokenize("パスワードの再設定 API 429")
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>['パス','スワ','ワー','ード','ドの','の再','再設','設定','api','429','api_429']
+</span></code></pre></div>
+<h3 id="33-retriever-bm25">3.3 Retriever BM25<a class="headerlink" href="#33-retriever-bm25" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rank_bm25</span><span class="w"> </span><span class="kn">import</span> <span class="n">BM25Okapi</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">BM25Retriever</span><span class="p">:</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="s2">"add"</span><span class="p">,</span> <span class="n">bigrams</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fold</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bigrams</span> <span class="o">=</span> <span class="n">ids</span><span class="p">,</span> <span class="n">fold</span><span class="p">,</span> <span class="n">bigrams</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">corpus_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">tokenize</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="n">fold</span><span class="p">,</span> <span class="n">bigrams</span><span class="o">=</span><span class="n">bigrams</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">]</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">bm25</span> <span class="o">=</span> <span class="n">BM25Okapi</span><span class="p">(</span><span class="n">corpus_tokens</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="n">k1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bm25</span><span class="o">.</span><span class="n">get_scores</span><span class="p">(</span><span class="n">tokenize</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fold</span><span class="p">,</span> <span class="n">bigrams</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bigrams</span><span class="p">))</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">scores</span><span class="p">)[:</span><span class="n">k</span><span class="p">]</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">float</span><span class="p">(</span><span class="n">scores</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">top</span><span class="p">]</span>
+</span></code></pre></div>
+<p><code>get_scores</code> tính điểm cho <strong>mọi</strong> tài liệu, độ phức tạp <span class="arithmatex">\(O(|q|\cdot N)\)</span>. Với 40 bài thì không sao; ở quy mô 800 bài + 200.000 ticket thì phải dùng inverted index (Elasticsearch/OpenSearch, Tantivy, hay <code>bm25s</code>) — xem Module 05.</p>
+<h2 id="4-dense-retrieval-voi-multilingual-e5-small">4. Dense retrieval với multilingual-e5-small<a class="headerlink" href="#4-dense-retrieval-voi-multilingual-e5-small" title="Permanent link">&para;</a></h2>
+<p><code>intfloat/multilingual-e5-small</code> (~118M tham số, vector 384 chiều, ~100 ngôn ngữ trong đó có vi/en/ja) đủ nhỏ để chạy CPU. Model card yêu cầu tiền tố <strong><code>query:</code></strong> cho câu hỏi và <strong><code>passage:</code></strong> cho tài liệu; quên tiền tố là lỗi phổ biến làm giảm chất lượng mà không báo lỗi.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sentence_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">SentenceTransformer</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">DENSE_MODEL</span> <span class="o">=</span> <span class="s2">"intfloat/multilingual-e5-small"</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">DenseRetriever</span><span class="p">:</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">DENSE_MODEL</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="c1"># normalize_embeddings=True -&gt; tích vô hướng chính là cosine</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">doc_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="s2">"passage: "</span><span class="p">,</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>                                         <span class="n">normalize_embeddings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert_to_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">encode_queries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">):</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="s2">"query: "</span><span class="p">,</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>                                 <span class="n">normalize_embeddings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert_to_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">q_emb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>        <span class="k">if</span> <span class="n">q_emb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>            <span class="n">q_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode_queries</span><span class="p">([</span><span class="n">query</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc_emb</span> <span class="o">@</span> <span class="n">q_emb</span>          <span class="c1"># exact kNN; ANN (HNSW) chỉ cần khi N lớn</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>        <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">scores</span><span class="p">)[:</span><span class="n">k</span><span class="p">]</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">float</span><span class="p">(</span><span class="n">scores</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">top</span><span class="p">]</span>
+</span></code></pre></div>
+<p>Tham số <code>prompt=</code> của <code>encode</code> (sentence-transformers ≥ 2.4, vẫn có ở 6.x) ghép tiền tố vào trước mỗi câu, tương đương với việc tự viết <code>"query: " + q</code>.</p>
+<h2 id="5-reciprocal-rank-fusion">5. Reciprocal Rank Fusion<a class="headerlink" href="#5-reciprocal-rank-fusion" title="Permanent link">&para;</a></h2>
+<p>BM25 trả điểm trong khoảng 0–40, cosine trong khoảng 0,7–0,9: cộng thẳng hai thang này là vô nghĩa. RRF chỉ dùng <strong>thứ hạng</strong>:</p>
+<div class="arithmatex">\[
+\text{RRF}(d)=\sum_{r\in R}\frac{w_r}{k+\text{rank}_r(d)}
+\]</div>
+<p>với <span class="arithmatex">\(\text{rank}\)</span> bắt đầu từ 1 và <span class="arithmatex">\(k=60\)</span> (giá trị Cormack và cộng sự, 2009 đề xuất). Hằng số <span class="arithmatex">\(k\)</span> làm phẳng chênh lệch giữa các hạng đầu: với <span class="arithmatex">\(k=60\)</span>, hạng 1 được <span class="arithmatex">\(1/61=0.0164\)</span>, hạng 2 được <span class="arithmatex">\(1/62=0.0161\)</span>, gần như ngang nhau. Nhờ vậy một tài liệu đứng đầu ở <strong>cả hai</strong> danh sách luôn thắng một tài liệu chỉ đứng đầu ở một danh sách.</p>
+<p>Ví dụ số: BM25 xếp <code>[KB-016, KB-017, KB-002]</code>, dense xếp <code>[KB-017, KB-040, KB-016]</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Tài liệu</th>
+<th>Hạng BM25</th>
+<th>Hạng dense</th>
+<th>RRF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KB-017</td>
+<td>2</td>
+<td>1</td>
+<td><span class="arithmatex">\(1/62+1/61=0.03252\)</span></td>
+</tr>
+<tr>
+<td>KB-016</td>
+<td>1</td>
+<td>3</td>
+<td><span class="arithmatex">\(1/61+1/63=0.03227\)</span></td>
+</tr>
+<tr>
+<td>KB-040</td>
+<td>—</td>
+<td>2</td>
+<td><span class="arithmatex">\(1/62=0.01613\)</span></td>
+</tr>
+<tr>
+<td>KB-002</td>
+<td>3</td>
+<td>—</td>
+<td><span class="arithmatex">\(1/63=0.01587\)</span></td>
+</tr>
+</tbody>
+</table>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">rrf</span><span class="p">(</span><span class="n">rankings</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="ow">or</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">rankings</span><span class="p">)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">fused</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">ranking</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">rankings</span><span class="p">):</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">doc_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ranking</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>            <span class="n">fused</span><span class="p">[</span><span class="n">doc_id</span><span class="p">]</span> <span class="o">+=</span> <span class="n">w</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="n">rank</span><span class="p">)</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fused</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[:</span><span class="n">top_n</span><span class="p">]</span>
+</span></code></pre></div>
+<h2 id="6-anh-gia">6. Đánh giá<a class="headerlink" href="#6-anh-gia" title="Permanent link">&para;</a></h2>
+<p>Chỉ 53 email có <code>relevant_doc_ids</code> được dùng để đo retrieval (7 email không có tài liệu nào để dành cho abstention ở lab04). Hit@k = có ít nhất một tài liệu đúng trong top-k; MRR@k = trung bình của <span class="arithmatex">\(1/\text{hạng}\)</span> của tài liệu đúng đầu tiên (định nghĩa đầy đủ ở lab02).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">hit_and_rr</span><span class="p">(</span><span class="n">ranked_ids</span><span class="p">,</span> <span class="n">relevant</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ranked_ids</span><span class="p">[:</span><span class="n">k</span><span class="p">],</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>        <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">relevant</span><span class="p">:</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>            <span class="k">return</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">i</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">queries</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">load_emails</span><span class="p">()</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s2">"relevant_doc_ids"</span><span class="p">]]</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="n">q_texts</span> <span class="o">=</span> <span class="p">[</span><span class="n">email_query</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">]</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="n">bm25</span> <span class="o">=</span> <span class="n">BM25Retriever</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">texts</span><span class="p">)</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="n">runs_bm25</span> <span class="o">=</span> <span class="p">[[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">bm25</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">)]</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">q_texts</span><span class="p">]</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="n">dense</span> <span class="o">=</span> <span class="n">DenseRetriever</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">texts</span><span class="p">)</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">q_emb</span> <span class="o">=</span> <span class="n">dense</span><span class="o">.</span><span class="n">encode_queries</span><span class="p">(</span><span class="n">q_texts</span><span class="p">)</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="n">runs_dense</span> <span class="o">=</span> <span class="p">[[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">dense</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">e</span><span class="p">)]</span> <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q_texts</span><span class="p">,</span> <span class="n">q_emb</span><span class="p">)]</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="n">runs_rrf</span> <span class="o">=</span> <span class="p">[[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">rrf</span><span class="p">([</span><span class="n">b</span><span class="p">,</span> <span class="n">de</span><span class="p">],</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">20</span><span class="p">)]</span> <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">de</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">runs_bm25</span><span class="p">,</span> <span class="n">runs_dense</span><span class="p">)]</span>
+</span></code></pre></div>
+<p>Script in thêm bảng Hit@1 theo ngôn ngữ và một cấu hình ablation <code>bm25_plain</code> (giữ dấu, không bigram) để bạn thấy tác dụng của bộ tách từ.</p>
+<h2 id="7-ket-qua-mong-oi">7. Kết quả mong đợi<a class="headerlink" href="#7-ket-qua-mong-oi" title="Permanent link">&para;</a></h2>
+<p>Phần BM25 (đã chạy thật trong sandbox, dữ liệu mặc định):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Đánh giá trên 53 email có nhãn | k=5
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>hệ thống             Hit@1   Hit@5   MRR@5
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>bm25                 0.830   0.906   0.859
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>bm25_plain           0.849   0.906   0.874
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>Hit@1 theo ngôn ngữ:
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>hệ thống               en(14)      ja(4)   mixed(2)     vi(33)
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>bm25                    0.786      0.750      1.000      0.848
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>bm25_plain              0.786      0.750      1.000      0.879
+</span></code></pre></div>
+<p>Đọc kết quả cho đúng:</p>
+<ul>
+<li>Trên bộ này, bigram + bỏ dấu <strong>không</strong> thắng bản thô (khác nhau 1/53 email = 1,9 điểm). Lý do: tài liệu ngắn, email thường dùng đúng từ khóa của bài. Bigram cũng làm IDF của các cụm phổ biến ("thanh_toán", "người_dùng") lấn át. Đây là bài học thật: một kỹ thuật "hợp lý trên giấy" phải được đo trên dữ liệu của mình, và 53 mẫu không đủ để phân biệt chênh lệch 2 điểm (xem bootstrap ở lab03).</li>
+<li>Bỏ dấu cứu được email gõ không dấu: <code>E-009</code> "doi the visa ... gia han tu dong" → top-1 <code>KB-009</code> với điểm 34,96 so với 20,03 của hạng 2.</li>
+<li>Các lỗi còn lại của BM25 rơi vào: email ngắn mà ý chính không nằm ở từ khóa (<code>E-039</code> muốn gặp người, <code>E-041</code> "SSO outage"), email tiếng Nhật về hoàn tiền (<code>E-052</code>, không có bài tiếng Nhật về hoàn tiền nên cần <strong>cross-lingual</strong>), câu hỏi "giảm giá cho nonprofit" (<code>E-048</code>).</li>
+</ul>
+<p>Phần dense và RRF <strong>chưa chạy được trong sandbox</strong> (không tải được model). Khi bạn chạy trên máy, kỳ vọng định tính: dense tốt hơn ở email tiếng Nhật hỏi về tài liệu chỉ có bản Việt/Anh (cross-lingual) và ở email diễn đạt khác từ khóa; BM25 tốt hơn ở mã lỗi/tên riêng ("429", "InvalidAudience", "X-Mekong-Signature"). RRF thường xấp xỉ hoặc nhỉnh hơn cái tốt nhất trong hai — nếu RRF kém hơn hẳn một nhánh, nhánh kia đang kéo xuống và bạn nên thử trọng số <code>weights=[0.5, 1.0]</code>.</p>
+<h2 id="8-bai-tap-mo-rong">8. Bài tập mở rộng<a class="headerlink" href="#8-bai-tap-mo-rong" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Tách từ thật</strong>: cài <code>underthesea</code> và thay tách âm tiết bằng <code>underthesea.word_tokenize(text, format="text")</code> (nối từ ghép bằng <code>_</code>). So sánh Hit@1 và thời gian index với bigram âm tiết. (CPU)</li>
+<li><strong>Quét tham số BM25</strong>: thử <span class="arithmatex">\(k_1\in\{0.5, 1.2, 2.0\}\)</span>, <span class="arithmatex">\(b\in\{0, 0.5, 0.75, 1\}\)</span>. Với corpus mà bài dài ngắn rất khác nhau (KB-003 dài gấp 4 lần KB-015), <span class="arithmatex">\(b\)</span> ảnh hưởng thế nào? (CPU)</li>
+<li><strong>Trọng số RRF và <span class="arithmatex">\(k\)</span></strong>: thử <span class="arithmatex">\(k\in\{1, 10, 60, 200\}\)</span> và <code>weights</code>. Giải thích bằng công thức vì sao <span class="arithmatex">\(k\)</span> nhỏ làm RRF gần với "lấy top-1 của từng hệ". (CPU)</li>
+<li><strong>Cross-lingual</strong>: đánh giá riêng 6 email tiếng Nhật, chỉ đếm là đúng nếu top-1 là bài <strong>khác</strong> ngôn ngữ (vi/en). Dense có tìm được bài tiếng Việt/Anh từ câu hỏi tiếng Nhật không? (CPU/GPU)</li>
+<li><strong>Embedding lớn hơn</strong>: thay bằng <code>BAAI/bge-m3</code> (568M tham số, 1024 chiều, không cần tiền tố). Đo tăng chất lượng so với tăng thời gian encode và bộ nhớ. (GPU 6GB vừa)</li>
+</ol>
+<h2 id="tai-lieu-tham-khao">Tài liệu tham khảo<a class="headerlink" href="#tai-lieu-tham-khao" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Robertson, S., Zaragoza, H. (2009). <em>The Probabilistic Relevance Framework: BM25 and Beyond</em>. Foundations and Trends in IR.</li>
+<li>Cormack, G. V., Clarke, C. L. A., Büttcher, S. (2009). <em>Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods</em>. SIGIR 2009.</li>
+<li>Wang, L. et al. (2024). <em>Multilingual E5 Text Embeddings: A Technical Report</em>. arXiv:2402.05672.</li>
+<li>Model card: https://huggingface.co/intfloat/multilingual-e5-small</li>
+<li>rank_bm25: https://github.com/dorianbrown/rank_bm25</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Trước: Labs — Thực hành RAG cho bài toán AI tư vấn khách hàng qua Zendesk">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Labs — Thực hành RAG cho bài toán AI tư vấn khách hàng qua Zendesk
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../lab02_chunking_metrics/" class="md-footer__link md-footer__link--next" aria-label="Sau: Lab 02 · Chunking &amp; metric">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Lab 02 · Chunking & metric
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tài liệu học tập — RAG Masterclass · 2026
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/HieNguyen08/rag-masterclass" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

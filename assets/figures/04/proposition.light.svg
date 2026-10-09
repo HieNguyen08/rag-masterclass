@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="630.72pt" height="186.96pt" viewBox="0 0 630.72 186.96" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 186.96 
+L 630.72 186.96 
+L 630.72 0 
+L 0 0 
+L 0 186.96 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 22.272 134.76 
+L 216.288 134.76 
+Q 222.48 134.76 222.48 128.568 
+L 222.48 48.072 
+Q 222.48 41.88 216.288 41.88 
+L 22.272 41.88 
+Q 16.08 41.88 16.08 48.072 
+L 16.08 128.568 
+Q 16.08 134.76 22.272 134.76 
+z
+" clip-path="url(#pc29b432d8b)" style="fill: #f4f3ef; stroke: #c9c8c2; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 227.64 88.32 
+Q 250.86 88.32 271.843932 88.32 
+" clip-path="url(#pc29b432d8b)" style="fill: none; stroke: #52514e; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 267.043932 85.92 
+L 271.843932 88.32 
+L 267.043932 90.72 
+z
+" clip-path="url(#pc29b432d8b)" style="fill: #52514e; stroke: #52514e; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 285.432 83.16 
+L 608.448 83.16 
+Q 614.64 83.16 614.64 76.968 
+L 614.64 48.072 
+Q 614.64 41.88 608.448 41.88 
+L 285.432 41.88 
+Q 279.24 41.88 279.24 48.072 
+L 279.24 76.968 
+Q 279.24 83.16 285.432 83.16 
+z
+" clip-path="url(#pc29b432d8b)" style="fill: #dff4ec; stroke: #1baf7a; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 285.432 139.92 
+L 608.448 139.92 
+Q 614.64 139.92 614.64 133.728 
+L 614.64 99.672 
+Q 614.64 93.48 608.448 93.48 
+L 285.432 93.48 
+Q 279.24 93.48 279.24 99.672 
+L 279.24 133.728 
+Q 279.24 139.92 285.432 139.92 
+z
+" clip-path="url(#pc29b432d8b)" style="fill: #dff4ec; stroke: #1baf7a; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #52514e" x="26.4" y="59.94" transform="rotate(-0 26.4 59.94)">Đoạn gốc</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(26.4 81.421859)">Tính năng này chỉ có ở gói Pro.</text>
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(26.4 92.487305)">Nó cho phép xuất tối đa 500</text>
+    <text style="font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(26.4 103.8)">hóa đơn mỗi lần.</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="250.86" y="75.42" transform="rotate(-0 250.86 75.42)">LLM</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="285.432" y="65.232695" transform="rotate(-0 285.432 65.232695)">Tính năng xuất hóa đơn hàng loạt chỉ có ở gói Pro.</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(285.432 113.675195)">Tính năng xuất hóa đơn hàng loạt cho phép xuất tối đa</text>
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(285.432 126.09582)">500 hóa đơn mỗi lần.</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #52514e" x="16.08" y="168.3" transform="rotate(-0 16.08 168.3)">Mỗi mệnh đề: một sự kiện, tự đủ nghĩa, đại từ được thay bằng danh từ đầy đủ.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pc29b432d8b">
+   <rect x="5.76" y="5.76" width="619.2" height="175.44"/>
+  </clipPath>
+ </defs>
+</svg>

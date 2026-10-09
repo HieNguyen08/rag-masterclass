@@ -1,0 +1,4141 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LLM & RAG từ nền tảng đến hệ thống production — xoay quanh bài toán AI tư vấn khách hàng qua Zendesk">
+      
+      
+        <meta name="author" content="HieNguyen08">
+      
+      
+        <link rel="canonical" href="https://hienguyen08.github.io/rag-masterclass/06-query-va-reranking/">
+      
+      
+        <link rel="prev" href="../05-retrieval-sparse-dense-hybrid/">
+      
+      
+        <link rel="next" href="../07-generation-grounding-guardrails/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>06 · Query & reranking - RAG Masterclass</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Be+Vietnam+Pro:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Be Vietnam Pro";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#module-06-xu-ly-query-reranking-nen-context" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="RAG Masterclass" class="md-header__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RAG Masterclass
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              06 · Query & reranking
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Chuyển sang nền sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang nền sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00-tong-quan-va-bai-toan/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần I · Nền tảng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../03-embedding-va-bieu-dien/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần II · Pipeline RAG
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../08-kien-truc-rag-nang-cao/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần III · Nâng cao
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11-production-va-quy-mo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần IV · Hệ thống
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../13-rag-da-phuong-thuc/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Phần V · Chuyên đề mở rộng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../labs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Thực hành
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="RAG Masterclass" class="md-nav__button md-logo" aria-label="RAG Masterclass" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 2-5 4.5v11l5-4.5zM6.5 5C4.55 5 2.45 5.4 1 6.5v14.66c0 .25.25.5.5.5.1 0 .15-.07.25-.07 1.35-.65 3.3-1.09 4.75-1.09 1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.31 4.75 1.06.1.05.15.03.25.03.25 0 .5-.25.5-.5V6.5c-.6-.45-1.25-.75-2-1V19c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V6.5C10.55 5.4 8.45 5 6.5 5"/></svg>
+
+    </a>
+    RAG Masterclass
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/HieNguyen08/rag-masterclass" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HieNguyen08/rag-masterclass
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần I · Nền tảng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần I · Nền tảng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-tong-quan-va-bai-toan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00 · Tổng quan & bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-nen-tang-llm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 · Nền tảng LLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-gioi-han-llm-va-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 · Giới hạn LLM & RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần II · Pipeline RAG
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần II · Pipeline RAG
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-embedding-va-bieu-dien/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 · Embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-ingestion-va-chunking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 · Ingestion & chunking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-retrieval-sparse-dense-hybrid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 · Retrieval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 · Query & reranking
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 · Query & reranking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu-hoc-tap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu học tập
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-buc-tranh-tong-the" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Bức tranh tổng thể
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-phan-tich-query-trong-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Phân tích query trong email
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Phân tích query trong email">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-van-e-email-khong-phai-la-mot-truy-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Vấn đề: email không phải là một truy vấn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-trich-xuat-co-cau-truc-bang-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Trích xuất có cấu trúc bằng LLM
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-viet-lai-truy-van-theo-hoi-thoai-query-condensation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Viết lại truy vấn theo hội thoại (query condensation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Viết lại truy vấn theo hội thoại (query condensation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-ky-thuat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Kỹ thuật
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-prompt-mau-va-cam-bay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Prompt mẫu và cạm bẫy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-multi-query-va-rag-fusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Multi-query và RAG-Fusion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Multi-query và RAG-Fusion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Ý tưởng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-toan-vi-sao-recall-tang-va-vi-sao-tang-co-gioi-han" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Toán: vì sao recall tăng, và vì sao tăng có giới hạn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-trade-off-va-lien-he-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Trade-off và liên hệ Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-hyde-hypothetical-document-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. HyDE — Hypothetical Document Embeddings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. HyDE — Hypothetical Document Embeddings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Ý tưởng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-vi-sao-no-hoat-ong-giai-thich-bang-toan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Vì sao nó hoạt động — giải thích bằng toán
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-query2doc-bien-the-cho-sparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Query2doc — biến thể cho sparse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-khi-nao-hyde-gay-hai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Khi nào HyDE gây hại
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-query-decomposition-va-step-back-prompting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Query decomposition và step-back prompting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Query decomposition và step-back prompting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-decomposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Decomposition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-step-back-prompting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Step-back prompting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-lien-he-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Liên hệ Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-routing-theo-intent-va-san-pham" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Routing theo intent và sản phẩm
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Routing theo intent và sản phẩm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-cach-lam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Cách làm
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-reranking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Reranking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Reranking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-vi-sao-can-tang-thu-hai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Vì sao cần tầng thứ hai
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-cross-encoder-toan-va-chi-phi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Cross-encoder: toán và chi phí
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-monot5-va-duot5-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 monoT5 và duoT5 (ý tưởng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-late-interaction-colbert-nhu-reranker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Late interaction (ColBERT) như reranker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-llm-lam-reranker-pointwise-pairwise-listwise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 LLM làm reranker: pointwise, pairwise, listwise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-reranker-llm-based-chuyen-dung-iem-giao-giua-hai-the-gioi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 Reranker "LLM-based" chuyên dụng — điểm giao giữa hai thế giới
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#87-chon-reranker-cho-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.7 Chọn reranker cho Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#88-code-rerank-voi-cross-encoder-va-cac-tin-hieu-bo-sung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.8 Code: rerank với cross-encoder và các tín hiệu bổ sung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-mmr-va-a-dang-hoa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. MMR và đa dạng hóa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. MMR và đa dạng hóa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-cong-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Công thức
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-vi-du-so" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Ví dụ số
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-chon-lambda-va-lien-he-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Chọn \(\lambda\) và liên hệ Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-nen-context-va-sap-xep-lai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Nén context và sắp xếp lại
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Nén context và sắp xếp lại">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-vi-sao-nen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Vì sao nén
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-nen-extractive-chon-cau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Nén extractive (chọn câu)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-nen-theo-token-selective-context-va-ho-llmlingua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Nén theo token: Selective Context và họ LLMLingua
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-sap-xep-lai-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Sắp xếp lại context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#105-code-nen-extractive-dua-tren-reranker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Code: nén extractive dựa trên reranker
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-ngan-sach-latency-cho-toan-chuoi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Ngân sách latency cho toàn chuỗi
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Ngân sách latency cho toàn chuỗi">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-ac-thu-bai-toan-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Đặc thù bài toán email
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-bang-ngan-sach-uoc-luong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Bảng ngân sách (ước lượng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-nguyen-tac-cat-giam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Nguyên tắc cắt giảm
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap-cach-xu-ly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi thường gặp &amp; cách xử lý
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tóm tắt (cheat-sheet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-tu-kiem-tra-phong-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Câu hỏi tự kiểm tra / phỏng vấn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bai-tap-thuc-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bài tập thực hành
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-generation-grounding-guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 · Generation & guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần III · Nâng cao
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần III · Nâng cao
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-kien-truc-rag-nang-cao/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 · Kiến trúc nâng cao & Agentic RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-fine-tuning-cho-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 · Fine-tuning cho RAG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-danh-gia-rag/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 · Đánh giá, confidence & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần IV · Hệ thống
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần IV · Hệ thống
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-production-va-quy-mo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 · Production & quy mô
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-capstone-thiet-ke-he-thong-zendesk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 · Capstone: hệ thống AI CS Zendesk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Phần V · Chuyên đề mở rộng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-rag-da-phuong-thuc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 · RAG đa phương thức
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-rag-du-lieu-co-cau-truc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 · RAG trên dữ liệu có cấu trúc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../labs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Thực hành
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Thực hành
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab01_bm25_dense_rrf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 · BM25, dense, RRF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab02_chunking_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 · Chunking & metric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab03_reranker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 · Reranker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab04_mini_rag_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 04 · Mini RAG API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab05_eval_escalation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 05 · Đánh giá & escalation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab06_agentic_langgraph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 06 · Agentic RAG với LangGraph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab07_finetune_embedding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 07 · Fine-tune embedding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab08_ingestion_dedup_pii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 08 · Làm sạch, MinHash, PII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab09_query_rewriting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 09 · Xử lý query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/data/README_data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dữ liệu mẫu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#muc-tieu-hoc-tap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mục tiêu học tập
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-buc-tranh-tong-the" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Bức tranh tổng thể
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-phan-tich-query-trong-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Phân tích query trong email
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Phân tích query trong email">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-van-e-email-khong-phai-la-mot-truy-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Vấn đề: email không phải là một truy vấn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-trich-xuat-co-cau-truc-bang-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Trích xuất có cấu trúc bằng LLM
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-viet-lai-truy-van-theo-hoi-thoai-query-condensation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Viết lại truy vấn theo hội thoại (query condensation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Viết lại truy vấn theo hội thoại (query condensation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-ky-thuat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Kỹ thuật
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-prompt-mau-va-cam-bay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Prompt mẫu và cạm bẫy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-multi-query-va-rag-fusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Multi-query và RAG-Fusion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Multi-query và RAG-Fusion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Ý tưởng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-toan-vi-sao-recall-tang-va-vi-sao-tang-co-gioi-han" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Toán: vì sao recall tăng, và vì sao tăng có giới hạn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-trade-off-va-lien-he-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Trade-off và liên hệ Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-hyde-hypothetical-document-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. HyDE — Hypothetical Document Embeddings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. HyDE — Hypothetical Document Embeddings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Ý tưởng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-vi-sao-no-hoat-ong-giai-thich-bang-toan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Vì sao nó hoạt động — giải thích bằng toán
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-query2doc-bien-the-cho-sparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Query2doc — biến thể cho sparse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-khi-nao-hyde-gay-hai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Khi nào HyDE gây hại
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-query-decomposition-va-step-back-prompting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Query decomposition và step-back prompting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Query decomposition và step-back prompting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-decomposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Decomposition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-step-back-prompting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Step-back prompting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-lien-he-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Liên hệ Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-routing-theo-intent-va-san-pham" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Routing theo intent và sản phẩm
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Routing theo intent và sản phẩm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-cach-lam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Cách làm
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-reranking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Reranking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Reranking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-vi-sao-can-tang-thu-hai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Vì sao cần tầng thứ hai
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-cross-encoder-toan-va-chi-phi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Cross-encoder: toán và chi phí
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-monot5-va-duot5-y-tuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 monoT5 và duoT5 (ý tưởng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-late-interaction-colbert-nhu-reranker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Late interaction (ColBERT) như reranker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-llm-lam-reranker-pointwise-pairwise-listwise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 LLM làm reranker: pointwise, pairwise, listwise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-reranker-llm-based-chuyen-dung-iem-giao-giua-hai-the-gioi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 Reranker "LLM-based" chuyên dụng — điểm giao giữa hai thế giới
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#87-chon-reranker-cho-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.7 Chọn reranker cho Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#88-code-rerank-voi-cross-encoder-va-cac-tin-hieu-bo-sung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.8 Code: rerank với cross-encoder và các tín hiệu bổ sung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-mmr-va-a-dang-hoa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. MMR và đa dạng hóa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. MMR và đa dạng hóa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-van-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Vấn đề
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-cong-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Công thức
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-vi-du-so" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Ví dụ số
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-chon-lambda-va-lien-he-zendesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Chọn \(\lambda\) và liên hệ Zendesk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-nen-context-va-sap-xep-lai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Nén context và sắp xếp lại
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Nén context và sắp xếp lại">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-vi-sao-nen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Vì sao nén
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-nen-extractive-chon-cau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Nén extractive (chọn câu)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-nen-theo-token-selective-context-va-ho-llmlingua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Nén theo token: Selective Context và họ LLMLingua
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-sap-xep-lai-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Sắp xếp lại context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#105-code-nen-extractive-dua-tren-reranker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Code: nén extractive dựa trên reranker
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-ngan-sach-latency-cho-toan-chuoi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Ngân sách latency cho toàn chuỗi
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Ngân sách latency cho toàn chuỗi">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-ac-thu-bai-toan-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Đặc thù bài toán email
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-bang-ngan-sach-uoc-luong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Bảng ngân sách (ước lượng)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-nguyen-tac-cat-giam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Nguyên tắc cắt giảm
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap-cach-xu-ly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi thường gặp &amp; cách xử lý
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tóm tắt (cheat-sheet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-tu-kiem-tra-phong-van" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Câu hỏi tự kiểm tra / phỏng vấn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bai-tap-thuc-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bài tập thực hành
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tai-lieu-tham-khao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tài liệu tham khảo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/HieNguyen08/rag-masterclass/edit/main/docs/06-query-va-reranking.md" title="Chỉnh sửa" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="module-06-xu-ly-query-reranking-nen-context">Module 06 — Xử lý query, reranking, nén context<a class="headerlink" href="#module-06-xu-ly-query-reranking-nen-context" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Thời lượng: ~40 phút · Mức độ: Trung bình – Nâng cao · Tiên quyết: Module 03 (Embedding), Module 05 (Retrieval)</p>
+</blockquote>
+<p>Module 05 xây tầng "candidate generation": hybrid BM25 + dense trả về ~50–100 ứng viên với recall cao. Module này xử lý hai đầu của tầng đó. <strong>Phía trước</strong>: biến một email lộn xộn của khách thành một hoặc nhiều truy vấn tốt — vì retriever chỉ giỏi bằng truy vấn nó nhận. <strong>Phía sau</strong>: từ 50 ứng viên, chọn ra 5–8 đoạn thật sự liên quan, không trùng lặp, gọn nhẹ, để đưa vào prompt (Module 07). Kèm theo là một câu hỏi rất thực tế: mỗi bước tốn bao nhiêu mili-giây và bao nhiêu tiền, và bước nào đáng làm cho bài toán Zendesk.</p>
+<h2 id="muc-tieu-hoc-tap">Mục tiêu học tập<a class="headerlink" href="#muc-tieu-hoc-tap" title="Permanent link">&para;</a></h2>
+<p>Sau module này, bạn có thể:</p>
+<ol>
+<li><strong>Phân tích một email khách hàng</strong> thành các truy vấn con có cấu trúc (câu hỏi tường minh, câu hỏi ngầm, định danh, ngôn ngữ, tín hiệu cần người) và viết lại truy vấn độc lập (standalone) từ lịch sử hội thoại.</li>
+<li><strong>Giải thích bằng toán</strong> vì sao multi-query/RAG-Fusion tăng recall và vì sao HyDE đưa truy vấn lại gần tài liệu thật trong không gian embedding; nêu được khi nào chúng gây hại.</li>
+<li><strong>Phân biệt và ước lượng chi phí</strong> của các loại reranker: cross-encoder, mono/duoT5, LLM reranker pointwise/pairwise/listwise (RankGPT), late interaction (ColBERT); chọn reranker cụ thể (tính đến 10/2026) cho tiếng Việt/Anh/Nhật.</li>
+<li><strong>Cài đặt MMR</strong>, tính tay một ví dụ, và chọn <span class="arithmatex">\(\lambda\)</span> hợp lý cho dữ liệu nhiều bản gần trùng như ticket lịch sử.</li>
+<li><strong>Áp dụng nén context</strong> (extractive, Selective Context, LongLLMLingua/LLMLingua-2, RECOMP, Provence) và biết rủi ro của từng cách với nội dung chính sách.</li>
+<li><strong>Lập ngân sách latency</strong> cho toàn bộ chuỗi xử lý query → retrieval → rerank → nén, và cắt bước nào khi ngân sách bị vượt.</li>
+</ol>
+<hr />
+<h2 id="1-buc-tranh-tong-the">1. Bức tranh tổng thể<a class="headerlink" href="#1-buc-tranh-tong-the" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+    E[Email đã làm sạch&lt;br/&gt;Module 04] --&gt; A[Phân tích query&lt;br/&gt;tách câu hỏi, định danh,&lt;br/&gt;ngôn ngữ, intent]
+    A --&gt; RW[Viết lại / condensation&lt;br/&gt;theo lịch sử ticket]
+    RW --&gt; X[Mở rộng:&lt;br/&gt;multi-query, HyDE,&lt;br/&gt;step-back]
+    X --&gt; RT[Hybrid retrieval&lt;br/&gt;Module 05]
+    A --&gt; RO[Routing&lt;br/&gt;intent/sản phẩm]
+    RO --&gt; RT
+    RT --&gt; RR[Rerank&lt;br/&gt;cross-encoder / LLM]
+    RR --&gt; MMR[Đa dạng hóa MMR&lt;br/&gt;+ chọn top-k]
+    MMR --&gt; C[Nén context&lt;br/&gt;+ sắp xếp]
+    C --&gt; G[Generation&lt;br/&gt;Module 07]</code></pre>
+<p>Một nguyên tắc chi phối toàn module: <strong>mỗi bước thêm vào là thêm latency, thêm chi phí và thêm một chỗ có thể hỏng.</strong> Bước nào cũng phải được biện minh bằng số đo trên golden set (Module 10), không phải vì "paper nói nó tốt". Mình sẽ chỉ rõ ở từng kỹ thuật: nó sửa lỗi gì, cái giá là gì, khi nào không nên dùng.</p>
+<p>Ký hiệu dùng trong module: <span class="arithmatex">\(q\)</span> là truy vấn (văn bản), <span class="arithmatex">\(\mathbf{q} = E_Q(q) \in \mathbb{R}^D\)</span> là embedding truy vấn, <span class="arithmatex">\(\mathbf{d} = E_D(d)\)</span> là embedding tài liệu, <span class="arithmatex">\(\mathrm{sim}(\cdot,\cdot)\)</span> là cosine; <span class="arithmatex">\(\mathcal{C}_q\)</span> là tập ứng viên sau retrieval; <span class="arithmatex">\(k\)</span> là số đoạn cuối cùng đưa vào prompt.</p>
+<hr />
+<h2 id="2-phan-tich-query-trong-email">2. Phân tích query trong email<a class="headerlink" href="#2-phan-tich-query-trong-email" title="Permanent link">&para;</a></h2>
+<h3 id="21-van-e-email-khong-phai-la-mot-truy-van">2.1 Vấn đề: email không phải là một truy vấn<a class="headerlink" href="#21-van-e-email-khong-phai-la-mot-truy-van" title="Permanent link">&para;</a></h3>
+<p>Truy vấn tìm kiếm điển hình là một câu ngắn có một nhu cầu. Email CS thì khác:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Chào team,
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Bên mình đang dùng gói Business, tuần trước nâng lên 50 user. Hóa đơn tháng này
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>vẫn tính theo 30 user?? Ngoài ra từ hôm qua đồng bộ với MISA báo lỗi ERR_SYNC_409,
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>mình đã thử reconnect rồi. Nếu không xử lý được trong hôm nay thì cho mình nói chuyện
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>với ai đó nhé, team kế toán đang chờ chốt sổ.
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>Thanks,
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Lan — Kế toán trưởng
+</span></code></pre></div>
+<p>Trong vài dòng có:</p>
+<ul>
+<li><strong>Hai câu hỏi tường minh</strong>: (1) vì sao hóa đơn chưa phản ánh việc nâng user; (2) lỗi <code>ERR_SYNC_409</code> khi đồng bộ.</li>
+<li><strong>Câu hỏi ngầm</strong>: "nâng user giữa kỳ thì tính tiền thế nào" (proration — chính sách giá, vùng <strong>rủi ro cao</strong>, không được bịa), "reconnect không được thì làm gì tiếp".</li>
+<li><strong>Định danh</strong>: gói "Business", con số 50/30 user, đối tác "MISA", mã lỗi.</li>
+<li><strong>Tín hiệu escalate</strong>: "cho mình nói chuyện với ai đó" (yêu cầu gặp người — yêu cầu số 2 trong ticket CS), tính khẩn cấp (chốt sổ hôm nay).</li>
+<li><strong>Nhiễu</strong>: lời chào, chữ ký, chức danh.</li>
+</ul>
+<p>Nếu đưa nguyên văn email làm một truy vấn, embedding sẽ là "trung bình" của hai chủ đề và không gần tài liệu nào thật sự; BM25 thì khớp cả các ticket có "thanks" và "kế toán". Hơn nữa, câu trả lời cần <strong>hai nhóm tài liệu khác nhau</strong> — một truy vấn gộp không thể lấy đủ cả hai.</p>
+<p>Toán của vấn đề "trung bình hai chủ đề": giả sử embedding của email xấp xỉ <span class="arithmatex">\(\mathbf{q} \approx \frac{\mathbf{a} + \mathbf{b}}{\|\mathbf{a} + \mathbf{b}\|}\)</span> với <span class="arithmatex">\(\mathbf{a}, \mathbf{b}\)</span> là hướng của hai chủ đề, chuẩn hóa, gần trực giao (<span class="arithmatex">\(\mathbf{a}^\top\mathbf{b} \approx 0\)</span>). Khi đó <span class="arithmatex">\(\|\mathbf{a} + \mathbf{b}\| = \sqrt{2}\)</span> và với tài liệu <span class="arithmatex">\(\mathbf{d}_a\)</span> nằm đúng hướng <span class="arithmatex">\(\mathbf{a}\)</span>: <span class="arithmatex">\(\mathrm{sim}(\mathbf{q}, \mathbf{d}_a) \approx 1/\sqrt{2} \approx 0{,}71\)</span> thay vì ~1. Tệ hơn, một tài liệu "chung chung" nằm giữa hai hướng (ví dụ bài "Tổng quan về hóa đơn và tích hợp") lại có <span class="arithmatex">\(\mathrm{sim} \approx 1\)</span> — nó thắng cả hai tài liệu đúng. Với ba chủ đề, con số rơi xuống <span class="arithmatex">\(1/\sqrt{3} \approx 0{,}58\)</span>. Tách câu hỏi không chỉ là "cho gọn" mà là <strong>điều kiện cần</strong> để dense retrieval hoạt động.</p>
+<!-- fig:topic-averaging -->
+<figure>
+  <img alt="Trái: email gộp hai chủ đề trực giao nằm giữa hai tài liệu đúng, nên một bài «tổng quan» chung chung lại gần nó nhất" loading="lazy" src="../assets/figures/06/topic-averaging.light.svg#only-light" />
+  <img alt="Trái: email gộp hai chủ đề trực giao nằm giữa hai tài liệu đúng, nên một bài «tổng quan» chung chung lại gần nó nhất" loading="lazy" src="../assets/figures/06/topic-averaging.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.1 — Trái: email gộp hai chủ đề trực giao nằm giữa hai tài liệu đúng, nên một bài «tổng quan» chung chung lại gần nó nhất. Phải: cosine tới tài liệu đúng giảm theo 1/√m.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="22-trich-xuat-co-cau-truc-bang-llm">2.2 Trích xuất có cấu trúc bằng LLM<a class="headerlink" href="#22-trich-xuat-co-cau-truc-bang-llm" title="Permanent link">&para;</a></h3>
+<p>Cách thực tế nhất: một lời gọi LLM nhỏ, nhiệt độ 0, xuất <strong>JSON theo schema</strong> (structured output — cơ chế constrained decoding ở Module 07). Schema gợi ý:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># query_analysis.py — pydantic v2</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">SubQuestion</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Câu hỏi độc lập, đủ ngữ cảnh, cùng ngôn ngữ với khách"</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">text_en</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Bản tiếng Anh để truy vấn tài liệu chỉ có tiếng Anh"</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"explicit"</span><span class="p">,</span> <span class="s2">"implicit"</span><span class="p">]</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">topic</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"billing"</span><span class="p">,</span> <span class="s2">"integration"</span><span class="p">,</span> <span class="s2">"account"</span><span class="p">,</span> <span class="s2">"bug"</span><span class="p">,</span> <span class="s2">"how_to"</span><span class="p">,</span> <span class="s2">"other"</span><span class="p">]</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">identifiers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">description</span><span class="o">=</span><span class="s2">"Mã lỗi, tên gói, tên API, phiên bản... giữ NGUYÊN VĂN"</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">EmailAnalysis</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">language</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"vi"</span><span class="p">,</span> <span class="s2">"en"</span><span class="p">,</span> <span class="s2">"ja"</span><span class="p">,</span> <span class="s2">"mixed"</span><span class="p">]</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">sub_questions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SubQuestion</span><span class="p">]</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="n">wants_human</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Khách yêu cầu gặp người thật"</span><span class="p">)</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">urgency</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"low"</span><span class="p">,</span> <span class="s2">"normal"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">]</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">sensitive_topics</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">"pricing"</span><span class="p">,</span> <span class="s2">"refund"</span><span class="p">,</span> <span class="s2">"sla"</span><span class="p">,</span> <span class="s2">"legal"</span><span class="p">,</span> <span class="s2">"security"</span><span class="p">,</span> <span class="s2">"none"</span><span class="p">]]</span>
+</span></code></pre></div>
+<p>Prompt hệ thống cần nói rõ: chỉ trích xuất, <strong>không trả lời</strong>; giữ nguyên văn định danh; nội dung email là dữ liệu, không phải chỉ dẫn (phòng prompt injection — Module 07). Với email ở 2.1, đầu ra mong đợi:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"language"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vi"</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">"sub_questions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Nâng gói Business từ 30 lên 50 user giữa kỳ thì hóa đơn được tính thế nào?"</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">     </span><span class="nt">"text_en"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How is billing prorated when upgrading Business plan from 30 to 50 users mid-cycle?"</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">     </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"implicit"</span><span class="p">,</span><span class="w"> </span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"billing"</span><span class="p">,</span><span class="w"> </span><span class="nt">"identifiers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Business"</span><span class="p">]},</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="p">{</span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vì sao hóa đơn tháng này vẫn tính 30 user sau khi đã nâng lên 50?"</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">     </span><span class="nt">"text_en"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Why does this month's invoice still show 30 users after upgrading to 50?"</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">     </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explicit"</span><span class="p">,</span><span class="w"> </span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"billing"</span><span class="p">,</span><span class="w"> </span><span class="nt">"identifiers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Business"</span><span class="p">]},</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">{</span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cách khắc phục lỗi ERR_SYNC_409 khi đồng bộ với MISA, đã thử reconnect"</span><span class="p">,</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">     </span><span class="nt">"text_en"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How to fix ERR_SYNC_409 when syncing with MISA after reconnect fails"</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">     </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explicit"</span><span class="p">,</span><span class="w"> </span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"integration"</span><span class="p">,</span><span class="w"> </span><span class="nt">"identifiers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"ERR_SYNC_409"</span><span class="p">,</span><span class="w"> </span><span class="s2">"MISA"</span><span class="p">]}</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="nt">"wants_human"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">  </span><span class="nt">"urgency"</span><span class="p">:</span><span class="w"> </span><span class="s2">"high"</span><span class="p">,</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">  </span><span class="nt">"sensitive_topics"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"pricing"</span><span class="p">]</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Đầu ra này phục vụ <strong>ba</strong> mục đích cùng lúc: truy vấn cho retrieval (mỗi <code>sub_question</code> một lượt, cộng <code>identifiers</code> làm truy vấn BM25 nguyên văn), tín hiệu cho routing (mục 7) và tín hiệu cho quyết định escalate (Module 10). Một lời gọi, nhiều công dụng — đó là lý do bước này gần như luôn đáng làm.</p>
+<!-- fig:email-analysis -->
+<figure>
+  <img alt="Một lời gọi LLM biến email ở mục 2" loading="lazy" src="../assets/figures/06/email-analysis.light.svg#only-light" />
+  <img alt="Một lời gọi LLM biến email ở mục 2" loading="lazy" src="../assets/figures/06/email-analysis.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.2 — Một lời gọi LLM biến email ở mục 2.1 thành truy vấn con, định danh cho BM25 và các tín hiệu routing/escalate.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Trade-off.</strong> Thêm một lời gọi LLM (với model nhỏ tự host qua vLLM: vài trăm ms đến ~2 s; với API: tương tự cộng mạng). Rủi ro: LLM bỏ sót câu hỏi hoặc "sáng tạo" câu hỏi khách không hỏi. Giảm thiểu: luôn chạy thêm một truy vấn từ <strong>email đã làm sạch nguyên văn</strong> song song với các truy vấn con (lưới an toàn cho recall), và đo trên golden set tỷ lệ email mà mọi câu hỏi được trích đủ.</p>
+<p><strong>Khi nào KHÔNG cần:</strong> truy vấn đã ngắn, một ý (ví dụ ô tìm kiếm trong Help Center). Với email CS, mình gần như luôn bật.</p>
+<p><strong>Liên hệ Zendesk.</strong> <code>wants_human = true</code> không có nghĩa là dừng pipeline: ở giai đoạn 1 (AI chỉ soạn draft), vẫn retrieval và soạn draft để agent tiếp nhận nhanh hơn, đồng thời gắn tag, đổi group và gửi thông báo cho CS (Module 12). <code>sensitive_topics</code> chứa <code>pricing</code> → câu trả lời chỉ được trích chính sách đã retrieve, không được suy luận con số (Module 07).</p>
+<hr />
+<h2 id="3-viet-lai-truy-van-theo-hoi-thoai-query-condensation">3. Viết lại truy vấn theo hội thoại (query condensation)<a class="headerlink" href="#3-viet-lai-truy-van-theo-hoi-thoai-query-condensation" title="Permanent link">&para;</a></h2>
+<h3 id="31-van-e">3.1 Vấn đề<a class="headerlink" href="#31-van-e" title="Permanent link">&para;</a></h3>
+<p>Ticket trung bình có 3–4 lượt trao đổi. Lượt thứ ba của khách thường như: "Vẫn không được, mình làm theo bước 2 rồi mà nó báo lỗi khác." Câu này <strong>không tự đứng được</strong>: "nó" là gì, "bước 2" của bài nào, "lỗi khác" là lỗi gì? Retriever không có trí nhớ; nó chỉ thấy chuỗi văn bản.</p>
+<h3 id="32-ky-thuat">3.2 Kỹ thuật<a class="headerlink" href="#32-ky-thuat" title="Permanent link">&para;</a></h3>
+<p><strong>Condensation:</strong> cho LLM lịch sử hội thoại <span class="arithmatex">\(H = (m_1, \dots, m_t)\)</span> và tin nhắn mới <span class="arithmatex">\(m_{t+1}\)</span>, sinh truy vấn độc lập <span class="arithmatex">\(\tilde{q} = \mathrm{LLM}(H, m_{t+1})\)</span> chứa đủ thực thể: "Lỗi mới sau khi làm bước 2 (tạo lại API token) trong hướng dẫn khắc phục ERR_SYNC_409 khi đồng bộ MISA". Về hình thức, ta muốn <span class="arithmatex">\(\tilde{q}\)</span> sao cho <span class="arithmatex">\(p(\text{tài liệu đúng} \mid \tilde{q}) \approx p(\text{tài liệu đúng} \mid H, m_{t+1})\)</span> — nén thông tin liên quan của lịch sử vào một câu.</p>
+<!-- fig:condensation -->
+<figure>
+  <img alt="Viết lại tin nhắn không tự đứng được thành truy vấn độc lập, đủ thực thể" loading="lazy" src="../assets/figures/06/condensation.light.svg#only-light" />
+  <img alt="Viết lại tin nhắn không tự đứng được thành truy vấn độc lập, đủ thực thể" loading="lazy" src="../assets/figures/06/condensation.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.3 — Viết lại tin nhắn không tự đứng được thành truy vấn độc lập, đủ thực thể.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Rewrite-Retrieve-Read</strong> (Ma et al., 2023, arXiv 2305.14283) đặt bước viết lại thành một khâu riêng, thậm chí huấn luyện một rewriter nhỏ bằng tín hiệu thưởng từ chất lượng câu trả lời cuối. Ý tưởng then chốt áp dụng được ngay: <strong>truy vấn tối ưu cho retriever khác câu hỏi tự nhiên của người dùng</strong>, và nên có một bước chuyên trách việc chuyển đổi đó.</p>
+<p><strong>Những thứ nên đưa vào lịch sử:</strong> tin nhắn của khách, tóm tắt câu trả lời đã gửi (đặc biệt là <em>những gì đã hướng dẫn</em> để không gợi ý lại), các bài đã trích dẫn ở lượt trước. <strong>Không</strong> nên đưa: toàn văn các câu trả lời dài (tốn token, kéo truy vấn về chủ đề cũ), internal note của agent chứa thông tin nội bộ nhạy cảm (trừ khi có chủ đích và đã kiểm soát).</p>
+<h3 id="33-prompt-mau-va-cam-bay">3.3 Prompt mẫu và cạm bẫy<a class="headerlink" href="#33-prompt-mau-va-cam-bay" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>[SYSTEM] Bạn viết lại tin nhắn mới nhất của khách thành MỘT câu truy vấn tìm kiếm độc lập.
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>- Thay đại từ ("nó", "cái đó", "bước 2") bằng thực thể cụ thể từ lịch sử.
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>- Giữ nguyên văn mã lỗi, tên gói, tên tích hợp.
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>- Nếu tin nhắn mới đổi sang chủ đề khác hẳn, KHÔNG kéo chủ đề cũ vào.
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>- Không trả lời câu hỏi. Chỉ xuất truy vấn.
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>[LỊCH SỬ TÓM TẮT] ...
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>[TIN NHẮN MỚI] ...
+</span></code></pre></div>
+<p>Cạm bẫy phổ biến nhất là <strong>topic drift ngược</strong>: khách đã chuyển sang hỏi chuyện hóa đơn, nhưng rewriter vẫn chèn "ERR_SYNC_409" vào vì nó nổi bật trong lịch sử → retrieval kéo về bài đồng bộ. Hướng dẫn "nếu đổi chủ đề thì không kéo chủ đề cũ" và một vài ví dụ few-shot thường đủ; đo bằng một tập ~50 cặp hội thoại có nhãn truy vấn chuẩn.</p>
+<p><strong>Liên hệ Zendesk:</strong> lịch sử lấy từ Ticket Comments API (public comment của khách và của agent/AI); bỏ quoted reply (Module 04) vì chúng lặp lại lượt trước. Khi khách trả lời trên một ticket đã đóng và Zendesk tạo ticket follow-up, cần nối với ticket gốc để có lịch sử.</p>
+<hr />
+<h2 id="4-multi-query-va-rag-fusion">4. Multi-query và RAG-Fusion<a class="headerlink" href="#4-multi-query-va-rag-fusion" title="Permanent link">&para;</a></h2>
+<h3 id="41-y-tuong">4.1 Ý tưởng<a class="headerlink" href="#41-y-tuong" title="Permanent link">&para;</a></h3>
+<p>Một truy vấn chỉ là một "điểm" trong không gian embedding; tài liệu đúng có thể nằm hơi lệch hướng. Sinh <span class="arithmatex">\(n\)</span> cách diễn đạt khác nhau <span class="arithmatex">\(q_1, \dots, q_n\)</span> (đồng nghĩa, thuật ngữ chính thức vs thuật ngữ của khách, ngôn ngữ khác), retrieval từng cái, rồi hợp nhất. <strong>RAG-Fusion</strong> (Rackauckas, 2024, arXiv 2402.03367) chính là: LLM sinh nhiều truy vấn → retrieval mỗi truy vấn → hợp nhất bằng <strong>Reciprocal Rank Fusion</strong> (Module 05, mục 4.2).</p>
+<h3 id="42-toan-vi-sao-recall-tang-va-vi-sao-tang-co-gioi-han">4.2 Toán: vì sao recall tăng, và vì sao tăng có giới hạn<a class="headerlink" href="#42-toan-vi-sao-recall-tang-va-vi-sao-tang-co-gioi-han" title="Permanent link">&para;</a></h3>
+<p>Gọi <span class="arithmatex">\(r_i\)</span> là xác suất tài liệu đúng lọt top-<span class="arithmatex">\(K\)</span> của truy vấn <span class="arithmatex">\(q_i\)</span>. Nếu các sự kiện "trượt" độc lập:</p>
+<div class="arithmatex">\[
+P(\text{lọt ít nhất một danh sách}) = 1 - \prod_{i=1}^{n} (1 - r_i)
+\]</div>
+<p>Với <span class="arithmatex">\(r_i = 0{,}6\)</span> và <span class="arithmatex">\(n = 3\)</span>: <span class="arithmatex">\(1 - 0{,}4^3 = 0{,}936\)</span>. Nhưng các diễn đạt lại do <em>cùng một LLM</em> sinh ra từ <em>cùng một câu</em> thì rất tương quan. Mô hình đơn giản: với xác suất <span class="arithmatex">\(\rho\)</span> tài liệu là "khó" (mọi diễn đạt cùng trượt), ngược lại các truy vấn độc lập:</p>
+<div class="arithmatex">\[
+P(\text{lọt}) = (1 - \rho)\Big[1 - (1 - r')^n\Big]
+\]</div>
+<p>với <span class="arithmatex">\(r'\)</span> là recall trên phần "không khó". Nếu <span class="arithmatex">\(\rho = 0{,}25\)</span>, <span class="arithmatex">\(r' = 0{,}8\)</span>: <span class="arithmatex">\(n = 1\)</span> cho <span class="arithmatex">\(0{,}60\)</span>; <span class="arithmatex">\(n = 3\)</span> cho <span class="arithmatex">\(0{,}744\)</span>; <span class="arithmatex">\(n = \infty\)</span> cũng chỉ <span class="arithmatex">\(0{,}75\)</span>. <strong>Phần lớn lợi ích đến từ 2–3 truy vấn đầu</strong>; thêm nữa chỉ tốn tiền. Phần "khó" cần kỹ thuật khác (HyDE, dịch thuật ngữ, step-back, hoặc đơn giản là kho tri thức thiếu bài).</p>
+<!-- fig:multiquery-recall -->
+<figure>
+  <img alt="Recall của multi-query theo số diễn đạt lại: mô hình độc lập so với mô hình có phần «khó» ρ = 0" loading="lazy" src="../assets/figures/06/multiquery-recall.light.svg#only-light" />
+  <img alt="Recall của multi-query theo số diễn đạt lại: mô hình độc lập so với mô hình có phần «khó» ρ = 0" loading="lazy" src="../assets/figures/06/multiquery-recall.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.4 — Recall của multi-query theo số diễn đạt lại: mô hình độc lập so với mô hình có phần «khó» ρ = 0.25 (bão hòa ở 0.75).</figcaption>
+</figure>
+<!-- /fig -->
+
+<p>Về precision: hợp nhiều danh sách cũng kéo theo nhiều nhiễu hơn. RRF giúp vì tài liệu xuất hiện ở <em>nhiều</em> danh sách được cộng điểm (đồng thuận), còn nhiễu riêng của một diễn đạt thường chỉ xuất hiện một lần. Sau đó reranker (mục 8) lọc tiếp.</p>
+<h3 id="43-code">4.3 Code<a class="headerlink" href="#43-code" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># multi_query.py — dùng lại hàm rrf() của Module 05</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">multi_query_retrieve</span><span class="p">(</span><span class="n">sub_q</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">identifiers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                         <span class="n">paraphrase</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>                         <span class="n">hybrid_search</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>                         <span class="n">bm25_search</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>                         <span class="n">n_para</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">top_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">queries</span> <span class="o">=</span> <span class="p">[</span><span class="n">sub_q</span><span class="p">]</span> <span class="o">+</span> <span class="n">paraphrase</span><span class="p">(</span><span class="n">sub_q</span><span class="p">,</span> <span class="n">n_para</span><span class="p">)</span>      <span class="c1"># truy vấn gốc luôn được giữ</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">ranked_lists</span> <span class="o">=</span> <span class="p">[</span><span class="n">hybrid_search</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">]</span>  <span class="c1"># mỗi lượt đã là hybrid (Module 05)</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="k">if</span> <span class="n">identifiers</span><span class="p">:</span>                                     <span class="c1"># định danh nguyên văn -&gt; BM25 riêng</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="n">ranked_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bm25_search</span><span class="p">(</span><span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">identifiers</span><span class="p">)))</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">fused</span> <span class="o">=</span> <span class="n">rrf</span><span class="p">(</span><span class="n">ranked_lists</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="n">top_n</span><span class="p">)</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">doc_id</span> <span class="k">for</span> <span class="n">doc_id</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">fused</span><span class="p">]</span>
+</span></code></pre></div>
+<p>Prompt sinh diễn đạt lại nên yêu cầu <strong>đa dạng có chủ đích</strong>: một bản dùng thuật ngữ chính thức của sản phẩm (có thể đưa vào prompt một glossary ngắn: "quay mãi không xong" ↔ "timeout"), một bản tiếng Anh (vì nhiều tài liệu chỉ có tiếng Anh), thay vì ba câu gần giống nhau.</p>
+<h3 id="44-trade-off-va-lien-he-zendesk">4.4 Trade-off và liên hệ Zendesk<a class="headerlink" href="#44-trade-off-va-lien-he-zendesk" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Ưu</th>
+<th>Nhược</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tăng recall với vocabulary mismatch; cầu nối ngôn ngữ (vi/ja → en)</td>
+<td>+1 lời gọi LLM; retrieval × <span class="arithmatex">\(n\)</span></td>
+</tr>
+<tr>
+<td>Dễ cài, không cần train</td>
+<td>Diễn đạt lại có thể "trôi" khỏi ý khách (đặc biệt câu mơ hồ)</td>
+</tr>
+<tr>
+<td>RRF hợp nhất không cần chuẩn hóa điểm</td>
+<td>Nhiều ứng viên hơn → rerank đắt hơn</td>
+</tr>
+</tbody>
+</table>
+<p>Với ~5.000 lượt retrieval/ngày, nhân 3–4 lần vẫn rất nhỏ (Module 05: &lt; 1 QPS). Chi phí thật là lời gọi LLM sinh diễn đạt — có thể <strong>gộp vào cùng lời gọi phân tích email</strong> ở mục 2.2 (trường <code>text_en</code> chính là một diễn đạt lại xuyên ngôn ngữ). Mình khuyên: truy vấn gốc + bản tiếng Anh + truy vấn định danh BM25; chỉ thêm diễn đạt thứ tư nếu golden set cho thấy lợi.</p>
+<hr />
+<h2 id="5-hyde-hypothetical-document-embeddings">5. HyDE — Hypothetical Document Embeddings<a class="headerlink" href="#5-hyde-hypothetical-document-embeddings" title="Permanent link">&para;</a></h2>
+<h3 id="51-y-tuong">5.1 Ý tưởng<a class="headerlink" href="#51-y-tuong" title="Permanent link">&para;</a></h3>
+<p>HyDE (Gao, Ma, Lin, Callan; arXiv 2212.10496, ACL 2023): thay vì embed câu hỏi, cho LLM <strong>viết một tài liệu giả định</strong> trả lời câu hỏi (có thể sai về chi tiết), embed tài liệu đó, rồi tìm láng giềng trong kho tài liệu thật. Bài gốc sinh nhiều tài liệu giả định và lấy trung bình embedding của chúng cùng với embedding câu hỏi:</p>
+<div class="arithmatex">\[
+\hat{\mathbf{v}} = \frac{1}{N+1}\Big(\mathbf{q} + \sum_{j=1}^{N} E_D(\tilde{d}_j)\Big),\qquad \tilde{d}_j \sim \mathrm{LLM}(\cdot \mid \text{"Viết đoạn văn trả lời: } q\text{"})
+\]</div>
+<p>rồi tìm theo <span class="arithmatex">\(\mathrm{sim}(\hat{\mathbf{v}}, \mathbf{d})\)</span>. Encoder trong bài là một dense retriever huấn luyện không giám sát (Contriever), và đóng góp chính là <strong>zero-shot</strong>: không cần nhãn relevance vẫn đạt kết quả tốt.</p>
+<h3 id="52-vi-sao-no-hoat-ong-giai-thich-bang-toan">5.2 Vì sao nó hoạt động — giải thích bằng toán<a class="headerlink" href="#52-vi-sao-no-hoat-ong-giai-thich-bang-toan" title="Permanent link">&para;</a></h3>
+<p>Mô hình hóa embedding như tổng của các thành phần:</p>
+<div class="arithmatex">\[
+\mathbf{q} = \boldsymbol{\mu}_z + \boldsymbol{\delta}_{\text{Q}} + \boldsymbol{\epsilon}_q, \qquad
+\mathbf{d} = \boldsymbol{\mu}_z + \boldsymbol{\delta}_{\text{D}} + \boldsymbol{\epsilon}_d
+\]</div>
+<p>trong đó <span class="arithmatex">\(\boldsymbol{\mu}_z\)</span> là "hướng chủ đề" <span class="arithmatex">\(z\)</span> (ví dụ hoàn tiền gói năm), <span class="arithmatex">\(\boldsymbol{\delta}_{\text{Q}}\)</span> là <strong>độ lệch phong cách câu hỏi</strong> (ngắn, dạng hỏi, đại từ ngôi thứ nhất, từ ngữ của khách), <span class="arithmatex">\(\boldsymbol{\delta}_{\text{D}}\)</span> là <strong>độ lệch phong cách tài liệu</strong> (dài, khẳng định, thuật ngữ chính thức), và <span class="arithmatex">\(\boldsymbol{\epsilon}\)</span> là nhiễu riêng.</p>
+<ul>
+<li>Khoảng cách câu hỏi–tài liệu đúng chứa hạng tử <span class="arithmatex">\(\boldsymbol{\delta}_{\text{Q}} - \boldsymbol{\delta}_{\text{D}}\)</span>: một <strong>khoảng lệch hệ thống</strong> giữa "không gian câu hỏi" và "không gian tài liệu". Bi-encoder bất đối xứng được huấn luyện để thu hẹp khoảng này (đó là lý do có tiền tố "query:"/"passage:", Module 03), nhưng không triệt tiêu hoàn toàn — nhất là ngoài miền huấn luyện.</li>
+<li>Tài liệu giả định <span class="arithmatex">\(\tilde{d}_j = \boldsymbol{\mu}_{z'} + \boldsymbol{\delta}_{\text{D}} + \boldsymbol{\epsilon}_j\)</span> có <strong>cùng phong cách</strong> với tài liệu thật: hạng tử lệch phong cách biến mất. Nếu LLM hiểu đúng chủ đề (<span class="arithmatex">\(z' \approx z\)</span>), <span class="arithmatex">\(\tilde{d}_j\)</span> gần <span class="arithmatex">\(\mathbf{d}\)</span> hơn <span class="arithmatex">\(\mathbf{q}\)</span>.</li>
+<li>Lấy trung bình <span class="arithmatex">\(N\)</span> tài liệu giả định làm giảm nhiễu: nếu <span class="arithmatex">\(\boldsymbol{\epsilon}_j\)</span> độc lập, phương sai <span class="arithmatex">\(\sigma^2\)</span> mỗi chiều, thì trung bình có phương sai <span class="arithmatex">\(\sigma^2/N\)</span>. Các chi tiết bịa đặt khác nhau giữa các lần sinh (một bản nói "hoàn trong 7 ngày", bản khác nói "14 ngày") <strong>triệt tiêu một phần</strong>, còn phần chung (chủ đề) được giữ lại. Đây là cách HyDE "lọc" ảo giác ở mức embedding: encoder đóng vai trò nút thắt cổ chai giữ lại ngữ nghĩa chung, bỏ bớt chi tiết.</li>
+</ul>
+<p><strong>Ví dụ số (đồ chơi, 4 chiều).</strong> Trục: [hoàn tiền, hóa đơn, phong cách tài liệu, phong cách câu hỏi]. Đã chuẩn hóa:</p>
+<ul>
+<li>Câu hỏi khách: <span class="arithmatex">\(\mathbf{q} = (0{,}51;\ 0;\ 0;\ 0{,}86)\)</span> — nói về hoàn tiền, nhưng mang đậm phong cách câu hỏi.</li>
+<li>Tài liệu đúng (bài "Chính sách hoàn tiền"): <span class="arithmatex">\(\mathbf{d}_1 = (0{,}6;\ 0;\ 0{,}8;\ 0)\)</span>.</li>
+<li>Tài liệu sai nhưng cùng <em>dạng câu hỏi</em> (một FAQ "Làm sao đổi thông tin hóa đơn?"): <span class="arithmatex">\(\mathbf{d}_2 = (0;\ 0{,}5;\ 0;\ 0{,}87)\)</span>.</li>
+<li>Tài liệu giả định do LLM viết: <span class="arithmatex">\(\mathbf{g} = (0{,}55;\ 0{,}05;\ 0{,}83;\ 0)\)</span>.</li>
+</ul>
+<p>Cosine: <span class="arithmatex">\(\mathrm{sim}(\mathbf{q}, \mathbf{d}_1) = 0{,}51 \times 0{,}6 = 0{,}30\)</span>; <span class="arithmatex">\(\mathrm{sim}(\mathbf{q}, \mathbf{d}_2) = 0{,}86 \times 0{,}87 = 0{,}75\)</span> → <strong>truy vấn gốc chọn sai</strong> vì khớp phong cách thay vì chủ đề. Với HyDE: <span class="arithmatex">\(\mathrm{sim}(\mathbf{g}, \mathbf{d}_1) \approx 0{,}997\)</span>, <span class="arithmatex">\(\mathrm{sim}(\mathbf{g}, \mathbf{d}_2) \approx 0{,}03\)</span> → chọn đúng. Trộn <span class="arithmatex">\(\hat{\mathbf{v}} = \mathrm{normalize}(\mathbf{q} + \mathbf{g})\)</span>: <span class="arithmatex">\(0{,}81\)</span> vs <span class="arithmatex">\(0{,}48\)</span> — vẫn đúng, và giữ một phần "neo" vào ý định gốc của khách. Ví dụ phóng đại có chủ đích, nhưng hiện tượng "khớp phong cách" là có thật: trong kho Zendesk, câu hỏi của khách rất dễ khớp với <strong>ticket lịch sử khác chủ đề nhưng cùng giọng văn</strong>, thay vì bài Help Center đúng.</p>
+<!-- fig:hyde -->
+<figure>
+  <img alt="Trái: phép chiếu minh họa của ví dụ 4 chiều — truy vấn khớp «phong cách câu hỏi», tài liệu giả định khớp «phong cách tài liệu»" loading="lazy" src="../assets/figures/06/hyde.light.svg#only-light" />
+  <img alt="Trái: phép chiếu minh họa của ví dụ 4 chiều — truy vấn khớp «phong cách câu hỏi», tài liệu giả định khớp «phong cách tài liệu»" loading="lazy" src="../assets/figures/06/hyde.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.5 — Trái: phép chiếu minh họa của ví dụ 4 chiều — truy vấn khớp «phong cách câu hỏi», tài liệu giả định khớp «phong cách tài liệu». Phải: các cosine tính trong mục 5.2.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="53-query2doc-bien-the-cho-sparse">5.3 Query2doc — biến thể cho sparse<a class="headerlink" href="#53-query2doc-bien-the-cho-sparse" title="Permanent link">&para;</a></h3>
+<p>Query2doc (Wang, Yang, Wei; arXiv 2303.07678, EMNLP 2023) sinh pseudo-document bằng LLM rồi <strong>nối</strong> với truy vấn. Với BM25, truy vấn gốc được lặp lại vài lần trước khi nối để không bị pseudo-document dài "nhấn chìm" (trọng số term của truy vấn gốc vẫn chiếm ưu thế); với dense thì nối một lần. Lợi ích cho BM25: pseudo-document mang theo thuật ngữ chính thức ("prorated", "pro-rata", "hoàn tiền theo tỷ lệ") mà khách không dùng — một dạng query expansion.</p>
+<h3 id="54-khi-nao-hyde-gay-hai">5.4 Khi nào HyDE gây hại<a class="headerlink" href="#54-khi-nao-hyde-gay-hai" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Câu hỏi về sự kiện riêng tư/mới</strong> mà LLM không biết (tính năng ra tuần trước, chính sách riêng của công ty): tài liệu giả định có thể mô tả <em>chính sách phổ biến trên thị trường</em> thay vì chính sách của bạn → kéo retrieval về bài sai, hoặc về ticket lịch sử nói chính sách cũ. Đây là rủi ro lớn nhất trong bài toán Zendesk, nơi điều cấm kỵ là bịa chính sách.</li>
+<li><strong>Truy vấn định danh</strong> (<code>ERR_SYNC_409</code>): LLM bịa ra nguyên nhân lỗi → embedding lệch. BM25 trên định danh tốt hơn nhiều.</li>
+<li><strong>Latency</strong>: sinh một đoạn 100–200 token mất cỡ 1–3 s với model nhỏ tự host; sinh <span class="arithmatex">\(N = 4\)</span> bản thì tốn hơn (có thể song song/batch).</li>
+<li><strong>Encoder đã được fine-tune tốt trên miền</strong> (Module 09): khoảng lệch <span class="arithmatex">\(\boldsymbol{\delta}_Q - \boldsymbol{\delta}_D\)</span> đã nhỏ, HyDE thêm ít.</li>
+</ol>
+<p><strong>Quan trọng:</strong> tài liệu giả định <strong>chỉ dùng để retrieval</strong>, tuyệt đối không đưa vào context của bước generation và không log như thể là tri thức.</p>
+<p><strong>Liên hệ Zendesk.</strong> Mình không bật HyDE mặc định. Dùng nó có điều kiện: (a) như một nhánh <em>bổ sung</em> trong RAG-Fusion (hợp nhất bằng RRF với nhánh truy vấn gốc, không thay thế); (b) chỉ cho topic <code>how_to</code>/<code>bug</code> dạng mô tả, không cho <code>billing</code>/<code>refund</code>/<code>sla</code>; (c) chỉ khi điểm reranker cao nhất của lượt đầu thấp hơn một ngưỡng (retrieval "không tự tin") — một dạng adaptive retrieval (Module 08).</p>
+<hr />
+<h2 id="6-query-decomposition-va-step-back-prompting">6. Query decomposition và step-back prompting<a class="headerlink" href="#6-query-decomposition-va-step-back-prompting" title="Permanent link">&para;</a></h2>
+<h3 id="61-decomposition">6.1 Decomposition<a class="headerlink" href="#61-decomposition" title="Permanent link">&para;</a></h3>
+<p>Khác với tách câu hỏi trong email (các câu hỏi độc lập), <strong>decomposition</strong> dành cho một câu hỏi cần <strong>nhiều bước suy luận</strong> trên nhiều tài liệu: "Gói Business có hỗ trợ SSO với Azure AD không, và nếu nâng lên Enterprise giữa kỳ thì SSO có kích hoạt ngay không?" → (1) Gói nào hỗ trợ SSO/Azure AD? (2) Khi nâng gói giữa kỳ, tính năng mới có hiệu lực khi nào?</p>
+<p>Có hai dạng:</p>
+<ul>
+<li><strong>Song song</strong>: các câu con độc lập → retrieval song song, hợp nhất. Rẻ, dễ.</li>
+<li><strong>Tuần tự (multi-hop)</strong>: câu con sau phụ thuộc kết quả câu trước ("phiên bản nào sửa lỗi X?" → "phiên bản đó yêu cầu cấu hình gì?"). Self-ask (Press et al., arXiv 2210.03350) cho LLM tự hỏi câu tiếp theo, tự trả lời bằng retrieval, lặp lại. Đây đã là vòng lặp kiểu agent — thuộc Module 08 (IRCoT/ReAct); ở đây chỉ cần biết ranh giới.</li>
+</ul>
+<h3 id="62-step-back-prompting">6.2 Step-back prompting<a class="headerlink" href="#62-step-back-prompting" title="Permanent link">&para;</a></h3>
+<p>Step-back (Zheng et al., arXiv 2310.06117) yêu cầu LLM trước tiên <strong>lùi một bước</strong> để hỏi câu tổng quát hơn — về nguyên lý hoặc khái niệm nền — rồi dùng cả câu tổng quát và câu cụ thể. Trong RAG: "Tại sao tài khoản của tôi bị khóa sau khi đổi email?" → step-back: "Chính sách bảo mật khi thay đổi email đăng nhập là gì?". Câu step-back khớp với bài chính sách tổng quát (thường là nguồn đáng tin nhất), còn câu cụ thể khớp với ticket tương tự.</p>
+<p>Trực giác bằng toán: câu cụ thể có embedding <span class="arithmatex">\(\mathbf{q} = \boldsymbol{\mu}_{\text{khái niệm}} + \boldsymbol{\delta}_{\text{chi tiết}}\)</span>; khi <span class="arithmatex">\(\boldsymbol{\delta}_{\text{chi tiết}}\)</span> lớn (nhiều chi tiết riêng của khách), nó kéo truy vấn ra xa bài tổng quát. Câu step-back xấp xỉ <span class="arithmatex">\(\boldsymbol{\mu}_{\text{khái niệm}}\)</span> — "chiếu" truy vấn về tâm của chủ đề.</p>
+<!-- fig:decomposition-stepback -->
+<figure>
+  <img alt="Decomposition tách một câu ghép thành các câu con độc lập; step-back thêm một câu tổng quát để khớp bài chính sách nền" loading="lazy" src="../assets/figures/06/decomposition-stepback.light.svg#only-light" />
+  <img alt="Decomposition tách một câu ghép thành các câu con độc lập; step-back thêm một câu tổng quát để khớp bài chính sách nền" loading="lazy" src="../assets/figures/06/decomposition-stepback.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.6 — Decomposition tách một câu ghép thành các câu con độc lập; step-back thêm một câu tổng quát để khớp bài chính sách nền.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="63-lien-he-zendesk">6.3 Liên hệ Zendesk<a class="headerlink" href="#63-lien-he-zendesk" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Kỹ thuật</th>
+<th>Dùng khi</th>
+<th>Ví dụ ticket</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tách câu hỏi (mục 2)</td>
+<td>Email nhiều ý độc lập</td>
+<td>Hóa đơn + lỗi đồng bộ</td>
+</tr>
+<tr>
+<td>Decomposition song song</td>
+<td>Một câu ghép nhiều điều kiện</td>
+<td>SSO + nâng gói giữa kỳ</td>
+</tr>
+<tr>
+<td>Multi-hop (Module 08)</td>
+<td>Cần kết quả bước trước</td>
+<td>"Bản vá cho lỗi X có trong phiên bản tôi đang dùng không?"</td>
+</tr>
+<tr>
+<td>Step-back</td>
+<td>Câu rất cụ thể, cần chính sách nền</td>
+<td>Khóa tài khoản sau khi đổi email</td>
+</tr>
+</tbody>
+</table>
+<p>Thực tế, mình gộp "tách câu hỏi + decomposition song song + một câu step-back cho topic nhạy cảm" vào <strong>cùng một lời gọi LLM</strong> phân tích email (thêm trường <code>step_back</code> vào schema), thay vì ba lời gọi.</p>
+<hr />
+<h2 id="7-routing-theo-intent-va-san-pham">7. Routing theo intent và sản phẩm<a class="headerlink" href="#7-routing-theo-intent-va-san-pham" title="Permanent link">&para;</a></h2>
+<h3 id="71-van-e">7.1 Vấn đề<a class="headerlink" href="#71-van-e" title="Permanent link">&para;</a></h3>
+<p>Kho tri thức gồm nhiều nguồn khác nhau về độ tin cậy và mục đích: Help Center (chính thức), macro (mẫu trả lời, đã duyệt), ticket lịch sử (thực tế nhưng có thể lỗi thời, đã ẩn danh hóa), tài liệu API (kỹ thuật, tiếng Anh), release notes (theo phiên bản), chính sách giá/SLA (nhạy cảm nhất). Tìm trên tất cả với cùng trọng số thường cho kết quả lẫn lộn: câu hỏi giá cả lại kéo về một ticket năm ngoái nói giá cũ.</p>
+<h3 id="72-cach-lam">7.2 Cách làm<a class="headerlink" href="#72-cach-lam" title="Permanent link">&para;</a></h3>
+<p><strong>Routing</strong> = chọn nguồn (index/collection/filter), trọng số và chiến lược theo nhãn của truy vấn. Nhãn lấy từ bước phân tích (mục 2) hoặc một classifier nhỏ (embedding + logistic regression, hoặc fine-tune — Module 09).</p>
+<table>
+<thead>
+<tr>
+<th>Intent</th>
+<th>Nguồn ưu tiên</th>
+<th>Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>billing</code> / <code>refund</code> / <code>sla</code></td>
+<td>Chính sách hiện hành + Help Center + macro</td>
+<td><strong>Loại ticket lịch sử</strong> khỏi context trả lời (chỉ dùng để tham khảo cách diễn đạt); lọc <code>valid_until</code></td>
+</tr>
+<tr>
+<td><code>integration</code> / <code>bug</code></td>
+<td>Tài liệu API, release notes, Help Center, ticket lịch sử đã giải quyết</td>
+<td>BM25 trên định danh được trọng số cao</td>
+</tr>
+<tr>
+<td><code>how_to</code></td>
+<td>Help Center, macro</td>
+<td>Thường đủ với naive + rerank</td>
+</tr>
+<tr>
+<td><code>account</code> (dữ liệu riêng của khách)</td>
+<td>Không phải retrieval — cần gọi API nội bộ</td>
+<td>Agent + tool (Module 08); hoặc escalate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Routing mềm vs cứng.</strong> Routing cứng (chỉ tìm trong một nguồn) rẻ và sạch nhưng nếu phân loại sai thì recall về 0. Gọi <span class="arithmatex">\(a\)</span> là độ chính xác của router, <span class="arithmatex">\(r_{\text{in}}\)</span> là recall khi route đúng, <span class="arithmatex">\(r_{\text{all}}\)</span> là recall khi tìm trên tất cả nguồn. Recall kỳ vọng của routing cứng là <span class="arithmatex">\(a \cdot r_{\text{in}}\)</span> (giả định route sai thì trượt hẳn). Với <span class="arithmatex">\(a = 0{,}9\)</span>, <span class="arithmatex">\(r_{\text{in}} = 0{,}9\)</span>: <span class="arithmatex">\(0{,}81\)</span> — có thể <strong>thua</strong> <span class="arithmatex">\(r_{\text{all}} = 0{,}85\)</span> dù mỗi nguồn riêng tốt hơn. Vì vậy:</p>
+<!-- fig:routing-hard-soft -->
+<figure>
+  <img alt="Recall kỳ vọng của routing cứng a·rin so với tìm trên mọi nguồn; với rin = 0" loading="lazy" src="../assets/figures/06/routing-hard-soft.light.svg#only-light" />
+  <img alt="Recall kỳ vọng của routing cứng a·rin so với tìm trên mọi nguồn; với rin = 0" loading="lazy" src="../assets/figures/06/routing-hard-soft.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.7 — Recall kỳ vọng của routing cứng a·r_in so với tìm trên mọi nguồn; với r_in = 0.9, router phải đúng trên ~94% mới hòa vốn.</figcaption>
+</figure>
+<!-- /fig -->
+
+<ul>
+<li>Dùng <strong>routing mềm</strong>: tìm trên tất cả nguồn được phép, nhưng nhân trọng số theo nguồn (weighted RRF) hoặc boost ở tầng rerank.</li>
+<li>Routing cứng <strong>chỉ</strong> khi xác suất của router cao (ví dụ <span class="arithmatex">\(\ge 0{,}9\)</span> đã hiệu chuẩn — Module 10), còn lại rơi về routing mềm.</li>
+<li>Ngoại lệ là <strong>routing vì an toàn</strong> (loại ticket lịch sử khỏi câu trả lời về giá) — đó là quy tắc chính sách, luôn cứng.</li>
+</ul>
+<p><strong>Liên hệ Zendesk.</strong> Router còn quyết định <strong>có retrieval hay không</strong>: intent "cảm ơn, đã giải quyết" → không cần retrieval, chỉ cần đóng ticket/gửi CSAT; intent "muốn gặp người" → vẫn retrieval để soạn tóm tắt cho agent nhưng chuyển ngay. Routing theo <strong>sản phẩm/phiên bản</strong> (khách dùng bản on-premise v3.x vs cloud) lấy từ custom field của organization trên Zendesk, không từ LLM — dữ liệu có cấu trúc đáng tin hơn suy đoán.</p>
+<hr />
+<h2 id="8-reranking">8. Reranking<a class="headerlink" href="#8-reranking" title="Permanent link">&para;</a></h2>
+<h3 id="81-vi-sao-can-tang-thu-hai">8.1 Vì sao cần tầng thứ hai<a class="headerlink" href="#81-vi-sao-can-tang-thu-hai" title="Permanent link">&para;</a></h3>
+<p>Bi-encoder (Module 03) mã hóa truy vấn và tài liệu <strong>độc lập</strong>: <span class="arithmatex">\(s(q, d) = \langle E_Q(q), E_D(d) \rangle\)</span>. Toàn bộ thông tin của một chunk 300 token bị ép vào một vector <span class="arithmatex">\(D\)</span> chiều <em>trước khi biết câu hỏi là gì</em>. Hệ quả: nó không thể chú ý vào đúng câu trong chunk liên quan đến câu hỏi này, không phân biệt tốt "hoàn tiền được" với "hoàn tiền không được", không bắt chi tiết như "gói Business" vs "gói Business Plus". Cái được là tốc độ: embedding tài liệu tính trước, truy vấn chỉ cần một tích vô hướng.</p>
+<p>Reranker đảo ngược đánh đổi này: chỉ áp dụng cho <span class="arithmatex">\(k\)</span> ứng viên (thường 20–100), nhưng mỗi cặp <span class="arithmatex">\((q, d)\)</span> được xét <strong>chung</strong>, cho phép tương tác ở mức token. Kiến trúc retrieve-then-rerank là tiêu chuẩn từ monoBERT (Nogueira &amp; Cho, 2019) đến nay.</p>
+<h3 id="82-cross-encoder-toan-va-chi-phi">8.2 Cross-encoder: toán và chi phí<a class="headerlink" href="#82-cross-encoder-toan-va-chi-phi" title="Permanent link">&para;</a></h3>
+<p><strong>Mô hình.</strong> Ghép <span class="arithmatex">\([\texttt{CLS}]\ q\ [\texttt{SEP}]\ d\ [\texttt{SEP}]\)</span>, đưa qua một Transformer encoder, lấy biểu diễn <span class="arithmatex">\(\mathbf{h}_{\texttt{CLS}}\)</span> và một lớp tuyến tính:</p>
+<div class="arithmatex">\[
+s(q, d) = \mathbf{w}^\top \mathbf{h}_{\texttt{CLS}}\big(\mathrm{Transformer}([q; d])\big) + b
+\]</div>
+<p>Khác bi-encoder, <span class="arithmatex">\(s\)</span> là một <strong>hàm chung</strong> <span class="arithmatex">\(f(q, d)\)</span> — không phân tách được thành <span class="arithmatex">\(\langle g(q), h(d)\rangle\)</span>. Mọi lớp self-attention cho phép token của <span class="arithmatex">\(q\)</span> chú ý tới token của <span class="arithmatex">\(d\)</span> và ngược lại. Đó là nguồn sức mạnh (biểu diễn phụ thuộc truy vấn) và cũng là lý do không thể tính trước gì cho tài liệu.</p>
+<p><strong>Huấn luyện</strong> (chi tiết ở Module 09): pointwise với binary cross-entropy <span class="arithmatex">\(-[y \log \sigma(s) + (1-y)\log(1 - \sigma(s))]\)</span>, hoặc listwise với softmax trên một nhóm gồm 1 positive và nhiều hard negative: <span class="arithmatex">\(-\log \frac{e^{s(q,d^+)}}{\sum_{d \in \{d^+\} \cup \mathcal{N}} e^{s(q,d)}}\)</span>.</p>
+<p><strong>Chi phí.</strong> Rerank <span class="arithmatex">\(k\)</span> ứng viên = <span class="arithmatex">\(k\)</span> lượt forward (batch được), mỗi lượt dài <span class="arithmatex">\(L = L_q + L_d\)</span> token. FLOPs xấp xỉ:</p>
+<div class="arithmatex">\[
+\text{FLOPs} \approx k \cdot \big(2 P_{\text{non-emb}} \cdot L + O(n_{\text{layers}} \cdot L^2 \cdot d_{\text{model}})\big)
+\]</div>
+<p>với <span class="arithmatex">\(P_{\text{non-emb}}\)</span> là số tham số không tính bảng embedding (bảng embedding chỉ là tra cứu, gần như không tốn FLOPs). Hạng tử <span class="arithmatex">\(L^2\)</span> (attention) đáng kể khi <span class="arithmatex">\(L\)</span> lớn — lý do cắt chunk về ~512 token cho reranker.</p>
+<p><strong>Ví dụ số (ước lượng).</strong> <code>bge-reranker-v2-m3</code> có ~0,57B tham số; phần lớn là bảng embedding cho từ vựng đa ngữ cỡ 250k token × 1024 chiều ≈ 0,26B, nên <span class="arithmatex">\(P_{\text{non-emb}} \approx 0{,}3\)</span>B. Rerank <span class="arithmatex">\(k = 50\)</span> chunk, <span class="arithmatex">\(L \approx 400\)</span>: <span class="arithmatex">\(50 \times 2 \times 0{,}3 \cdot 10^9 \times 400 \approx 1{,}2 \cdot 10^{13}\)</span> FLOPs = 12 TFLOP. Giả định GPU đạt hiệu dụng ~30 TFLOPS fp16 (ước lượng cho GPU datacenter tầm trung; GPU laptop như RTX 4050 thấp hơn) → <strong>~0,4 s</strong>; trên CPU nhiều lõi: vài giây đến hàng chục giây. Từ đây rút ra hai đòn bẩy: giảm <span class="arithmatex">\(k\)</span> (50 → 30 tiết kiệm 40%), và giảm <span class="arithmatex">\(L\)</span> (rerank trên chunk con thay vì chunk cha dài).</p>
+<!-- fig:rerank-cascade -->
+<figure>
+  <img alt="Trái: kiến trúc nhiều tầng của mục 1" loading="lazy" src="../assets/figures/06/rerank-cascade.light.svg#only-light" />
+  <img alt="Trái: kiến trúc nhiều tầng của mục 1" loading="lazy" src="../assets/figures/06/rerank-cascade.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.8 — Trái: kiến trúc nhiều tầng của mục 1. Phải: thời gian rerank ước lượng theo công thức FLOPs của mục 8.2 (bỏ qua hạng tử L²).</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>Ngân sách VRAM trên 6 GB:</strong> ~0,57B tham số fp16 ≈ 1,1 GB trọng số; activation cho batch 16–32 cặp × 512 token vẫn vừa. Đây là reranker phù hợp cho lab cá nhân.</p>
+<h3 id="83-monot5-va-duot5-y-tuong">8.3 monoT5 và duoT5 (ý tưởng)<a class="headerlink" href="#83-monot5-va-duot5-y-tuong" title="Permanent link">&para;</a></h3>
+<p><strong>monoT5</strong> (Nogueira, Jiang, Pradeep, Lin; arXiv 2003.06713): dùng mô hình seq2seq T5, đầu vào <code>Query: q Document: d Relevant:</code>, điểm là xác suất sinh token "true" so với "false":</p>
+<div class="arithmatex">\[
+s(q, d) = \frac{e^{z_{\text{true}}}}{e^{z_{\text{true}}} + e^{z_{\text{false}}}}
+\]</div>
+<p>Ý tưởng "dùng logit của token trả lời làm điểm" là tổ tiên trực tiếp của các reranker dựa trên LLM ngày nay (mục 8.6).</p>
+<p><strong>duoT5</strong> (pairwise): đầu vào gồm <span class="arithmatex">\(q\)</span> và <strong>hai</strong> tài liệu <span class="arithmatex">\(d_i, d_j\)</span>, mô hình ước lượng <span class="arithmatex">\(p_{ij} = P(d_i \succ d_j \mid q)\)</span>. Điểm tổng hợp cho <span class="arithmatex">\(d_i\)</span> là <span class="arithmatex">\(\sum_{j \ne i} p_{ij}\)</span>. Chi phí <span class="arithmatex">\(O(k^2)\)</span> lượt forward — vì vậy mẫu thiết kế <strong>Expando-Mono-Duo</strong> (Pradeep, Nogueira, Lin; arXiv 2101.05667) chỉ dùng duo cho top rất nhỏ (ví dụ 50 cặp từ top-10) sau mono. Bài học kiến trúc: <strong>xếp tầng theo chi phí</strong> — mỗi tầng đắt hơn xử lý ít ứng viên hơn.</p>
+<h3 id="84-late-interaction-colbert-nhu-reranker">8.4 Late interaction (ColBERT) như reranker<a class="headerlink" href="#84-late-interaction-colbert-nhu-reranker" title="Permanent link">&para;</a></h3>
+<p>ColBERT (Khattab &amp; Zaharia, arXiv 2004.12832) giữ <strong>embedding cho từng token</strong>: <span class="arithmatex">\(\{\mathbf{q}_i\}_{i=1}^{|q|}\)</span> và <span class="arithmatex">\(\{\mathbf{d}_j\}_{j=1}^{|d|}\)</span> (chuẩn hóa, chiều nhỏ ~128). Điểm MaxSim (Module 03):</p>
+<div class="arithmatex">\[
+s(q, d) = \sum_{i=1}^{|q|} \max_{j} \ \mathbf{q}_i^\top \mathbf{d}_j
+\]</div>
+<p>Như một reranker: token embedding của tài liệu tính trước và lưu; khi rerank, chỉ encode truy vấn rồi tính <span class="arithmatex">\(|q| \times |d| \times 128\)</span> phép nhân-cộng mỗi tài liệu. Với <span class="arithmatex">\(|q| = 32\)</span>, <span class="arithmatex">\(|d| = 300\)</span>, <span class="arithmatex">\(k = 50\)</span>: ~61 triệu phép nhân-cộng — <strong>vài mili-giây trên CPU</strong>, rẻ hơn cross-encoder hai đến ba bậc. Cái giá là <strong>bộ nhớ</strong>: 300 token × 128 chiều × 2 byte ≈ 77 KB/chunk; 500k chunk ≈ 38 GB nếu không nén (ColBERTv2, arXiv 2112.01488, dùng nén residual để giảm mạnh con số này). Chất lượng thường nằm giữa bi-encoder và cross-encoder.</p>
+<p><strong>Khi nào chọn:</strong> latency cực chặt hoặc không có GPU cho cross-encoder; hoặc như tầng giữa: dense top-200 → ColBERT top-50 → cross-encoder top-10. Qdrant hỗ trợ multi-vector để làm tầng này trong cùng truy vấn <code>prefetch</code> (Module 05).</p>
+<h3 id="85-llm-lam-reranker-pointwise-pairwise-listwise">8.5 LLM làm reranker: pointwise, pairwise, listwise<a class="headerlink" href="#85-llm-lam-reranker-pointwise-pairwise-listwise" title="Permanent link">&para;</a></h3>
+<p>Khi dùng LLM sinh văn bản (decoder-only) để xếp hạng, có ba cách đặt bài toán:</p>
+<p><strong>Pointwise.</strong> Mỗi cặp <span class="arithmatex">\((q, d)\)</span> một lời gọi: "Tài liệu có trả lời câu hỏi không? yes/no", lấy <span class="arithmatex">\(s = P(\text{yes})\)</span> từ logprob (Module 01), hoặc yêu cầu điểm 0–3. Chi phí <span class="arithmatex">\(O(k)\)</span> lời gọi, song song được. Nhược: điểm giữa các lời gọi không được hiệu chuẩn với nhau (mỗi lời gọi chỉ thấy một tài liệu, không có thước đo tương đối); yêu cầu "điểm 0–10" dạng văn bản thì rất thô và dồn cục.</p>
+<p><strong>Pairwise</strong> (PRP — Qin et al., arXiv 2306.17563): "Tài liệu A hay B liên quan hơn?". So sánh tương đối dễ với LLM hơn chấm điểm tuyệt đối. Nhưng: all-pairs cần <span class="arithmatex">\(k(k-1)\)</span> lời gọi (hỏi cả hai thứ tự để khử <strong>bias vị trí</strong> — LLM hay ưu tiên tài liệu đặt trước); với <span class="arithmatex">\(k = 50\)</span> là 2.450 lời gọi. Biến thể sắp xếp (heap sort, sliding window kiểu bubble sort cho top-<span class="arithmatex">\(K\)</span>) giảm còn <span class="arithmatex">\(O(k \log k)\)</span> hoặc <span class="arithmatex">\(O(K \cdot k)\)</span>.</p>
+<p><strong>Listwise</strong> (RankGPT — Sun et al., arXiv 2304.09542, EMNLP 2023): đưa cả danh sách <span class="arithmatex">\([1]\ d_1 \dots [w]\ d_w\)</span> vào prompt, yêu cầu xuất hoán vị như <code>[3] &gt; [1] &gt; [7] &gt; ...</code>. Context có hạn nên dùng <strong>cửa sổ trượt</strong> từ cuối danh sách lên đầu: cửa sổ <span class="arithmatex">\(w\)</span>, bước <span class="arithmatex">\(s\)</span>. Số lời gọi cho <span class="arithmatex">\(k\)</span> ứng viên:</p>
+<div class="arithmatex">\[
+n_{\text{calls}} = \left\lceil \frac{k - w}{s} \right\rceil + 1
+\]</div>
+<p>Với <span class="arithmatex">\(k = 100\)</span>, <span class="arithmatex">\(w = 20\)</span>, <span class="arithmatex">\(s = 10\)</span>: 9 lời gọi, mỗi lời gọi ~20 đoạn × ~100 token ≈ 2.000 token đầu vào. Một lượt quét từ dưới lên đảm bảo tài liệu tốt nhất "nổi" lên top (giống một lượt bubble sort), đủ cho mục tiêu chọn top-10. RankVicuna (arXiv 2309.15088) và RankZephyr (arXiv 2312.02724) chưng cất khả năng listwise vào model mở 7B; Setwise (Zhuang et al., arXiv 2310.09497) chọn "tài liệu tốt nhất trong một nhóm nhỏ" để cân bằng chi phí giữa pairwise và listwise.</p>
+<table>
+<thead>
+<tr>
+<th>Cách</th>
+<th>Số lời gọi cho <span class="arithmatex">\(k\)</span> ứng viên</th>
+<th>Ưu</th>
+<th>Nhược</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pointwise</td>
+<td><span class="arithmatex">\(k\)</span> (song song)</td>
+<td>đơn giản, có điểm để đặt ngưỡng</td>
+<td>điểm thiếu hiệu chuẩn tương đối</td>
+</tr>
+<tr>
+<td>Pairwise all-pairs</td>
+<td><span class="arithmatex">\(k(k-1)\)</span></td>
+<td>so sánh tương đối, chính xác</td>
+<td>quá đắt khi <span class="arithmatex">\(k\)</span> lớn</td>
+</tr>
+<tr>
+<td>Pairwise sorting</td>
+<td><span class="arithmatex">\(O(k \log k)\)</span> hoặc <span class="arithmatex">\(O(Kk)\)</span></td>
+<td>rẻ hơn nhiều</td>
+<td>vẫn tuần tự, latency cao</td>
+</tr>
+<tr>
+<td>Listwise sliding window</td>
+<td><span class="arithmatex">\(\lceil (k-w)/s \rceil + 1\)</span></td>
+<td>xét tương quan cả nhóm</td>
+<td>output hoán vị có thể lỗi định dạng; nhạy thứ tự đầu vào</td>
+</tr>
+</tbody>
+</table>
+<!-- fig:llm-rerank-calls -->
+<figure>
+  <img alt="Số lời gọi LLM theo số ứng viên cho từng cách dùng LLM làm reranker (trục log)" loading="lazy" src="../assets/figures/06/llm-rerank-calls.light.svg#only-light" />
+  <img alt="Số lời gọi LLM theo số ứng viên cho từng cách dùng LLM làm reranker (trục log)" loading="lazy" src="../assets/figures/06/llm-rerank-calls.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.9 — Số lời gọi LLM theo số ứng viên cho từng cách dùng LLM làm reranker (trục log).</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="86-reranker-llm-based-chuyen-dung-iem-giao-giua-hai-the-gioi">8.6 Reranker "LLM-based" chuyên dụng — điểm giao giữa hai thế giới<a class="headerlink" href="#86-reranker-llm-based-chuyen-dung-iem-giao-giua-hai-the-gioi" title="Permanent link">&para;</a></h3>
+<p>Thế hệ reranker mới (tính đến 10/2026) là <strong>mô hình LLM nhỏ được huấn luyện riêng cho xếp hạng</strong>, gộp ưu điểm cả hai bên:</p>
+<ul>
+<li><strong>Qwen3-Reranker</strong> (0,6B / 4B / 8B; Apache 2.0; ngữ cảnh 32k; hơn 100 ngôn ngữ; báo cáo kỹ thuật arXiv 2506.05176): định dạng đầu vào gồm instruction, query, document; điểm là xác suất token "yes" so với "no" ở vị trí cuối — đúng tinh thần monoT5 nhưng trên decoder-only. <strong>Instruction-aware</strong>: có thể viết instruction theo miền (ví dụ "Đánh giá đoạn này có trả lời được câu hỏi hỗ trợ khách hàng về phần mềm SaaS không"); model card cho biết instruction phù hợp thường thêm khoảng 1–5%.</li>
+<li><strong>jina-reranker-v3</strong> (0,6B, dựa trên Qwen3-0.6B; arXiv 2509.25085): <strong>listwise</strong> trong một lượt forward — đưa query và tới 64 tài liệu vào cùng cửa sổ ngữ cảnh lớn, các tài liệu "nhìn thấy nhau" qua attention. <strong>Giấy phép CC BY-NC 4.0</strong> — không dùng thương mại nếu không có thỏa thuận riêng.</li>
+<li><strong>bge-reranker-v2-m3</strong> (BAAI; ~0,57B; Apache 2.0): cross-encoder đa ngữ dựa trên nền BGE-M3, đã chứng minh trong rất nhiều hệ production; nhẹ, ổn định — <strong>baseline mặc định</strong> của mình.</li>
+<li><strong>mxbai-rerank-v2</strong> (Mixedbread; base/large; Apache 2.0): thêm một lựa chọn mở đa ngữ.</li>
+<li><strong>API thương mại:</strong> Cohere Rerank 4 (<code>rerank-v4.0-pro</code> và <code>rerank-v4.0-fast</code>, ra 12/2025, ngữ cảnh 32k, đa ngữ); Voyage <code>rerank-3</code> và <code>rerank-3-lite</code> (ra 30/09/2026, ngữ cảnh 32K, có instruction-following). Các bảng so sánh do nhà cung cấp tự công bố — luôn tự đánh giá trên dữ liệu của mình.</li>
+</ul>
+<h3 id="87-chon-reranker-cho-zendesk">8.7 Chọn reranker cho Zendesk<a class="headerlink" href="#87-chon-reranker-cho-zendesk" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Tiêu chí</th>
+<th>Gợi ý</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Self-host, GPU 6 GB / GPU nhỏ, đa ngữ vi/en/ja, thương mại</td>
+<td><code>bge-reranker-v2-m3</code> (baseline) → thử <code>Qwen3-Reranker-0.6B</code> có instruction</td>
+</tr>
+<tr>
+<td>Có GPU lớn hơn, cần chất lượng cao hơn</td>
+<td><code>Qwen3-Reranker-4B</code> (có thể lượng tử hóa)</td>
+</tr>
+<tr>
+<td>Không muốn vận hành GPU, chấp nhận gửi dữ liệu ra ngoài</td>
+<td>Cohere / Voyage — <strong>chỉ sau khi</strong> đã che PII và kiểm tra điều khoản xử lý dữ liệu (Module 11)</td>
+</tr>
+<tr>
+<td>Latency cực chặt, không có GPU</td>
+<td>ColBERT/multi-vector rerank hoặc bỏ rerank, tăng chất lượng hybrid</td>
+</tr>
+<tr>
+<td>Dữ liệu có nhãn từ ticket lịch sử</td>
+<td>Fine-tune reranker (Module 09) — thường là cải thiện lớn nhất</td>
+</tr>
+</tbody>
+</table>
+<p>Quy trình đánh giá: golden set ~300 truy vấn phân tầng theo ngôn ngữ và intent (Module 10), đo nDCG@10 và Recall@5 trước/sau rerank, <strong>tách riêng tiếng Nhật</strong> — đa số benchmark công khai thiên về tiếng Anh/Trung, chất lượng trên tiếng Việt/Nhật miền SaaS phải tự đo.</p>
+<h3 id="88-code-rerank-voi-cross-encoder-va-cac-tin-hieu-bo-sung">8.8 Code: rerank với cross-encoder và các tín hiệu bổ sung<a class="headerlink" href="#88-code-rerank-voi-cross-encoder-va-cac-tin-hieu-bo-sung" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># rerank.py — sentence-transformers &gt;= 3.x; chạy được trên GPU 6GB (fp16)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sentence_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrossEncoder</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">reranker</span> <span class="o">=</span> <span class="n">CrossEncoder</span><span class="p">(</span><span class="s2">"BAAI/bge-reranker-v2-m3"</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">reranker</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">half</span><span class="p">()</span>  <span class="c1"># fp16 để tiết kiệm VRAM (cần GPU)</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">rerank</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cands</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">top_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>           <span class="n">lang</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">beta_lang</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="sd">"""cands: [{'id':..., 'text':..., 'lang':..., 'source':...}] từ hybrid retrieval."""</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">logits</span> <span class="o">=</span> <span class="n">reranker</span><span class="o">.</span><span class="n">predict</span><span class="p">([(</span><span class="n">query</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="s2">"text"</span><span class="p">])</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cands</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cands</span><span class="p">,</span> <span class="n">logits</span><span class="p">):</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>        <span class="n">c</span><span class="p">[</span><span class="s2">"rerank_logit"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        <span class="n">c</span><span class="p">[</span><span class="s2">"rerank_prob"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span>   <span class="c1"># sigmoid: KHÔNG phải xác suất đã hiệu chuẩn</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>        <span class="c1"># boost nhẹ cùng ngôn ngữ (Module 05: không lọc cứng locale)</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        <span class="n">c</span><span class="p">[</span><span class="s2">"final"</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="s2">"rerank_logit"</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">beta_lang</span> <span class="k">if</span> <span class="n">lang</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"lang"</span><span class="p">)</span> <span class="o">==</span> <span class="n">lang</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cands</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="o">-</span><span class="n">c</span><span class="p">[</span><span class="s2">"final"</span><span class="p">])[:</span><span class="n">top_n</span><span class="p">]</span>
+</span></code></pre></div>
+<p>Ba lưu ý:</p>
+<ol>
+<li><strong>Điểm reranker là tín hiệu tốt cho quyết định "có đủ thông tin không"</strong> (Module 10): nếu logit cao nhất vẫn thấp, khả năng cao là kho không có câu trả lời → nghiêng về abstain/escalate. Nhưng sigmoid của logit <strong>không phải xác suất đã hiệu chuẩn</strong> và thang điểm khác nhau giữa các model; phải hiệu chuẩn (Platt/temperature scaling) trên dữ liệu có nhãn trước khi đặt ngưỡng.</li>
+<li><strong>Boost cộng vào logit</strong> (ngôn ngữ, độ mới <code>updated_at</code>, nguồn chính thức) nên nhỏ và được tune; chúng là "chính sách" của bạn, tách khỏi mô hình.</li>
+<li><strong>Truncation:</strong> tài liệu bị cắt ở <code>max_length</code> — nếu chunk dài hơn, câu trả lời ở cuối chunk bị mất. Chunk cho reranker nên ≤ ~400 token (Module 04: chunk con trong parent-child).</li>
+</ol>
+<hr />
+<h2 id="9-mmr-va-a-dang-hoa">9. MMR và đa dạng hóa<a class="headerlink" href="#9-mmr-va-a-dang-hoa" title="Permanent link">&para;</a></h2>
+<h3 id="91-van-e">9.1 Vấn đề<a class="headerlink" href="#91-van-e" title="Permanent link">&para;</a></h3>
+<p>Kho ticket lịch sử chứa hàng trăm ticket "quên mật khẩu" gần như giống hệt; Help Center có bài tiếng Việt, tiếng Anh, tiếng Nhật của cùng một nội dung. Sau rerank, top-8 có thể là 6 bản gần trùng của cùng một thông tin. Hệ quả: lãng phí ngân sách token, <strong>che mất</strong> khía cạnh thứ hai của câu hỏi (ví dụ chỉ thấy cách đặt lại mật khẩu, không thấy chính sách khóa tài khoản), và đẩy LLM về hướng "đa số phiếu" của các ticket cũ.</p>
+<p>Deduplication lúc ingestion (MinHash — Module 04) xử lý bản trùng gần như tuyệt đối; MMR xử lý <strong>dư thừa ngữ nghĩa</strong> ở thời điểm truy vấn.</p>
+<h3 id="92-cong-thuc">9.2 Công thức<a class="headerlink" href="#92-cong-thuc" title="Permanent link">&para;</a></h3>
+<p>Maximal Marginal Relevance (Carbonell &amp; Goldstein, SIGIR 1998) chọn tham lam từng tài liệu; ở mỗi bước, với tập đã chọn <span class="arithmatex">\(S\)</span> và tập ứng viên <span class="arithmatex">\(R\)</span>:</p>
+<div class="arithmatex">\[
+\mathrm{MMR} = \underset{d_i \in R \setminus S}{\arg\max}\Big[\lambda \cdot \mathrm{rel}(q, d_i) - (1 - \lambda) \cdot \max_{d_j \in S} \mathrm{sim}(d_i, d_j)\Big]
+\]</div>
+<ul>
+<li><span class="arithmatex">\(\mathrm{rel}(q, d_i)\)</span>: điểm liên quan — tốt nhất là điểm reranker đã đưa về <span class="arithmatex">\([0, 1]\)</span>, không phải cosine bi-encoder thô.</li>
+<li><span class="arithmatex">\(\mathrm{sim}(d_i, d_j)\)</span>: độ tương tự giữa hai tài liệu — cosine embedding của chúng.</li>
+<li><span class="arithmatex">\(\lambda \in [0,1]\)</span>: <span class="arithmatex">\(\lambda = 1\)</span> là xếp theo relevance thuần; <span class="arithmatex">\(\lambda = 0\)</span> là đa dạng tối đa (bỏ qua relevance — nguy hiểm). Hạng tử <span class="arithmatex">\(\max_{d_j \in S}\)</span> phạt ứng viên giống <strong>bất kỳ</strong> tài liệu nào đã chọn.</li>
+</ul>
+<p>Độ phức tạp: chọn <span class="arithmatex">\(k\)</span> từ <span class="arithmatex">\(|R|\)</span> ứng viên cần <span class="arithmatex">\(O(k \cdot |R|)\)</span> phép cập nhật nếu lưu sẵn ma trận tương tự <span class="arithmatex">\(|R| \times |R|\)</span> (tính một lần, <span class="arithmatex">\(O(|R|^2 D)\)</span>) — với <span class="arithmatex">\(|R| = 30\)</span> là không đáng kể.</p>
+<h3 id="93-vi-du-so">9.3 Ví dụ số<a class="headerlink" href="#93-vi-du-so" title="Permanent link">&para;</a></h3>
+<p>Câu hỏi: "Tài khoản bị khóa sau khi đổi email, làm sao mở lại?". Năm ứng viên sau rerank:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Nội dung</th>
+<th>rel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d1</td>
+<td>Ticket A: mở khóa sau đổi email bằng link xác minh</td>
+<td>0,90</td>
+</tr>
+<tr>
+<td>d2</td>
+<td>Ticket B: gần như giống d1</td>
+<td>0,88</td>
+</tr>
+<tr>
+<td>d3</td>
+<td>Ticket C: gần như giống d1</td>
+<td>0,85</td>
+</tr>
+<tr>
+<td>d4</td>
+<td>Bài Help Center: chính sách bảo mật khi đổi email (khóa 24h)</td>
+<td>0,70</td>
+</tr>
+<tr>
+<td>d5</td>
+<td>Macro: cách liên hệ admin của tổ chức để đổi email</td>
+<td>0,55</td>
+</tr>
+</tbody>
+</table>
+<p>Độ tương tự giữa các tài liệu: <span class="arithmatex">\(\mathrm{sim}(d_1,d_2) = 0{,}95\)</span>, <span class="arithmatex">\(\mathrm{sim}(d_1,d_3) = 0{,}92\)</span>, <span class="arithmatex">\(\mathrm{sim}(d_2,d_3) = 0{,}93\)</span>; <span class="arithmatex">\(d_4\)</span> với <span class="arithmatex">\(d_1, d_2, d_3\)</span>: <span class="arithmatex">\(0{,}40;\ 0{,}45;\ 0{,}42\)</span>; <span class="arithmatex">\(d_5\)</span> với <span class="arithmatex">\(d_1..d_4\)</span>: <span class="arithmatex">\(0{,}15;\ 0{,}12;\ 0{,}14;\ 0{,}20\)</span>.</p>
+<p><strong><span class="arithmatex">\(\lambda = 1\)</span>:</strong> chọn d1, d2, d3 — ba bản gần trùng.</p>
+<p><strong><span class="arithmatex">\(\lambda = 0{,}7\)</span>:</strong></p>
+<ul>
+<li>Bước 1 (<span class="arithmatex">\(S = \emptyset\)</span>): điểm <span class="arithmatex">\(= 0{,}7 \cdot \mathrm{rel}\)</span> → d1 (0,630).</li>
+<li>Bước 2: d2: <span class="arithmatex">\(0{,}7(0{,}88) - 0{,}3(0{,}95) = 0{,}616 - 0{,}285 = 0{,}331\)</span>; d3: <span class="arithmatex">\(0{,}595 - 0{,}276 = 0{,}319\)</span>; d4: <span class="arithmatex">\(0{,}49 - 0{,}3(0{,}40) = 0{,}370\)</span>; d5: <span class="arithmatex">\(0{,}385 - 0{,}045 = 0{,}340\)</span> → <strong>d4</strong>.</li>
+<li>Bước 3 (<span class="arithmatex">\(S = \{d_1, d_4\}\)</span>): d2: <span class="arithmatex">\(0{,}616 - 0{,}3\max(0{,}95; 0{,}45) = 0{,}331\)</span>; d3: <span class="arithmatex">\(0{,}319\)</span>; d5: <span class="arithmatex">\(0{,}385 - 0{,}3 \max(0{,}15; 0{,}20) = 0{,}325\)</span> → <strong>d2</strong>.</li>
+<li>Kết quả: <strong>d1, d4, d2</strong> — có cả cách mở khóa lẫn chính sách nền.</li>
+</ul>
+<p><strong><span class="arithmatex">\(\lambda = 0{,}5\)</span>:</strong> d1 → d5 (0,200 vs d4 0,150) → d4. Kết quả d1, d5, d4: đa dạng nhất nhưng đã bỏ ticket thứ hai xác nhận cách làm, và đưa macro ít liên quan (0,55) vào sớm.</p>
+<!-- fig:mmr-example -->
+<figure>
+  <img alt="Ví dụ MMR mục 9" loading="lazy" src="../assets/figures/06/mmr-example.light.svg#only-light" />
+  <img alt="Ví dụ MMR mục 9" loading="lazy" src="../assets/figures/06/mmr-example.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.10 — Ví dụ MMR mục 9.3: ma trận tương tự giữa năm ứng viên và ba tài liệu được chọn đầu tiên với từng λ.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="94-chon-lambda-va-lien-he-zendesk">9.4 Chọn <span class="arithmatex">\(\lambda\)</span> và liên hệ Zendesk<a class="headerlink" href="#94-chon-lambda-va-lien-he-zendesk" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Mặc định thực tế: <span class="arithmatex">\(\lambda \in [0{,}6;\ 0{,}8]\)</span>. Dưới 0,5 thường đưa tài liệu kém liên quan vào.</li>
+<li>Áp MMR <strong>sau rerank</strong>, trên top-20–30, để chọn <span class="arithmatex">\(k = 5\)</span>–8 đoạn cuối.</li>
+<li>Với ticket lịch sử: thêm ràng buộc cứng đơn giản hơn MMR — <strong>tối đa 2 ticket lịch sử</strong> trong context, ưu tiên Help Center/macro cho phần chính sách.</li>
+<li>Đa ngôn ngữ: coi các bản dịch của cùng bài là trùng (nhóm theo <code>article_id</code>), chỉ giữ bản cùng ngôn ngữ với khách (hoặc bản tiếng Anh nếu không có).</li>
+<li>MMR không thay được dedup lúc ingestion; dùng cả hai.</li>
+</ul>
+<hr />
+<h2 id="10-nen-context-va-sap-xep-lai">10. Nén context và sắp xếp lại<a class="headerlink" href="#10-nen-context-va-sap-xep-lai" title="Permanent link">&para;</a></h2>
+<h3 id="101-vi-sao-nen">10.1 Vì sao nén<a class="headerlink" href="#101-vi-sao-nen" title="Permanent link">&para;</a></h3>
+<p>Sau rerank và MMR, ta có 5–8 chunk × 300–500 token = 2.000–4.000 token context. Vì sao vẫn muốn ngắn hơn?</p>
+<ol>
+<li><strong>Chi phí và latency</strong> tỷ lệ với số token đầu vào (prefill — Module 11); với ~5.000 lượt sinh/ngày, mỗi 1.000 token bớt được là 5 triệu token/ngày.</li>
+<li><strong>Nhiễu làm giảm chất lượng</strong>: đoạn không liên quan trong context có thể khiến LLM trả lời lạc đề hoặc trộn thông tin.</li>
+<li><strong>"Lost in the middle"</strong> (Liu et al., arXiv 2307.03172): LLM dùng thông tin ở đầu và cuối context tốt hơn ở giữa; context dài làm hiện tượng này nặng hơn (chi tiết Module 02, Module 07).</li>
+</ol>
+<p>Nhưng nén có rủi ro riêng: <strong>nén sai một câu chính sách là bịa chính sách</strong>. Với bài toán Zendesk, đây là ràng buộc lớn nhất khi chọn phương pháp.</p>
+<h3 id="102-nen-extractive-chon-cau">10.2 Nén extractive (chọn câu)<a class="headerlink" href="#102-nen-extractive-chon-cau" title="Permanent link">&para;</a></h3>
+<p><strong>Ý tưởng:</strong> tách chunk thành câu, chấm điểm từng câu theo truy vấn (cross-encoder, hoặc cosine), giữ câu vượt ngưỡng, cộng một câu ngữ cảnh trước/sau. Văn bản giữ nguyên văn — <strong>không có rủi ro bịa</strong>, chỉ có rủi ro bỏ sót.</p>
+<p>RECOMP (Xu, Shi, Choi; arXiv 2310.04408) huấn luyện hai loại bộ nén: <strong>extractive</strong> (chọn câu bằng một encoder nhỏ) và <strong>abstractive</strong> (tóm tắt bằng model sinh); điểm hay là bộ nén được phép trả về <strong>chuỗi rỗng</strong> khi tài liệu không giúp gì — "selective augmentation". Provence (Chirkova et al., 2025, arXiv 2501.16214) gộp <strong>cắt tỉa câu và reranking vào cùng một model</strong>: một lượt forward vừa cho điểm xếp hạng, vừa đánh dấu câu nào giữ — nên nén gần như "miễn phí" nếu bạn đã rerank.</p>
+<h3 id="103-nen-theo-token-selective-context-va-ho-llmlingua">10.3 Nén theo token: Selective Context và họ LLMLingua<a class="headerlink" href="#103-nen-theo-token-selective-context-va-ho-llmlingua" title="Permanent link">&para;</a></h3>
+<p><strong>Selective Context</strong> (Li et al., arXiv 2310.06201) dựa trên <strong>self-information</strong> của token theo một LM nhỏ:</p>
+<div class="arithmatex">\[
+I(x_t) = -\log p(x_t \mid x_{&lt;t})
+\]</div>
+<p>Token dễ đoán (xác suất cao, <span class="arithmatex">\(I\)</span> thấp) mang ít thông tin mới → có thể bỏ. Gộp theo đơn vị (cụm từ, câu), tính tổng <span class="arithmatex">\(I\)</span>, bỏ các đơn vị có <span class="arithmatex">\(I\)</span> dưới phân vị <span class="arithmatex">\(p\)</span>. Trực giác: "của", "là", "theo như" bị bỏ; "ERR_SYNC_409", "14 ngày" được giữ.</p>
+<!-- fig:selective-context -->
+<figure>
+  <img alt="Selective Context giữ token có self-information cao; số liệu giả định chỉ để minh họa cơ chế và rủi ro «xé» văn bản" loading="lazy" src="../assets/figures/06/selective-context.light.svg#only-light" />
+  <img alt="Selective Context giữ token có self-information cao; số liệu giả định chỉ để minh họa cơ chế và rủi ro «xé» văn bản" loading="lazy" src="../assets/figures/06/selective-context.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.11 — Selective Context giữ token có self-information cao; số liệu giả định chỉ để minh họa cơ chế và rủi ro «xé» văn bản.</figcaption>
+</figure>
+<!-- /fig -->
+
+<p><strong>LongLLMLingua</strong> (Jiang et al., arXiv 2310.06839) làm cho ý tưởng này <strong>phụ thuộc câu hỏi</strong>: thay vì perplexity thuần, dùng perplexity có điều kiện theo câu hỏi để đo mức liên quan của từng đoạn và từng token; nén thô (bỏ cả đoạn) rồi nén mịn (bỏ token), phân bổ tỷ lệ nén động theo mức liên quan, và <strong>sắp xếp lại tài liệu</strong> để đoạn quan trọng nằm ở đầu. <strong>LLMLingua-2</strong> (Pan et al., arXiv 2403.12968) đổi sang <strong>phân loại token</strong> (giữ/bỏ) bằng một encoder cỡ BERT, huấn luyện trên dữ liệu chưng cất từ LLM lớn — nhanh hơn nhiều và không phụ thuộc vào LM nhân quả. Thư viện <code>llmlingua</code> (PyPI) cài đặt cả họ này.</p>
+<p><strong>Trade-off khi áp vào CS:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Phương pháp</th>
+<th>Tỷ lệ nén</th>
+<th>Rủi ro với nội dung chính sách</th>
+<th>Khuyến nghị Zendesk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Extractive (câu) / Provence</td>
+<td>2–4×</td>
+<td>thấp (nguyên văn), có thể bỏ sót</td>
+<td><strong>Dùng</strong> cho mọi nguồn</td>
+</tr>
+<tr>
+<td>Token-level (Selective Context, LLMLingua)</td>
+<td>cao hơn</td>
+<td>văn bản bị "xé", có thể mất phủ định ("không"), mất điều kiện</td>
+<td>Chỉ cho ticket lịch sử dài; <strong>không</strong> cho chính sách giá/hoàn tiền/SLA</td>
+</tr>
+<tr>
+<td>Abstractive (tóm tắt)</td>
+<td>rất cao</td>
+<td>bộ tóm tắt có thể ảo giác</td>
+<td>Chỉ cho lịch sử hội thoại dài, không cho tri thức trích dẫn</td>
+</tr>
+</tbody>
+</table>
+<p>Quy tắc của mình: <strong>văn bản được trích dẫn trong câu trả lời gửi khách phải là nguyên văn nguồn</strong> (để kiểm tra citation ở Module 07 khớp được). Nén token chỉ hợp lệ cho phần context "tham khảo", không bao giờ cho phần được trích dẫn.</p>
+<h3 id="104-sap-xep-lai-context">10.4 Sắp xếp lại context<a class="headerlink" href="#104-sap-xep-lai-context" title="Permanent link">&para;</a></h3>
+<p>Sau khi chọn <span class="arithmatex">\(k\)</span> đoạn, thứ tự trong prompt ảnh hưởng đến chất lượng. Hai chiến lược phổ biến:</p>
+<ul>
+<li><strong>Giảm dần theo điểm</strong>: đơn giản, đoạn tốt nhất ở đầu.</li>
+<li><strong>"Hai đầu"</strong>: đặt đoạn tốt nhất ở đầu, đoạn tốt thứ hai ở cuối, các đoạn yếu ở giữa — khai thác hình chữ U của "lost in the middle". Ví dụ 5 đoạn xếp hạng 1..5 → thứ tự <span class="arithmatex">\([1, 3, 5, 4, 2]\)</span>.</li>
+</ul>
+<p>Với context ngắn (≤ 8 đoạn, &lt; 4k token), khác biệt thường nhỏ; thứ tự còn bị chi phối bởi yêu cầu nghiệp vụ (nhóm theo câu hỏi con, chính sách chính thức trước ticket tham khảo). Chi tiết định dạng context có ID nguồn ở Module 07.</p>
+<!-- fig:context-ordering -->
+<figure>
+  <img alt="Hai cách sắp xếp năm đoạn đã xếp hạng (màu đậm = điểm cao)" loading="lazy" src="../assets/figures/06/context-ordering.light.svg#only-light" />
+  <img alt="Hai cách sắp xếp năm đoạn đã xếp hạng (màu đậm = điểm cao)" loading="lazy" src="../assets/figures/06/context-ordering.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.12 — Hai cách sắp xếp năm đoạn đã xếp hạng (màu đậm = điểm cao).</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="105-code-nen-extractive-dua-tren-reranker">10.5 Code: nén extractive dựa trên reranker<a class="headerlink" href="#105-code-nen-extractive-dua-tren-reranker" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># compress.py — tái dùng reranker ở mục 8.8; tách câu đơn giản cho vi/en/ja</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">SENT_SPLIT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?&lt;=[\.\?\!。？！])\s*"</span><span class="p">)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">extractive_compress</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>                        <span class="n">min_keep</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">sents</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">SENT_SPLIT</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">chunk_text</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sents</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">min_keep</span><span class="p">:</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>        <span class="k">return</span> <span class="n">chunk_text</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="n">scores</span> <span class="o">=</span> <span class="n">reranker</span><span class="o">.</span><span class="n">predict</span><span class="p">([(</span><span class="n">query</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sents</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    <span class="n">n_keep</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_keep</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sents</span><span class="p">)</span> <span class="o">*</span> <span class="n">keep_ratio</span><span class="p">))</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="n">top</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sents</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="o">-</span><span class="n">scores</span><span class="p">[</span><span class="n">i</span><span class="p">])[:</span><span class="n">n_keep</span><span class="p">]</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>    <span class="n">keep</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">top</span><span class="p">:</span>                          <span class="c1"># giữ thêm câu lân cận để không mất điều kiện/phủ định</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>        <span class="n">keep</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">window</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sents</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="n">window</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>    <span class="k">return</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sents</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">keep</span><span class="p">))</span>   <span class="c1"># giữ NGUYÊN VĂN, đúng thứ tự gốc</span>
+</span></code></pre></div>
+<p>Lưu ý <code>window = 1</code>: câu "Hoàn tiền trong 14 ngày." thường đi kèm câu sau "Không áp dụng cho gói năm đã kích hoạt." — bỏ câu thứ hai là sai chính sách. Với tài liệu loại <code>policy</code>, mình đặt <code>keep_ratio = 1.0</code> (không nén).</p>
+<hr />
+<h2 id="11-ngan-sach-latency-cho-toan-chuoi">11. Ngân sách latency cho toàn chuỗi<a class="headerlink" href="#11-ngan-sach-latency-cho-toan-chuoi" title="Permanent link">&para;</a></h2>
+<h3 id="111-ac-thu-bai-toan-email">11.1 Đặc thù bài toán email<a class="headerlink" href="#111-ac-thu-bai-toan-email" title="Permanent link">&para;</a></h3>
+<p>Email không phải chat: khách không ngồi chờ từng giây. Mục tiêu kinh doanh là FRT (thời gian phản hồi đầu tiên) — tính bằng phút hoặc giờ khi do người làm. Vì vậy hệ có thể xử lý <strong>bất đồng bộ</strong> qua queue/worker (Module 11), và ngân sách cho một ticket có thể là <strong>vài chục giây</strong>. Hai ngoại lệ cần nhanh hơn: giao diện nội bộ cho agent (stream draft qua SSE, agent muốn thấy trong vài giây) và giờ cao điểm (gấp ~3 lần tải trung bình — hàng đợi không được phình).</p>
+<h3 id="112-bang-ngan-sach-uoc-luong">11.2 Bảng ngân sách (ước lượng)<a class="headerlink" href="#112-bang-ngan-sach-uoc-luong" title="Permanent link">&para;</a></h3>
+<p>Giả định: LLM nhỏ–vừa tự host qua vLLM hoặc API tương đương; embedding và reranker trên GPU; 3 câu hỏi con mỗi email. Con số là <strong>dải ước lượng để lập kế hoạch</strong>, phải đo lại trên hạ tầng thật.</p>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Ước lượng</th>
+<th>Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phân tích email (JSON có cấu trúc, gộp diễn đạt lại + step-back)</td>
+<td>0,5–2 s</td>
+<td>một lời gọi LLM, output ~300–500 token</td>
+</tr>
+<tr>
+<td>Embed truy vấn (3 câu con × 2 bản)</td>
+<td>20–60 ms</td>
+<td>batch một lần</td>
+</tr>
+<tr>
+<td>Hybrid retrieval (6 dense + 6 BM25 + 1 định danh)</td>
+<td>20–100 ms</td>
+<td>song song; Module 05</td>
+</tr>
+<tr>
+<td>RRF + gom ứng viên</td>
+<td>&lt; 5 ms</td>
+<td></td>
+</tr>
+<tr>
+<td>Rerank ~60 ứng viên (cross-encoder 0,6B)</td>
+<td>0,2–0,8 s</td>
+<td>phụ thuộc <span class="arithmatex">\(L\)</span>, GPU</td>
+</tr>
+<tr>
+<td>MMR + chọn top-k</td>
+<td>&lt; 5 ms</td>
+<td></td>
+</tr>
+<tr>
+<td>Nén extractive (dùng lại reranker trên câu)</td>
+<td>0,1–0,4 s</td>
+<td>hoặc ~0 nếu dùng model kiểu Provence</td>
+</tr>
+<tr>
+<td>HyDE (nếu bật, có điều kiện)</td>
+<td>+1–3 s</td>
+<td>chỉ khi retrieval "không tự tin"</td>
+</tr>
+<tr>
+<td>LLM rerank listwise (nếu bật)</td>
+<td>+2–10 s</td>
+<td>thường không đáng với Zendesk</td>
+</tr>
+<tr>
+<td><strong>Tổng tiền xử lý trước generation</strong></td>
+<td><strong>~1–4 s</strong> (không HyDE/LLM rerank)</td>
+<td>generation và verify: Module 07, 11</td>
+</tr>
+</tbody>
+</table>
+<!-- fig:latency-budget -->
+<figure>
+  <img alt="Bảng ngân sách latency mục 11" loading="lazy" src="../assets/figures/06/latency-budget.light.svg#only-light" />
+  <img alt="Bảng ngân sách latency mục 11" loading="lazy" src="../assets/figures/06/latency-budget.dark.svg#only-dark" />
+<br />
+<figcaption>Hình 6.13 — Bảng ngân sách latency mục 11.2 trên trục log; hai bước xám chỉ bật có điều kiện.</figcaption>
+</figure>
+<!-- /fig -->
+
+<h3 id="113-nguyen-tac-cat-giam">11.3 Nguyên tắc cắt giảm<a class="headerlink" href="#113-nguyen-tac-cat-giam" title="Permanent link">&para;</a></h3>
+<p>Khi vượt ngân sách (hoặc chi phí), cắt theo thứ tự <strong>lợi ích/chi phí thấp nhất trước</strong>, luôn đo lại trên golden set:</p>
+<ol>
+<li>LLM listwise rerank → thay bằng cross-encoder.</li>
+<li>HyDE → chỉ bật có điều kiện (hoặc tắt).</li>
+<li>Diễn đạt lại thứ ba trở đi trong multi-query.</li>
+<li>Giảm <span class="arithmatex">\(k\)</span> rerank (60 → 30), giảm <code>max_length</code> của reranker.</li>
+<li><strong>Không cắt</strong>: tách câu hỏi trong email, truy vấn định danh BM25, cross-encoder rerank, filter tenant — đây là các bước có tỷ lệ lợi ích/chi phí cao nhất trong bài toán này.</li>
+</ol>
+<p>Kỹ thuật bổ trợ: chạy song song mọi thứ độc lập (các câu hỏi con, các nhánh retrieval); cache embedding của truy vấn lặp lại (nhiều khách hỏi cùng một câu — khóa cache phải có tenant, Module 11); đặt timeout cho từng bước với <strong>đường lùi an toàn</strong> (rerank timeout → dùng thứ tự RRF; phân tích email lỗi → dùng email đã làm sạch làm truy vấn duy nhất và hạ ngưỡng escalate).</p>
+<pre class="mermaid"><code>flowchart TB
+    S[Email mới] --&gt; P{Phân tích email&lt;br/&gt;timeout 3s}
+    P -- OK --&gt; Q[Câu hỏi con + định danh]
+    P -- lỗi/timeout --&gt; F[Email đã làm sạch&lt;br/&gt;làm truy vấn duy nhất&lt;br/&gt;+ đánh dấu độ tin cậy thấp]
+    Q --&gt; R[Hybrid retrieval song song]
+    F --&gt; R
+    R --&gt; RR{Rerank&lt;br/&gt;timeout 1,5s}
+    RR -- OK --&gt; M[MMR + nén extractive]
+    RR -- timeout --&gt; O[Dùng thứ tự RRF&lt;br/&gt;+ hạ độ tin cậy]
+    M --&gt; G[Generation - Module 07]
+    O --&gt; G</code></pre>
+<hr />
+<h2 id="loi-thuong-gap-cach-xu-ly">Lỗi thường gặp &amp; cách xử lý<a class="headerlink" href="#loi-thuong-gap-cach-xu-ly" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Triệu chứng</th>
+<th>Nguyên nhân gốc</th>
+<th>Cách xử lý</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Email hỏi hai việc, draft chỉ trả lời một</td>
+<td>Dùng cả email làm một truy vấn; embedding "trung bình" hai chủ đề</td>
+<td>Tách câu hỏi con bằng bước phân tích có schema; retrieval riêng từng câu</td>
+</tr>
+<tr>
+<td>Lượt trả lời thứ 3 của khách kéo về bài không liên quan</td>
+<td>Truy vấn chứa đại từ ("nó", "bước 2"), không có lịch sử</td>
+<td>Condensation thành truy vấn độc lập; kiểm tra topic drift</td>
+</tr>
+<tr>
+<td>Khách đổi chủ đề nhưng retrieval vẫn về chủ đề cũ</td>
+<td>Rewriter chèn thực thể nổi bật từ lịch sử</td>
+<td>Hướng dẫn rõ trong prompt + few-shot; đo trên tập hội thoại có nhãn</td>
+</tr>
+<tr>
+<td>Câu hỏi về chính sách hoàn tiền trả về ticket nói chính sách cũ</td>
+<td>HyDE sinh chính sách "phổ biến"; hoặc không routing theo intent</td>
+<td>Tắt HyDE cho billing/refund/sla; routing an toàn loại ticket lịch sử; lọc <code>valid_until</code></td>
+</tr>
+<tr>
+<td>Multi-query tăng chi phí gấp 4 nhưng recall gần như không đổi</td>
+<td>Diễn đạt lại quá giống nhau (tương quan cao)</td>
+<td>Yêu cầu đa dạng có chủ đích (thuật ngữ chính thức, tiếng Anh); giữ 2–3 truy vấn</td>
+</tr>
+<tr>
+<td>Reranker đẩy tài liệu đúng xuống</td>
+<td>Chunk dài bị cắt ở <code>max_length</code>; reranker yếu với tiếng Nhật</td>
+<td>Chunk con ≤ 400 token cho rerank; đánh giá riêng theo ngôn ngữ; thử reranker khác hoặc fine-tune</td>
+</tr>
+<tr>
+<td>Ngưỡng "đủ thông tin" theo điểm reranker hoạt động kém sau khi đổi model</td>
+<td>Thang điểm khác nhau giữa các reranker; chưa hiệu chuẩn</td>
+<td>Hiệu chuẩn lại (Platt/temperature) trên dữ liệu có nhãn mỗi lần đổi model</td>
+</tr>
+<tr>
+<td>LLM listwise rerank trả về hoán vị thiếu/lặp id</td>
+<td>Lỗi định dạng output</td>
+<td>Structured output / parse chịu lỗi: bổ sung id thiếu theo thứ tự cũ</td>
+</tr>
+<tr>
+<td>Top-k toàn ticket gần trùng nhau</td>
+<td>Không đa dạng hóa</td>
+<td>MMR (<span class="arithmatex">\(\lambda \approx 0{,}7\)</span>) + giới hạn số ticket lịch sử; dedup lúc ingestion</td>
+</tr>
+<tr>
+<td>Draft nói sai điều kiện hoàn tiền dù tài liệu đúng đã được retrieve</td>
+<td>Nén token/tóm tắt làm mất câu phủ định hoặc điều kiện</td>
+<td>Không nén tài liệu chính sách; nén extractive có cửa sổ câu lân cận</td>
+</tr>
+<tr>
+<td>Latency phình ở giờ cao điểm</td>
+<td>Bước tuần tự (HyDE, LLM rerank) bật cho mọi ticket</td>
+<td>Bật có điều kiện; song song hóa; timeout + đường lùi</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tom-tat-cheat-sheet">Tóm tắt (cheat-sheet)<a class="headerlink" href="#tom-tat-cheat-sheet" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Email ≠ truy vấn.</strong> Trộn <span class="arithmatex">\(m\)</span> chủ đề trực giao làm cosine với tài liệu đúng tụt về khoảng <span class="arithmatex">\(1/\sqrt{m}\)</span> → luôn <strong>tách câu hỏi con</strong>, giữ <strong>định danh nguyên văn</strong> cho BM25, trích tín hiệu <code>wants_human</code>/<code>sensitive_topics</code> trong cùng một lời gọi.</li>
+<li><strong>Condensation:</strong> viết lại tin nhắn mới thành truy vấn độc lập từ lịch sử; cảnh giác topic drift.</li>
+<li><strong>Multi-query / RAG-Fusion:</strong> <span class="arithmatex">\(P(\text{lọt}) = (1-\rho)[1 - (1 - r')^n]\)</span> — lợi ích bão hòa sau 2–3 truy vấn; hợp nhất bằng RRF.</li>
+<li><strong>HyDE:</strong> embed tài liệu giả định để khử độ lệch phong cách <span class="arithmatex">\(\boldsymbol{\delta}_Q - \boldsymbol{\delta}_D\)</span>; lấy trung bình nhiều bản làm giảm nhiễu (<span class="arithmatex">\(\sigma^2/N\)</span>). <strong>Nguy hiểm</strong> với chính sách riêng/định danh; chỉ dùng cho retrieval, không đưa vào context.</li>
+<li><strong>Step-back:</strong> thêm câu tổng quát để chạm bài chính sách nền. <strong>Decomposition</strong> song song ở đây; multi-hop ở Module 08.</li>
+<li><strong>Routing:</strong> mềm (trọng số) mặc định; cứng chỉ khi router tự tin hoặc vì quy tắc an toàn. Recall routing cứng ≈ <span class="arithmatex">\(a \cdot r_{\text{in}}\)</span>.</li>
+<li><strong>Cross-encoder:</strong> <span class="arithmatex">\(s = f(q, d)\)</span> chung, <span class="arithmatex">\(O(k)\)</span> lượt forward, FLOPs <span class="arithmatex">\(\approx 2 P_{\text{non-emb}} L k\)</span>; giảm <span class="arithmatex">\(k\)</span>, giảm <span class="arithmatex">\(L\)</span>.</li>
+<li><strong>LLM rerank:</strong> pointwise <span class="arithmatex">\(k\)</span> lời gọi; pairwise <span class="arithmatex">\(k(k-1)\)</span>; listwise cửa sổ trượt <span class="arithmatex">\(\lceil (k-w)/s \rceil + 1\)</span> lời gọi.</li>
+<li><strong>Reranker 10/2026:</strong> <code>bge-reranker-v2-m3</code> (baseline mở), Qwen3-Reranker 0,6B/4B/8B (instruction-aware, Apache 2.0), jina-reranker-v3 (listwise, CC BY-NC), API Cohere Rerank 4 / Voyage rerank-3. Tự đánh giá theo ngôn ngữ.</li>
+<li><strong>MMR:</strong> <span class="arithmatex">\(\arg\max\,[\lambda\,\mathrm{rel} - (1-\lambda)\max_{S}\mathrm{sim}]\)</span>, <span class="arithmatex">\(\lambda \approx 0{,}6\)</span>–<span class="arithmatex">\(0{,}8\)</span>, áp sau rerank.</li>
+<li><strong>Nén:</strong> extractive/Provence an toàn (nguyên văn); token-level (Selective Context <span class="arithmatex">\(I = -\log p\)</span>, LongLLMLingua, LLMLingua-2) và abstractive <strong>không</strong> dùng cho chính sách. Sắp xếp "hai đầu" cho context dài.</li>
+<li><strong>Latency:</strong> tiền xử lý ~1–4 s/ticket là chấp nhận được với email bất đồng bộ; cắt HyDE/LLM rerank trước, không cắt tách câu hỏi, BM25 định danh, cross-encoder, filter tenant; mọi bước có timeout + đường lùi.</li>
+</ul>
+<hr />
+<h2 id="cau-hoi-tu-kiem-tra-phong-van">Câu hỏi tự kiểm tra / phỏng vấn<a class="headerlink" href="#cau-hoi-tu-kiem-tra-phong-van" title="Permanent link">&para;</a></h2>
+<p><strong>1. Vì sao dùng nguyên văn một email hỏi hai việc làm truy vấn dense lại kém? Giải thích bằng toán.</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Embedding email xấp xỉ hướng trung bình <span class="arithmatex">\((\mathbf{a} + \mathbf{b})/\sqrt{2}\)</span> của hai chủ đề gần trực giao; cosine với tài liệu thuần chủ đề <span class="arithmatex">\(\mathbf{a}\)</span> chỉ còn ~<span class="arithmatex">\(0{,}71\)</span>, trong khi một tài liệu "chung chung" nằm giữa hai hướng lại được điểm cao. Với <span class="arithmatex">\(m\)</span> chủ đề, ~<span class="arithmatex">\(1/\sqrt{m}\)</span>. Ngoài ra câu trả lời cần hai nhóm tài liệu khác nhau, một danh sách top-k khó chứa đủ cả hai.</p>
+</details>
+<p><strong>2. Multi-query với 5 diễn đạt lại không tăng recall so với 2. Vì sao?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Các diễn đạt do cùng LLM sinh từ cùng câu nên lỗi tương quan mạnh. Với mô hình <span class="arithmatex">\(P = (1-\rho)[1-(1-r')^n]\)</span>, khi <span class="arithmatex">\(n\)</span> tăng, <span class="arithmatex">\(P\)</span> bão hòa ở <span class="arithmatex">\(1 - \rho\)</span>: phần "khó" (kho thiếu bài, thuật ngữ lạ, khác ngôn ngữ) không được giải quyết bởi thêm diễn đạt cùng kiểu. Cần đa dạng có chủ đích (thuật ngữ chính thức, bản tiếng Anh) hoặc kỹ thuật khác.</p>
+</details>
+<p><strong>3. Giải thích vì sao HyDE có thể giúp retrieval dù tài liệu giả định chứa thông tin sai.</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Embedding xấp xỉ "chủ đề + phong cách + nhiễu". Tài liệu giả định có cùng phong cách với tài liệu thật, khử khoảng lệch câu hỏi–tài liệu; chi tiết sai là nhiễu, bị encoder nén bớt và triệt tiêu một phần khi lấy trung bình nhiều bản (<span class="arithmatex">\(\sigma^2/N\)</span>), còn hướng chủ đề được giữ. Nó chỉ dùng để tìm kiếm, không làm nguồn tri thức.</p>
+</details>
+<p><strong>4. Khi nào bạn tắt HyDE trong hệ Zendesk?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Với intent billing/refund/SLA/pháp lý (LLM sẽ viết chính sách "phổ biến" chứ không phải của công ty, kéo về bài/ticket sai); với truy vấn có định danh (mã lỗi, phiên bản); khi latency chặt; khi embedding đã fine-tune tốt trên miền. Chỉ bật như nhánh phụ trong RRF và có điều kiện (retrieval kém tự tin).</p>
+</details>
+<p><strong>5. So sánh bi-encoder và cross-encoder về biểu diễn, chi phí và vai trò.</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Bi-encoder: <span class="arithmatex">\(s = \langle g(q), h(d)\rangle\)</span>, tài liệu encode trước, truy vấn <span class="arithmatex">\(O(1)\)</span> forward + ANN → dùng cho retrieval trên toàn kho. Cross-encoder: <span class="arithmatex">\(s = f(q, d)\)</span> chung, token query–document chú ý lẫn nhau, chính xác hơn nhưng cần <span class="arithmatex">\(k\)</span> forward mỗi truy vấn và không tính trước được → chỉ rerank top-<span class="arithmatex">\(k\)</span>.</p>
+</details>
+<p><strong>6. Ước lượng chi phí rerank 50 chunk 400 token với reranker có 0,3B tham số không tính embedding. Làm sao giảm?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p><span class="arithmatex">\(\approx 2 \times 0{,}3 \cdot 10^9 \times 400 \times 50 = 1{,}2 \cdot 10^{13}\)</span> FLOPs; ở ~30 TFLOPS hiệu dụng là ~0,4 s (ước lượng). Giảm <span class="arithmatex">\(k\)</span> (fusion tốt hơn → cần ít ứng viên), giảm <span class="arithmatex">\(L\)</span> (chunk con cho rerank), fp16/int8, batch hợp lý, reranker nhỏ hơn hoặc tầng ColBERT trước.</p>
+</details>
+<p><strong>7. Pointwise, pairwise, listwise LLM reranking khác nhau thế nào về số lời gọi và chất lượng?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Pointwise: <span class="arithmatex">\(k\)</span> lời gọi song song, điểm tuyệt đối thiếu hiệu chuẩn giữa các lời gọi. Pairwise: so sánh tương đối dễ hơn cho LLM nhưng <span class="arithmatex">\(k(k-1)\)</span> lời gọi (cả hai thứ tự để khử bias vị trí), giảm được bằng thuật toán sắp xếp. Listwise (RankGPT): cửa sổ trượt, <span class="arithmatex">\(\lceil (k-w)/s\rceil + 1\)</span> lời gọi, xét các tài liệu cùng lúc nhưng có thể lỗi định dạng và nhạy thứ tự đầu vào.</p>
+</details>
+<p><strong>8. Tính MMR với <span class="arithmatex">\(\lambda = 0{,}7\)</span> cho ví dụ ở mục 9.3 và giải thích vì sao d4 được chọn trước d2.</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Sau khi chọn d1: d2 có <span class="arithmatex">\(0{,}7 \times 0{,}88 - 0{,}3 \times 0{,}95 = 0{,}331\)</span>; d4 có <span class="arithmatex">\(0{,}7 \times 0{,}70 - 0{,}3 \times 0{,}40 = 0{,}370\)</span>. d2 gần trùng d1 nên bị phạt nặng (0,285), còn d4 khác d1 nhiều nên chỉ bị phạt 0,12 — phần relevance kém hơn được bù bằng tính mới.</p>
+</details>
+<p><strong>9. Vì sao không nên dùng LLMLingua để nén bài chính sách hoàn tiền trước khi đưa cho LLM viết email?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Nén theo token dựa trên self-information có thể bỏ những token "dễ đoán" nhưng mang nghĩa quyết định như "không", "trừ khi", số ngày; văn bản bị xé khiến LLM suy diễn sai điều kiện → bịa chính sách. Ngoài ra trích dẫn phải khớp nguyên văn nguồn để kiểm tra citation. Dùng nén extractive có cửa sổ câu, hoặc không nén loại <code>policy</code>.</p>
+</details>
+<p><strong>10. Router intent có độ chính xác 90%. Có nên chỉ tìm trong index của intent dự đoán?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Không nên mặc định: recall kỳ vọng ≈ <span class="arithmatex">\(a \cdot r_{\text{in}} = 0{,}9 r_{\text{in}}\)</span>, có thể thấp hơn tìm toàn bộ. Dùng routing mềm (trọng số nguồn trong RRF/boost ở rerank); routing cứng chỉ khi xác suất router đã hiệu chuẩn cao, hoặc khi đó là quy tắc an toàn (loại ticket lịch sử khỏi câu trả lời về giá).</p>
+</details>
+<p><strong>11. Ngân sách tiền xử lý cho một ticket bị vượt gấp đôi ở giờ cao điểm. Bạn cắt gì, giữ gì?</strong></p>
+<details>
+<summary>Đáp án gợi ý</summary>
+<p>Cắt theo lợi ích/chi phí thấp nhất trước: LLM listwise rerank, HyDE (chỉ bật có điều kiện), diễn đạt lại thứ ba trở đi, giảm <span class="arithmatex">\(k\)</span> và <code>max_length</code> của reranker. Giữ: tách câu hỏi, truy vấn BM25 định danh, cross-encoder rerank, filter tenant. Song song hóa, cache embedding (khóa có tenant), timeout với đường lùi (thứ tự RRF) và đánh dấu độ tin cậy thấp để nghiêng về draft/escalate.</p>
+</details>
+<hr />
+<h2 id="bai-tap-thuc-hanh">Bài tập thực hành<a class="headerlink" href="#bai-tap-thuc-hanh" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>Lab có sẵn: <a href="../labs/lab09_query_rewriting/">Lab 09</a> đo từng phép biến đổi query (ngưng tụ, tách câu hỏi, PRF, HyDE) trên email có nhãn — kể cả các trường hợp kỹ thuật làm <em>hại</em>.</p>
+</blockquote>
+<p><strong>Bài 1 — Phân tích email đa ngôn ngữ</strong> <em>(GPU 6GB với model nhỏ quantized qua Ollama/vLLM, hoặc API)</em>
+Viết 20 email giả lập (vi/en/ja, có email hỏi 2–3 việc, có yêu cầu gặp người, có mã lỗi). Cài bước phân tích theo schema <code>EmailAnalysis</code> ở mục 2.2 với structured output (model 3–4B lượng tử hóa 4-bit vừa 6GB). Gán nhãn tay các câu hỏi con; đo: tỷ lệ email trích đủ câu hỏi, độ chính xác <code>wants_human</code>, tỷ lệ định danh giữ nguyên văn. So sánh với một model lớn qua API nếu có.</p>
+<p><strong>Bài 2 — Multi-query, HyDE và đo recall</strong> <em>(GPU 6GB)</em>
+Dùng bộ FAQ + truy vấn có nhãn từ lab Module 05. So sánh Recall@20 của: (a) truy vấn gốc; (b) gốc + bản tiếng Anh + 1 diễn đạt (RRF); (c) (b) + HyDE 1 bản; (d) (b) + HyDE 4 bản lấy trung bình. Tách kết quả theo loại truy vấn (định danh / mô tả / chính sách). Kiểm chứng: HyDE có làm hại truy vấn định danh và chính sách không?</p>
+<p><strong>Bài 3 — Reranker và MMR</strong> <em>(GPU 6GB)</em>
+Lấy top-50 từ hybrid ở bài 2, rerank bằng <code>BAAI/bge-reranker-v2-m3</code> (fp16) và <code>Qwen/Qwen3-Reranker-0.6B</code> (có và không có instruction miền CS). Đo nDCG@10 (công thức ở Module 10) và latency theo <code>max_length</code> ∈ {256, 512}. Sau đó áp MMR với <span class="arithmatex">\(\lambda \in \{1{,}0;\ 0{,}8;\ 0{,}6\}\)</span> trên tập có nhiều bản gần trùng (nhân bản ticket có chỉnh sửa nhẹ), đo số "khía cạnh" khác nhau trong top-5 (gán nhãn khía cạnh tay). Phần khung code, dữ liệu mẫu và cách tính khoảng tin cậy bootstrap ghép cặp có sẵn ở <a href="../labs/lab03_reranker/">Lab 03 — Rerank bằng cross-encoder</a>.</p>
+<p><strong>Bài 4 — Nén context an toàn</strong> <em>(GPU 6GB)</em>
+Lấy 10 bài chính sách có câu phủ định/điều kiện. So sánh nén extractive (mục 10.5, <code>window</code> = 0 và 1) với <code>llmlingua</code> (LLMLingua-2) ở tỷ lệ nén 2×. Với mỗi bài, kiểm tra tay: điều kiện/phủ định nào bị mất? Viết kết luận một đoạn: phương pháp nào được phép dùng cho loại tài liệu nào trong hệ Zendesk.</p>
+<hr />
+<h2 id="tai-lieu-tham-khao">Tài liệu tham khảo<a class="headerlink" href="#tai-lieu-tham-khao" title="Permanent link">&para;</a></h2>
+<p><strong>Xử lý query</strong></p>
+<ul>
+<li>Ma, X. et al. (2023). <em>Query Rewriting for Retrieval-Augmented Large Language Models</em>. arXiv:2305.14283. https://arxiv.org/abs/2305.14283</li>
+<li>Rackauckas, Z. (2024). <em>RAG-Fusion: a New Take on Retrieval-Augmented Generation</em>. arXiv:2402.03367. https://arxiv.org/abs/2402.03367</li>
+<li>Gao, L., Ma, X., Lin, J., Callan, J. (2022/2023). <em>Precise Zero-Shot Dense Retrieval without Relevance Labels</em> (HyDE). arXiv:2212.10496; ACL 2023. https://aclanthology.org/2023.acl-long.99/</li>
+<li>Wang, L., Yang, N., Wei, F. (2023). <em>Query2doc: Query Expansion with Large Language Models</em>. arXiv:2303.07678; EMNLP 2023. https://arxiv.org/abs/2303.07678</li>
+<li>Zheng, H. S. et al. (2023). <em>Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models</em>. arXiv:2310.06117. https://arxiv.org/abs/2310.06117</li>
+<li>Press, O. et al. (2022). <em>Measuring and Narrowing the Compositionality Gap in Language Models</em> (Self-ask). arXiv:2210.03350. https://arxiv.org/abs/2210.03350</li>
+<li>Cormack, G., Clarke, C., Büttcher, S. (2009). <em>Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods</em>. SIGIR 2009. https://dblp.org/rec/conf/sigir/CormackCB09.html</li>
+</ul>
+<p><strong>Reranking</strong></p>
+<ul>
+<li>Nogueira, R., Cho, K. (2019). <em>Passage Re-ranking with BERT</em>. arXiv:1901.04085. https://arxiv.org/abs/1901.04085</li>
+<li>Nogueira, R., Jiang, Z., Pradeep, R., Lin, J. (2020). <em>Document Ranking with a Pretrained Sequence-to-Sequence Model</em> (monoT5). arXiv:2003.06713. https://arxiv.org/abs/2003.06713</li>
+<li>Pradeep, R., Nogueira, R., Lin, J. (2021). <em>The Expando-Mono-Duo Design Pattern for Text Ranking with Pretrained Sequence-to-Sequence Models</em>. arXiv:2101.05667. https://huggingface.co/papers/2101.05667</li>
+<li>Khattab, O., Zaharia, M. (2020). <em>ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT</em>. arXiv:2004.12832. https://arxiv.org/abs/2004.12832</li>
+<li>Santhanam, K. et al. (2021). <em>ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction</em>. arXiv:2112.01488. https://arxiv.org/abs/2112.01488</li>
+<li>Sun, W. et al. (2023). <em>Is ChatGPT Good at Search? Investigating Large Language Models as Re-Ranking Agents</em> (RankGPT). arXiv:2304.09542. https://arxiv.org/abs/2304.09542</li>
+<li>Qin, Z. et al. (2023). <em>Large Language Models are Effective Text Rankers with Pairwise Ranking Prompting</em>. arXiv:2306.17563. https://arxiv.org/abs/2306.17563</li>
+<li>Pradeep, R., Sharifymoghaddam, S., Lin, J. (2023). <em>RankVicuna</em> arXiv:2309.15088; <em>RankZephyr</em> arXiv:2312.02724. https://arxiv.org/abs/2312.02724</li>
+<li>Zhuang, S. et al. (2023). <em>A Setwise Approach for Effective and Highly Efficient Zero-shot Ranking with Large Language Models</em>. arXiv:2310.09497. https://arxiv.org/abs/2310.09497</li>
+<li>Zhang, Y. et al. (2025). <em>Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models</em>. arXiv:2506.05176. https://arxiv.org/abs/2506.05176</li>
+<li>Wang, F. et al. (2025). <em>jina-reranker-v3: Last but Not Late Interaction for Listwise Document Reranking</em>. arXiv:2509.25085. https://arxiv.org/abs/2509.25085</li>
+</ul>
+<p><strong>Đa dạng hóa &amp; nén context</strong></p>
+<ul>
+<li>Carbonell, J., Goldstein, J. (1998). <em>The Use of MMR, Diversity-Based Reranking for Reordering Documents and Producing Summaries</em>. SIGIR 1998. https://dblp.org/rec/conf/sigir/CarbonellG98.html</li>
+<li>Liu, N. F. et al. (2023). <em>Lost in the Middle: How Language Models Use Long Contexts</em>. arXiv:2307.03172. https://arxiv.org/abs/2307.03172</li>
+<li>Li, Y. et al. (2023). <em>Compressing Context to Enhance Inference Efficiency of Large Language Models</em> (Selective Context). arXiv:2310.06201. https://arxiv.org/abs/2310.06201</li>
+<li>Jiang, H. et al. (2023). <em>LongLLMLingua: Accelerating and Enhancing LLMs in Long Context Scenarios via Prompt Compression</em>. arXiv:2310.06839. https://arxiv.org/abs/2310.06839</li>
+<li>Pan, Z. et al. (2024). <em>LLMLingua-2: Data Distillation for Efficient and Faithful Task-Agnostic Prompt Compression</em>. arXiv:2403.12968. https://arxiv.org/abs/2403.12968</li>
+<li>Xu, F., Shi, W., Choi, E. (2023). <em>RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation</em>. arXiv:2310.04408. https://arxiv.org/abs/2310.04408</li>
+<li>Chirkova, N. et al. (2025). <em>Provence: efficient and robust context pruning for retrieval-augmented generation</em>. arXiv:2501.16214. https://arxiv.org/abs/2501.16214</li>
+</ul>
+<p><strong>Model card &amp; tài liệu chính thức (truy cập 10/2026)</strong></p>
+<ul>
+<li>BAAI/bge-reranker-v2-m3. https://huggingface.co/BAAI/bge-reranker-v2-m3</li>
+<li>Qwen/Qwen3-Reranker-0.6B. https://huggingface.co/Qwen/Qwen3-Reranker-0.6B</li>
+<li>jinaai/jina-reranker-v3 (giấy phép CC BY-NC 4.0). https://huggingface.co/jinaai/jina-reranker-v3</li>
+<li>Cohere — Rerank v4.0 changelog. https://docs.cohere.com/changelog/rerank-v4.0</li>
+<li>Voyage AI — rerank-3 và rerank-3-lite (30/09/2026). https://blog.voyageai.com/2026/09/30/rerank-3/</li>
+<li>Mixedbread — mxbai-rerank-v2. https://www.mixedbread.com/blog/mxbai-rerank-v2</li>
+<li>naver/provence-reranker-debertav3-v1. https://huggingface.co/naver/provence-reranker-debertav3-v1</li>
+<li>LLMLingua (PyPI). https://pypi.org/project/llmlingua/</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../05-retrieval-sparse-dense-hybrid/" class="md-footer__link md-footer__link--prev" aria-label="Trước: 05 · Retrieval">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                05 · Retrieval
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../07-generation-grounding-guardrails/" class="md-footer__link md-footer__link--next" aria-label="Sau: 07 · Generation &amp; guardrails">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                07 · Generation & guardrails
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tài liệu học tập — RAG Masterclass · 2026
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/HieNguyen08/rag-masterclass" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

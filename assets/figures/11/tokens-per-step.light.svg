@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="566.088125pt" height="209.340812pt" viewBox="0 0 566.088125 209.340812" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 209.340812 
+L 566.088125 209.340812 
+L 566.088125 -0 
+L 0 -0 
+L 0 209.340812 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 91.608125 171.428469 
+L 560.328125 171.428469 
+L 560.328125 21.740469 
+L 91.608125 21.740469 
+L 91.608125 171.428469 
+z
+" style="fill: none"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 91.608125 171.428469 
+L 91.608125 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2">
+      <defs>
+       <path id="m2024aa28e6" d="M 0 0 
+L 0 3.5 
+" style="stroke: #52514e; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m2024aa28e6" x="91.608125" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="91.608125" y="186.026125" transform="rotate(-0 91.608125 186.026125)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 146.110451 171.428469 
+L 146.110451 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="146.110451" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="146.110451" y="186.026125" transform="rotate(-0 146.110451 186.026125)">1000</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 200.612776 171.428469 
+L 200.612776 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="200.612776" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="200.612776" y="186.026125" transform="rotate(-0 200.612776 186.026125)">2000</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_7">
+      <path d="M 255.115102 171.428469 
+L 255.115102 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="255.115102" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="255.115102" y="186.026125" transform="rotate(-0 255.115102 186.026125)">3000</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_9">
+      <path d="M 309.617427 171.428469 
+L 309.617427 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="309.617427" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="309.617427" y="186.026125" transform="rotate(-0 309.617427 186.026125)">4000</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_11">
+      <path d="M 364.119753 171.428469 
+L 364.119753 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="364.119753" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="364.119753" y="186.026125" transform="rotate(-0 364.119753 186.026125)">5000</text>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_13">
+      <path d="M 418.622078 171.428469 
+L 418.622078 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="418.622078" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="418.622078" y="186.026125" transform="rotate(-0 418.622078 186.026125)">6000</text>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_15">
+      <path d="M 473.124404 171.428469 
+L 473.124404 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_16">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="473.124404" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="473.124404" y="186.026125" transform="rotate(-0 473.124404 186.026125)">7000</text>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_17">
+      <path d="M 527.62673 171.428469 
+L 527.62673 21.740469 
+" clip-path="url(#p052dae9800)" style="fill: none; stroke: #e4e3df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_18">
+      <g>
+       <use xlink:href="#m2024aa28e6" x="527.62673" y="171.428469" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="527.62673" y="186.026125" transform="rotate(-0 527.62673 186.026125)">8000</text>
+     </g>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #52514e" x="325.968125" y="201.178469" transform="rotate(-0 325.968125 201.178469)">token mỗi lượt chạy (giả định)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_19">
+      <defs>
+       <path id="m4179212233" d="M 0 0 
+L -3.5 0 
+" style="stroke: #52514e; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m4179212233" x="91.608125" y="39.085877" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: end; fill: #52514e" x="84.608125" y="42.406877" transform="rotate(-0 84.608125 42.406877)">Phân loại (nhỏ)</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_20">
+      <g>
+       <use xlink:href="#m4179212233" x="91.608125" y="77.418272" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: end; fill: #52514e" x="84.608125" y="80.887897" transform="rotate(-0 84.608125 80.887897)">Viết lại query (nhỏ)</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_21">
+      <g>
+       <use xlink:href="#m4179212233" x="91.608125" y="115.750666" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: end; fill: #52514e" x="84.608125" y="119.030025" transform="rotate(-0 84.608125 119.030025)">Sinh draft (lớn)</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_22">
+      <g>
+       <use xlink:href="#m4179212233" x="91.608125" y="154.08306" style="fill: #52514e; stroke: #52514e; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_14">
+      <text style="font-size: 8.2px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: end; fill: #52514e" x="84.608125" y="157.618029" transform="rotate(-0 84.608125 157.618029)">Kiểm chứng (nhỏ)</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 91.608125 49.627286 
+L 173.361613 49.627286 
+L 173.361613 28.544469 
+L 91.608125 28.544469 
+z
+" clip-path="url(#p052dae9800)" style="fill: #2a78d6"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 91.608125 87.95968 
+L 173.361613 87.95968 
+L 173.361613 66.876863 
+L 91.608125 66.876863 
+z
+" clip-path="url(#p052dae9800)" style="fill: #2a78d6"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 91.608125 126.292074 
+L 445.873241 126.292074 
+L 445.873241 105.209257 
+L 91.608125 105.209257 
+z
+" clip-path="url(#p052dae9800)" style="fill: #2a78d6"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 91.608125 164.624469 
+L 282.366265 164.624469 
+L 282.366265 143.541652 
+L 91.608125 143.541652 
+z
+" clip-path="url(#p052dae9800)" style="fill: #2a78d6"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 173.361613 49.627286 
+L 178.811846 49.627286 
+L 178.811846 28.544469 
+L 173.361613 28.544469 
+z
+" clip-path="url(#p052dae9800)" style="fill: #eb6834"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 173.361613 87.95968 
+L 181.536962 87.95968 
+L 181.536962 66.876863 
+L 173.361613 66.876863 
+z
+" clip-path="url(#p052dae9800)" style="fill: #eb6834"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 445.873241 126.292074 
+L 467.674172 126.292074 
+L 467.674172 105.209257 
+L 445.873241 105.209257 
+z
+" clip-path="url(#p052dae9800)" style="fill: #eb6834"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 282.366265 164.624469 
+L 293.26673 164.624469 
+L 293.26673 143.541652 
+L 282.366265 143.541652 
+z
+" clip-path="url(#p052dae9800)" style="fill: #eb6834"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 91.608125 171.428469 
+L 91.608125 21.740469 
+" style="fill: none; stroke: #c9c8c2; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 91.608125 171.428469 
+L 560.328125 171.428469 
+" style="fill: none; stroke: #c9c8c2; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="185.352125" y="41.164002" transform="rotate(-0 185.352125 41.164002)">1.500 + 100</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="188.077241" y="79.496397" transform="rotate(-0 188.077241 79.496397)">1.500 + 150</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="474.214451" y="117.828791" transform="rotate(-0 474.214451 117.828791)">6.500 + 400</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="299.807009" y="156.161185" transform="rotate(-0 299.807009 156.161185)">3.500 + 200</text>
+   </g>
+   <g id="text_19">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="91.608125" y="13.740469" transform="rotate(-0 91.608125 13.740469)">13.000 token vào, 850 token ra mỗi lượt: chi phí bị chi phối bởi input (≈ 15 : 1)</text>
+   </g>
+   <g id="legend_1">
+    <g id="patch_13">
+     <path d="M 493.008031 150.834031 
+L 508.608031 150.834031 
+L 508.608031 145.374031 
+L 493.008031 145.374031 
+z
+" style="fill: #2a78d6"/>
+    </g>
+    <g id="text_20">
+     <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="514.848031" y="150.834031" transform="rotate(-0 514.848031 150.834031)">token vào</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 493.008031 162.534641 
+L 508.608031 162.534641 
+L 508.608031 157.074641 
+L 493.008031 157.074641 
+z
+" style="fill: #eb6834"/>
+    </g>
+    <g id="text_21">
+     <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="514.848031" y="162.534641" transform="rotate(-0 514.848031 162.534641)">token ra</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p052dae9800">
+   <rect x="91.608125" y="21.740469" width="468.72" height="149.688"/>
+  </clipPath>
+ </defs>
+</svg>

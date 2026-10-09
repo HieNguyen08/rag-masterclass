@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="645.12pt" height="236.345806pt" viewBox="0 0 645.12 236.345806" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 236.345806 
+L 645.12 236.345806 
+L 645.12 -0 
+L 0 -0 
+L 0 236.345806 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 15.979355 61.966452 
+L 381.832258 61.966452 
+L 381.832258 31.308387 
+L 15.979355 31.308387 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #2a78d6"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 383.876129 61.966452 
+L 504.464516 61.966452 
+L 504.464516 31.308387 
+L 383.876129 31.308387 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #eb6834"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 506.508387 61.966452 
+L 565.780645 61.966452 
+L 565.780645 31.308387 
+L 506.508387 31.308387 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #1baf7a"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 567.824516 61.966452 
+L 596.43871 61.966452 
+L 596.43871 31.308387 
+L 567.824516 31.308387 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #4a3aa7"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 598.482581 61.966452 
+L 627.096774 61.966452 
+L 627.096774 31.308387 
+L 598.482581 31.308387 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #e34948"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 15.979355 87.514839 
+L 26.19871 87.514839 
+L 26.19871 77.295484 
+L 15.979355 77.295484 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #2a78d6"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 140.655484 87.514839 
+L 150.874839 87.514839 
+L 150.874839 77.295484 
+L 140.655484 77.295484 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #eb6834"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 265.331613 87.514839 
+L 275.550968 87.514839 
+L 275.550968 77.295484 
+L 265.331613 77.295484 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #1baf7a"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 390.007742 87.514839 
+L 400.227097 87.514839 
+L 400.227097 77.295484 
+L 390.007742 77.295484 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #4a3aa7"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 514.683871 87.514839 
+L 524.903226 87.514839 
+L 524.903226 77.295484 
+L 514.683871 77.295484 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #e34948"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 22.110968 199.927742 
+L 89.047742 199.927742 
+Q 95.179355 199.927742 95.179355 193.796129 
+L 95.179355 149.852903 
+Q 95.179355 143.72129 89.047742 143.72129 
+L 22.110968 143.72129 
+Q 15.979355 143.72129 15.979355 149.852903 
+L 15.979355 193.796129 
+Q 15.979355 199.927742 22.110968 199.927742 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #fce8e1; stroke: #eb6834; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 108.975484 199.927742 
+L 175.912258 199.927742 
+Q 182.043871 199.927742 182.043871 193.796129 
+L 182.043871 149.852903 
+Q 182.043871 143.72129 175.912258 143.72129 
+L 108.975484 143.72129 
+Q 102.843871 143.72129 102.843871 149.852903 
+L 102.843871 193.796129 
+Q 102.843871 199.927742 108.975484 199.927742 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #d9ecd9; stroke: #008300; stroke-width: 2.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 195.84 199.927742 
+L 262.776774 199.927742 
+Q 268.908387 199.927742 268.908387 193.796129 
+L 268.908387 149.852903 
+Q 268.908387 143.72129 262.776774 143.72129 
+L 195.84 143.72129 
+Q 189.708387 143.72129 189.708387 149.852903 
+L 189.708387 193.796129 
+Q 189.708387 199.927742 195.84 199.927742 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #ededed; stroke: #8a8984; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 282.704516 199.927742 
+L 349.64129 199.927742 
+Q 355.772903 199.927742 355.772903 193.796129 
+L 355.772903 149.852903 
+Q 355.772903 143.72129 349.64129 143.72129 
+L 282.704516 143.72129 
+Q 276.572903 143.72129 276.572903 149.852903 
+L 276.572903 193.796129 
+Q 276.572903 199.927742 282.704516 199.927742 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #ededed; stroke: #8a8984; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 368.547097 171.824516 
+Q 381.32129 171.824516 392.306629 171.824516 
+" clip-path="url(#pecfdc3b8cc)" style="fill: none; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 387.506629 169.424516 
+L 392.306629 171.824516 
+L 387.506629 174.224516 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #52514e; stroke: #52514e; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 405.336774 210.147097 
+L 623.009032 210.147097 
+Q 629.140645 210.147097 629.140645 204.015484 
+L 629.140645 139.633548 
+Q 629.140645 133.501935 623.009032 133.501935 
+L 405.336774 133.501935 
+Q 399.205161 133.501935 399.205161 139.633548 
+L 399.205161 204.015484 
+Q 399.205161 210.147097 405.336774 210.147097 
+z
+" clip-path="url(#pecfdc3b8cc)" style="fill: #eaf2fb; stroke: #2a78d6; stroke-width: 1.4; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #ffffff" x="199.927742" y="48.871404" transform="rotate(-0 199.927742 48.871404)">60%</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #ffffff" x="445.192258" y="48.871404" transform="rotate(-0 445.192258 48.871404)">20%</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 8.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #ffffff" x="537.166452" y="48.871404" transform="rotate(-0 537.166452 48.871404)">10%</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="15.979355" y="18.534194" transform="rotate(-0 15.979355 18.534194)">Tỷ lệ loại mẫu RAFT cho Zendesk (điểm xuất phát)</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 7.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="31.308387" y="84.353696" transform="rotate(-0 31.308387 84.353696)">A · oracle + distractor</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 7.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="155.984516" y="84.54354" transform="rotate(-0 155.984516 84.54354)">B · chỉ distractor → abstain</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 7.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="280.660645" y="84.679478" transform="rotate(-0 280.660645 84.679478)">C · một phần</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 7.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="405.336774" y="84.785532" transform="rotate(-0 405.336774 84.785532)">D · mâu thuẫn</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 7.5px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="530.012903" y="84.353696" transform="rotate(-0 530.012903 84.353696)">E · injection</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #1b1b1a" x="15.979355" y="118.172903" transform="rotate(-0 15.979355 118.172903)">Ví dụ mẫu A: khách hỏi giới hạn API gói Business</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(28.713949 168.791641)">S1 Enterprise:</text>
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(27.265199 179.203641)">1.000 req/phút</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(118.369683 169.527891)">S2 Business:</text>
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(117.755152 179.203641)">300 req/phút</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #1b1b1a" x="229.308387" y="174.657891" transform="rotate(-0 229.308387 174.657891)">S3 distractor</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: middle; fill: #1b1b1a" x="316.172903" y="174.657891" transform="rotate(-0 316.172903 174.657891)">S4 distractor</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(405.336774 158.337829)">claims: «Gói Business giới hạn 300</text>
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(405.336774 168.867829)">request/phút.» → [S2]</text>
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(405.336774 179.28936)">answer_plan: «S1 là gói Enterprise,</text>
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; fill: #1b1b1a" transform="translate(405.336774 189.927829)">không áp dụng»</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 7.8px; font-family: 'DejaVu Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic', sans-serif, 'Noto Sans CJK JP'; text-anchor: start; fill: #52514e" x="15.979355" y="225.476129" transform="rotate(-0 15.979355 225.476129)">distractor lấy từ chính retriever production (xáo thứ tự)</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pecfdc3b8cc">
+   <rect x="5.76" y="5.76" width="633.6" height="224.825806"/>
+  </clipPath>
+ </defs>
+</svg>
