@@ -30,6 +30,14 @@ Hai kết quả thực nghiệm đáng nhớ:
 
 Với Zendesk, điều này có hệ quả rất cụ thể: chính sách giá/hoàn tiền thay đổi hằng tuần. Nếu bạn SFT generator trên 200.000 reply cũ, model sẽ "thuộc" giá cũ và tự tin nói ra khi context không có — một dạng hallucination khó phát hiện vì câu trả lời nghe rất "đúng giọng công ty". Vì vậy mình đặt nguyên tắc: **tri thức biến động sống trong index; trọng số model chỉ học phong cách, định dạng, cách đọc context, cách từ chối, và hàm tương đồng giữa câu hỏi và tài liệu.**
 
+<!-- fig:where-to-finetune -->
+<figure markdown="span">
+  ![Bốn chỗ có thể hỏng trong RAG và công cụ tương ứng: luôn thử cách rẻ trước, fine-tune đúng thành phần đang hỏng](assets/figures/09/where-to-finetune.light.svg#only-light){ loading=lazy }
+  ![Bốn chỗ có thể hỏng trong RAG và công cụ tương ứng: luôn thử cách rẻ trước, fine-tune đúng thành phần đang hỏng](assets/figures/09/where-to-finetune.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.1 — Bốn chỗ có thể hỏng trong RAG và công cụ tương ứng: luôn thử cách rẻ trước, fine-tune đúng thành phần đang hỏng.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 1.3 Ma trận quyết định theo triệu chứng
 
 Trước khi fine-tune bất cứ gì, bạn cần bộ đánh giá của Module 10 để biết lỗi nằm ở đâu. Bảng dưới đây giả định bạn đã có golden set và đo được các chỉ số tương ứng.
@@ -83,6 +91,14 @@ Các bước làm sạch (dựa trên Module 04): tách quoted reply và chữ k
 
 **Ước lượng sản lượng (giả định để học).** Nếu ~30% trong 200.000 ticket có link bài hoặc macro rõ ràng, sau lọc CSAT/reopen còn ~50% → khoảng 30.000 cặp. Đó là quy mô rất đủ cho fine-tune embedding cỡ base.
 
+<!-- fig:weak-pairs-funnel -->
+<figure markdown="span">
+  ![Ước lượng sản lượng cặp huấn luyện từ ticket lịch sử theo các tỷ lệ giả định của mục 2](assets/figures/09/weak-pairs-funnel.light.svg#only-light){ loading=lazy }
+  ![Ước lượng sản lượng cặp huấn luyện từ ticket lịch sử theo các tỷ lệ giả định của mục 2](assets/figures/09/weak-pairs-funnel.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.2 — Ước lượng sản lượng cặp huấn luyện từ ticket lịch sử theo các tỷ lệ giả định của mục 2.1.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Cạm bẫy.** Phân bố bị lệch về các câu hỏi phổ biến (đặt lại mật khẩu, hóa đơn). Hãy giới hạn số cặp tối đa cho mỗi tài liệu (ví dụ ≤ 50) để model không chỉ giỏi top-20 bài phổ biến.
 
 ### 2.2 Câu hỏi tổng hợp do LLM sinh
@@ -123,6 +139,14 @@ Ba kiểu rò rỉ hay gặp:
 - **Rò rỉ do trùng lặp gần**: khách gửi cùng một email cho nhiều ticket, hoặc các macro gần như giống nhau. Dùng MinHash/SimHash (Module 04) để khử trùng lặp *trước* khi chia.
 
 Và quan trọng nhất: **golden set của Module 10 không bao giờ được dùng để train.** Lưu danh sách ID ticket/tài liệu của golden set và lọc chúng ra khỏi mọi tập train.
+
+<!-- fig:leak-free-split -->
+<figure markdown="span">
+  ![Chia dữ liệu không rò rỉ: theo thời gian, theo nhóm tài liệu, và tách hẳn golden set](assets/figures/09/leak-free-split.light.svg#only-light){ loading=lazy }
+  ![Chia dữ liệu không rò rỉ: theo thời gian, theo nhóm tài liệu, và tách hẳn golden set](assets/figures/09/leak-free-split.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.3 — Chia dữ liệu không rò rỉ: theo thời gian, theo nhóm tài liệu, và tách hẳn golden set.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 2.4 Data governance: PII và dữ liệu khách hàng trong dữ liệu huấn luyện
 
@@ -178,6 +202,14 @@ Kiểm tra dòng 1: $e^{16}/(e^{16}+e^{12}+e^{6}+e^{2}) = 1/(1+e^{-4}+e^{-10}+e^
 
 **Vai trò của $\gamma$ (hay $\tau$).** Nếu bỏ scale ($\gamma = 1$), cùng dòng 1 có $\pi_{ii} = e^{0{,}8}/(e^{0{,}8}+e^{0{,}6}+e^{0{,}3}+e^{0{,}1}) \approx 0{,}342$ và loss $\approx 1{,}07$: cosine nằm trong $[-1,1]$ nên không đủ "biên độ" để softmax trở nên sắc. $\gamma$ lớn làm phân phối sắc hơn và tập trung gradient vào negative khó; quá lớn thì nhạy với nhiễu nhãn. Giá trị 20 (tức $\tau=0{,}05$) là mặc định hợp lý; hiếm khi cần chỉnh.
 
+<!-- fig:mnrl-cases -->
+<figure markdown="span">
+  ![Trái: phân phối softmax và loss của ba trường hợp trong bảng mục 3](assets/figures/09/mnrl-cases.light.svg#only-light){ loading=lazy }
+  ![Trái: phân phối softmax và loss của ba trường hợp trong bảng mục 3](assets/figures/09/mnrl-cases.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.4 — Trái: phân phối softmax và loss của ba trường hợp trong bảng mục 3.2. Phải: loss của trường hợp negative dễ theo hệ số scale γ.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Batch size.** Với $C$ ứng viên, loss ngẫu nhiên ban đầu khoảng $\log C$, và cận dưới MI mà InfoNCE ước lượng bị chặn bởi $\log C$ (Module 03). Thực tế: batch lớn hơn = nhiều negative hơn = tín hiệu tốt hơn, đến một mức bão hòa. Trên GPU 6 GB, batch 32–64 với model base là giới hạn thực tế; `CachedMultipleNegativesRankingLoss` (dựa trên GradCache của Gao et al., 2021, arXiv:2101.06983) cho phép batch hiệu dụng vài trăm–vài nghìn bằng cách tính embedding theo mini-batch không giữ graph, rồi tính lại gradient từng phần — đổi bộ nhớ lấy thời gian (~gấp đôi forward).
 
 **Trùng lặp trong batch.** Nếu hai cặp trong cùng batch có cùng passage (hai khách hỏi cùng một bài), passage của cặp kia trở thành "negative" của query này — một false negative tự tạo. Dùng batch sampler `NO_DUPLICATES` để tránh.
@@ -194,6 +226,14 @@ Kiểm tra dòng 1: $e^{16}/(e^{16}+e^{12}+e^{6}+e^{2}) = 1/(1+e^{-4}+e^{-10}+e^
 2. Áp positive-aware threshold bằng một cross-encoder mạnh (không phải chính embedding đang train).
 3. Bỏ qua hạng 1–$r$ đầu (ví dụ `range_min=10`) nếu corpus có nhiều trùng lặp — hạng quá cao thường là false negative.
 4. Lấy mẫu kiểm tra tay 100 bộ ba (query, positive, negative) trước khi train. Nếu > 10% negative thực ra là đúng, quay lại bước 1.
+
+<!-- fig:positive-aware-mining -->
+<figure markdown="span">
+  ![Positive-aware mining (số minh họa): loại ứng viên cùng họ tài liệu và ứng viên có điểm vượt 95% điểm positive](assets/figures/09/positive-aware-mining.light.svg#only-light){ loading=lazy }
+  ![Positive-aware mining (số minh họa): loại ứng viên cùng họ tài liệu và ứng viên có điểm vượt 95% điểm positive](assets/figures/09/positive-aware-mining.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.5 — Positive-aware mining (số minh họa): loại ứng viên cùng họ tài liệu và ứng viên có điểm vượt 95% điểm positive.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 3.4 Matryoshka loss — một model, nhiều kích thước vector
 
@@ -285,6 +325,14 @@ print("Sau fine-tune:", evaluator(model))
 
 **VRAM để fine-tune embedding.** Fine-tune *toàn bộ* với AdamW cần khoảng 16 byte/tham số cho trọng số + gradient + 2 moment khi huấn luyện mixed precision với master weights fp32 (4 + 4 + 4 + 4), chưa tính activation. Model ~118M tham số (cỡ small) → ~1,9 GB; ~278M (cỡ base) → ~4,4 GB; ~568M (cỡ `bge-m3`) → ~9 GB — vượt 6 GB. Với model ≥ 0,5B trên GPU 6 GB, dùng LoRA cho encoder (sentence-transformers hỗ trợ adapter qua PEFT) hoặc thuê GPU cloud vài giờ. (Số tham số trên là xấp xỉ theo model card; kiểm tra lại với model bạn chọn.)
 
+<!-- fig:embedding-vram -->
+<figure markdown="span">
+  ![Bộ nhớ cho full fine-tune theo quy tắc 16 byte/tham số của mục 3](assets/figures/09/embedding-vram.light.svg#only-light){ loading=lazy }
+  ![Bộ nhớ cho full fine-tune theo quy tắc 16 byte/tham số của mục 3](assets/figures/09/embedding-vram.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.6 — Bộ nhớ cho full fine-tune theo quy tắc 16 byte/tham số của mục 3.6.</figcaption>
+</figure>
+<!-- /fig -->
+
 > **Liên hệ Zendesk.** Kinh nghiệm thực tế: lợi ích lớn nhất của fine-tune embedding thường đến từ (1) thuật ngữ nội bộ/mã lỗi, (2) truy vấn cross-lingual (email tiếng Nhật ↔ bài tiếng Anh chưa dịch), (3) email dài nhiều nhiễu. Đừng kỳ vọng cải thiện lớn ở các câu FAQ phổ biến — model chung đã làm tốt.
 
 ---
@@ -306,6 +354,14 @@ $$
 Ví dụ: positive có logit 2,0 → $\hat p = 0{,}881$, loss $= -\ln 0{,}881 = 0{,}127$. Hard negative có logit 1,5 → $\hat p = 0{,}818$, loss $= -\ln(1-0{,}818) = 1{,}70$ — gradient chủ yếu đến từ negative khó, như ta muốn.
 
 Ưu điểm: đầu ra $\hat p$ có nghĩa xác suất "liên quan" và — sau hiệu chuẩn (Module 10, mục 6.4) — là một tín hiệu confidence rất tốt cho quyết định escalate. Đây là lý do mình hay chọn BCE cho reranker trong bài toán CS.
+
+<!-- fig:reranker-bce -->
+<figure markdown="span">
+  ![Binary cross-entropy cho reranker với hai ví dụ của mục 4](assets/figures/09/reranker-bce.light.svg#only-light){ loading=lazy }
+  ![Binary cross-entropy cho reranker với hai ví dụ của mục 4](assets/figures/09/reranker-bce.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.7 — Binary cross-entropy cho reranker với hai ví dụ của mục 4.2.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Listwise — softmax cross-entropy.** Với 1 positive và $n$ negative của cùng query:
 
@@ -380,6 +436,14 @@ Về cài đặt, ta nối $x \oplus y$ thành một chuỗi và đặt nhãn c�
 
 **Ví dụ số.** $|x| = 2.400$, $|y| = 200$ token; loss trung bình 1,2 nat/token prompt, 0,6 nat/token trả lời. Không mask: $(2.400 \times 1{,}2 + 200 \times 0{,}6)/2.600 \approx 1{,}154$, câu trả lời chỉ đóng góp $120/3.000 = 4\%$. Có mask: loss $= 0{,}6$, 100% tín hiệu từ hành vi cần dạy.
 
+<!-- fig:sft-mask -->
+<figure markdown="span">
+  ![Vì sao phải mask phần prompt khi SFT cho RAG](assets/figures/09/sft-mask.light.svg#only-light){ loading=lazy }
+  ![Vì sao phải mask phần prompt khi SFT cho RAG](assets/figures/09/sft-mask.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.8 — Vì sao phải mask phần prompt khi SFT cho RAG.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 5.2 Dữ liệu SFT từ Zendesk: dạy đúng "hợp đồng" đầu ra của Module 07
 
 Nguyên tắc số một: **định dạng train trùng từng ký tự với lúc inference** — cùng system prompt, ID nguồn `S1..Sk`, datamarking, và schema JSON Module 07 (mục 7.3: `customer_questions`, `answer_plan`, `claims`, `draft`, `unanswered_questions`, `escalate`, `escalate_reasons`, `confidence`, `note_for_agent`).
@@ -416,6 +480,14 @@ Tỷ lệ là điểm xuất phát, chỉnh theo số đo (mục 5.4). Distracto
 
 Trường `answer_plan` + `claims` của schema Module 07 đóng vai trò "suy luận có trích dẫn" của RAFT; giữ ngắn (1–3 câu) vì mỗi token sinh thêm nhân với 1.500 ticket/ngày.
 
+<!-- fig:raft-mix -->
+<figure markdown="span">
+  ![Hỗn hợp dữ liệu RAFT điều chỉnh cho Zendesk và mẫu loại A của ví dụ giới hạn API](assets/figures/09/raft-mix.light.svg#only-light){ loading=lazy }
+  ![Hỗn hợp dữ liệu RAFT điều chỉnh cho Zendesk và mẫu loại A của ví dụ giới hạn API](assets/figures/09/raft-mix.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.9 — Hỗn hợp dữ liệu RAFT điều chỉnh cho Zendesk và mẫu loại A của ví dụ giới hạn API.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 5.4 Học abstention: dạy model nói "không đủ thông tin"
 
 LLM sau post-training có thiên hướng trả lời bằng mọi giá (Module 07, mục 4); model nhỏ thường cần được *dạy* abstain bằng ví dụ. R-Tuning (Zhang et al., 2023, arXiv:2311.09677) tách dữ liệu theo việc model có biết đáp án không và dạy nó biểu thị không chắc chắn ở phần không biết. Với RAG, câu hỏi dễ kiểm soát hơn là **context có đủ không?** — Joren et al. (2024, arXiv:2411.06037) hình thức hóa *sufficient context* và cho thấy model hay trả lời (sai) thay vì từ chối khi context thiếu. Mẫu loại B, C ở bảng 5.3 dạy đúng hành vi đó.
@@ -443,6 +515,14 @@ Theo ma trận chi phí Module 07 (mục 4.2) với $c_w = 5$ (trả lời câu 
 Base: $5 \times 59 + 12 = 307$; SFT chỉ A: $5 \times 78 + 8 = 398$ (**tệ hơn base** — fine-tune ngây thơ làm model tự tin hơn); A+B+C: $5 \times 13 + 24 = 89$; B 50%: $5 \times 4 + 88 = 108$.
 
 Phiên bản thứ ba thắng. Với intent hoàn tiền ($c_w = 50$) thứ hạng có thể đảo — vì vậy ngưỡng escalate cuối cùng đặt theo intent ở Module 10; fine-tune chỉ cần làm *tín hiệu* abstain tốt hơn.
+
+<!-- fig:abstention-tradeoff -->
+<figure markdown="span">
+  ![Bốn phiên bản của bảng mục 5](assets/figures/09/abstention-tradeoff.light.svg#only-light){ loading=lazy }
+  ![Bốn phiên bản của bảng mục 5](assets/figures/09/abstention-tradeoff.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.10 — Bốn phiên bản của bảng mục 5.4 trên mặt phẳng AnsRate / AbsRate, kèm chi phí trên 500 câu.</figcaption>
+</figure>
+<!-- /fig -->
 
 Abstention của model **không thay thế** bộ quyết định escalate: quy tắc cứng vẫn chạy ngoài model (Module 12, mục 8.1) và `confidence` vẫn phải hiệu chuẩn (Module 10, mục 6).
 
@@ -525,6 +605,14 @@ $$
 
 **Ví dụ số.** $P_\theta(y_w) = 0{,}6$ (odds 1,5), $P_\theta(y_l) = 0{,}4$ (odds 0,667): $\log(1{,}5/0{,}667) \approx 0{,}811$, phạt $= -\ln\sigma(0{,}811) \approx 0{,}368$; nếu hai xác suất bằng nhau, phạt $= \ln 2 \approx 0{,}693$.
 
+<!-- fig:dpo-orpo -->
+<figure markdown="span">
+  ![Trái: loss DPO theo hiệu phần thưởng ngầm (β = 0](assets/figures/09/dpo-orpo.light.svg#only-light){ loading=lazy }
+  ![Trái: loss DPO theo hiệu phần thưởng ngầm (β = 0](assets/figures/09/dpo-orpo.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.11 — Trái: loss DPO theo hiệu phần thưởng ngầm (β = 0.1). Phải: số hạng phạt odds ratio của ORPO; các điểm là ví dụ trong bài.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Trade-off.** ORPO gộp hai giai đoạn và không cần $\pi_{\text{ref}}$. Nhưng với LoRA, DPO cũng không cần bản sao model thứ hai ($\pi_{\text{ref}}$ = model nền khi *tắt adapter*), nên lợi thế bộ nhớ nhỏ. Trong TRL 1.x, ORPO nằm ở `trl.experimental` (API có thể đổi) còn DPO thuộc lõi ổn định — cho production mình ưu tiên SFT → DPO.
 
 ### 6.3 KTO — khi chỉ có nhãn "tốt/xấu", không có cặp
@@ -553,6 +641,14 @@ $$
 
 **Số tham số một ma trận**: $r(d_{\text{in}} + d_{\text{out}})$ thay vì $d_{\text{in}} d_{\text{out}}$.
 
+<!-- fig:lora -->
+<figure markdown="span">
+  ![LoRA: nhánh hạng thấp B·A cộng vào đầu ra của W₀ đóng băng](assets/figures/09/lora.light.svg#only-light){ loading=lazy }
+  ![LoRA: nhánh hạng thấp B·A cộng vào đầu ra của W₀ đóng băng](assets/figures/09/lora.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.12 — LoRA: nhánh hạng thấp B·A cộng vào đầu ra của W₀ đóng băng.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 7.2 Đếm tham số LoRA cho Qwen3-1.7B và Qwen3-4B
 
 Cấu hình từ `config.json` chính thức trên Hugging Face (kiểm tra 10/2026): Qwen3-1.7B có $d = 2.048$, $L = 28$, 16 query head / 8 KV head, $d_h = 128$, $d_{ff} = 6.144$; Qwen3-4B có $d = 2.560$, $L = 36$, 32 / 8 head, $d_h = 128$, $d_{ff} = 9.728$; cả hai có từ vựng 151.936 và embedding gắn với LM head. Lưu ý $n_{\text{heads}} \cdot d_h$ không nhất thiết bằng $d$ (ở 4B: $32 \times 128 = 4.096 \neq 2.560$). Kích thước các phép chiếu trong một lớp:
@@ -571,6 +667,14 @@ Cấu hình từ `config.json` chính thức trên Hugging Face (kiểm tra 10/2
 
 So với tổng tham số: model 1.7B có ~1,41 tỷ tham số ở các lớp tuyến tính + ~0,31 tỷ ở embedding ($151.936 \times 2.048$) ≈ 1,72 tỷ (bỏ qua norm). LoRA $r=16$ trên mọi lớp tuyến tính = **~1,0%** tham số. Với 4B: 3,63 tỷ + 0,39 tỷ ≈ 4,02 tỷ; LoRA = **~0,8%**. Số tham số tỷ lệ tuyến tính với $r$ ($r=64$ → 69,7M / 132,1M).
 
+<!-- fig:lora-params -->
+<figure markdown="span">
+  ![Tham số LoRA r = 16 cho từng ma trận chiếu của Qwen3-1](assets/figures/09/lora-params.light.svg#only-light){ loading=lazy }
+  ![Tham số LoRA r = 16 cho từng ma trận chiếu của Qwen3-1](assets/figures/09/lora-params.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.13 — Tham số LoRA r = 16 cho từng ma trận chiếu của Qwen3-1.7B và Qwen3-4B (bảng mục 7.2).</figcaption>
+</figure>
+<!-- /fig -->
+
 **Chọn module và hạng.** QLoRA paper cho thấy gắn LoRA vào **tất cả lớp tuyến tính** quan trọng hơn tăng $r$. Ta chỉ dạy hành vi (định dạng, cite, xưng hô, abstain) nên $r \in \{8, 16, 32\}$ thường đủ; hạng cao vẫn không học được thường là dấu hiệu đang nhồi tri thức hoặc dữ liệu mâu thuẫn. DoRA (Liu et al., 2024, arXiv:2402.09353) tách độ lớn và hướng trọng số, đôi khi tốt hơn ở cùng hạng (`use_dora=True` trong PEFT).
 
 ### 7.3 QLoRA: NF4, double quantization, paged optimizer
@@ -580,6 +684,14 @@ QLoRA (Dettmers et al., 2023, arXiv:2305.14314) giữ model nền ở **4-bit** 
 **(1) NormalFloat 4-bit (NF4).** Trọng số đã huấn luyện xấp xỉ phân phối chuẩn quanh 0. Lượng tử hóa đều (INT4) phí mức ở vùng đuôi thưa; NF4 đặt 16 mức theo **phân vị của phân phối chuẩn** (chuẩn hóa vào $[-1, 1]$) để mỗi mức phục vụ xấp xỉ cùng số trọng số. Trọng số chia block 64; mỗi block lưu scale $c = \max|w|$ (absmax), mỗi trọng số lưu chỉ số mức gần nhất của $w/c$.
 
 *Ví dụ tính tay:* block có absmax $c = 0{,}08$, trọng số $w = 0{,}021$ → $w/c = 0{,}2625$. Trong bảng NF4 có các mức dương ≈ 0,0796; 0,1609; 0,2461; 0,3379; … Mức gần nhất là 0,2461 → giá trị khôi phục $0{,}2461 \times 0{,}08 \approx 0{,}0197$, sai số $\approx 0{,}0013$ (6%). (Giá trị bảng lấy theo cài đặt của bitsandbytes; con số cụ thể chỉ để minh họa cách tính.)
+
+<!-- fig:nf4-levels -->
+<figure markdown="span">
+  ![16 mức NF4 (giá trị theo bitsandbytes) so với 16 mức INT4 đều, cùng ví dụ lượng tử hóa của mục 7](assets/figures/09/nf4-levels.light.svg#only-light){ loading=lazy }
+  ![16 mức NF4 (giá trị theo bitsandbytes) so với 16 mức INT4 đều, cùng ví dụ lượng tử hóa của mục 7](assets/figures/09/nf4-levels.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.14 — 16 mức NF4 (giá trị theo bitsandbytes) so với 16 mức INT4 đều, cùng ví dụ lượng tử hóa của mục 7.3.</figcaption>
+</figure>
+<!-- /fig -->
 
 **(2) Double quantization.** Mỗi block 64 trọng số tốn thêm một scale fp32 = 32 bit → $32/64 = 0{,}5$ bit/tham số chi phí phụ. QLoRA lượng tử hóa *chính các scale* này sang 8-bit theo block 256, kèm một scale fp32 cho mỗi block 256: chi phí còn $8/64 + 32/(64 \times 256) \approx 0{,}125 + 0{,}002 = 0{,}127$ bit/tham số. Tiết kiệm ~0,373 bit/tham số (~66 MB với 1,41 tỷ tham số) — nhỏ, nhưng trên 6 GB đáng kể.
 
@@ -606,6 +718,14 @@ $$
 | Logits fp32 $S \times V \times 4$ (+ gradient cùng cỡ) | $3.072 \times 151.936 \times 4 \approx 1{,}87$ GB (×2) | $2.048 \times 151.936 \times 4 \approx 1{,}24$ GB (×2) |
 
 **Bài học quan trọng nhất: thủ phạm OOM thường là logits, không phải trọng số.** Từ vựng 151.936 làm ma trận logits $S \times V$ ở fp32 cỡ 2 GB, chưa kể gradient. Xử lý: (1) **fused linear cross-entropy** (tính loss theo khối, không vật chất hóa cả ma trận logits — ví dụ Liger Kernel qua cờ `use_liger_kernel`; TRL đang chuyển loss tiết kiệm bộ nhớ thành mặc định, đọc trang "Reducing memory usage" của đúng phiên bản); (2) giảm $S$ (ít chunk hơn, bỏ quoted reply); (3) batch 1 + gradient accumulation.
+
+<!-- fig:qlora-vram -->
+<figure markdown="span">
+  ![Ước lượng VRAM QLoRA theo bảng mục 7](assets/figures/09/qlora-vram.light.svg#only-light){ loading=lazy }
+  ![Ước lượng VRAM QLoRA theo bảng mục 7](assets/figures/09/qlora-vram.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.15 — Ước lượng VRAM QLoRA theo bảng mục 7.4 (dùng giữa dải cho phần CUDA/tính lại lớp); phần gạch là logits và gradient của chúng.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Kết luận cho 6 GB** (ước lượng; đo thật bằng `torch.cuda.max_memory_allocated()`): full fine-tune 1.7B (~27,5 GB) — không; LoRA trên nền bf16 1.7B — rất sát, chỉ khi $S \le 1.024$; **QLoRA 1.7B, $S = 3.072$ + fused CE — thoải mái (~3 GB)**, không fused CE thì dễ OOM ở chuỗi dài nhất; **QLoRA 4B, $S = 2.048$ + fused CE — được nhưng sát (~4,5 GB)**; 4B với $S = 4.096$ hoặc model ≥ 8B — thuê GPU cloud.
 
@@ -638,6 +758,14 @@ forward $= 0{,}5\ln\frac{0{,}5}{0{,}9} + 0{,}5\ln\frac{0{,}5}{0{,}1} = -0{,}294 
 reverse $= 0{,}9\ln\frac{0{,}9}{0{,}5} + 0{,}1\ln\frac{0{,}1}{0{,}5} = 0{,}529 - 0{,}161 = 0{,}368$.
 Reverse KL khoan dung hơn với việc bỏ một mode — với email CS, chọn chắc một cách diễn đạt an toàn thường tốt hơn trộn hai cách.
 
+<!-- fig:forward-reverse-kl -->
+<figure markdown="span">
+  ![Trái: minh họa học trò theo forward KL (phủ) và reverse KL (chọn)](assets/figures/09/forward-reverse-kl.light.svg#only-light){ loading=lazy }
+  ![Trái: minh họa học trò theo forward KL (phủ) và reverse KL (chọn)](assets/figures/09/forward-reverse-kl.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.16 — Trái: minh họa học trò theo forward KL (phủ) và reverse KL (chọn). Phải: hai giá trị KL của ví dụ mục 8.2.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 8.3 Quy trình distill cho Zendesk
 
 ```mermaid
@@ -668,6 +796,14 @@ Mục 2.4 đã nêu nguyên tắc cho dữ liệu embedding/reranker. Với gene
 2. **Manifest + dòng dõi dữ liệu (lineage)** cho từng phiên bản adapter: ID ticket, phiên bản bộ redaction, phiên bản giáo viên, prompt template. Yêu cầu xóa dữ liệu → tra manifest → quyết định train lại.
 3. **Không train trên dữ liệu tenant khác nếu hợp đồng không cho phép**; với khách Nhật, kiểm tra yêu cầu APPI về mục đích sử dụng (Module 11).
 4. **Cổng phát hành (regression gate)**: adapter mới chỉ lên production khi trên golden set nó **không kém hơn** bản hiện hành ở mọi tầng intent × ngôn ngữ (kiểm định cặp, Module 10), **tốt hơn** ở chỉ số mục tiêu, JSON hợp lệ ≥ 99,5%, và không vi phạm policy trên bộ test đối kháng.
+
+<!-- fig:release-gate -->
+<figure markdown="span">
+  ![Cổng phát hành adapter: mọi điều kiện phải đạt trước khi vào shadow mode](assets/figures/09/release-gate.light.svg#only-light){ loading=lazy }
+  ![Cổng phát hành adapter: mọi điều kiện phải đạt trước khi vào shadow mode](assets/figures/09/release-gate.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 9.17 — Cổng phát hành adapter: mọi điều kiện phải đạt trước khi vào shadow mode.</figcaption>
+</figure>
+<!-- /fig -->
 
 ---
 
