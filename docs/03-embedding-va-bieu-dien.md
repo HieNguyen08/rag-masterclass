@@ -33,6 +33,14 @@ Gọi $V$ là từ vựng (vocabulary) có $|V|$ phần tử. Cách biểu diễ
 
 Đây là *vocabulary mismatch* — rất phổ biến trong email tiếng Việt ("ko", "dc", "tk"…). Sparse retrieval vẫn quý cho mã lỗi, tên tính năng (Module 05), nhưng ta cần biểu diễn mà *ý nghĩa gần thì vector gần*.
 
+<!-- fig:onehot-vs-dense -->
+<figure markdown="span">
+  ![Trái: với vector đếm từ, d₁ thắng chỉ nhờ hai từ chức năng, còn bài đúng d₂ có cosine 0](assets/figures/03/onehot-vs-dense.light.svg#only-light){ loading=lazy }
+  ![Trái: với vector đếm từ, d₁ thắng chỉ nhờ hai từ chức năng, còn bài đúng d₂ có cosine 0](assets/figures/03/onehot-vs-dense.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.1 — Trái: với vector đếm từ, d₁ thắng chỉ nhờ hai từ chức năng, còn bài đúng d₂ có cosine 0. Phải: sơ đồ minh họa điều ta muốn — văn bản cùng nghĩa nằm gần nhau dù khác chữ, khác ngôn ngữ.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 1.2 Giả thuyết phân bố và word2vec
 
 **Ý tưởng (distributional hypothesis):** từ xuất hiện trong ngữ cảnh giống nhau thì nghĩa giống nhau — "login" và "đăng nhập" cùng hay đi với "mật khẩu", "tài khoản".
@@ -44,6 +52,14 @@ $$
 $$
 
 với $\sigma(z) = 1/(1+e^{-z})$. Số hạng đầu kéo cặp thật lại gần (tích vô hướng lớn), số hạng sau đẩy cặp nhiễu ra xa. Đây là **mầm mống của học tương phản** (mục 3).
+
+<!-- fig:word2vec-skipgram -->
+<figure markdown="span">
+  ![Skip-gram với negative sampling: từ trung tâm được kéo gần các từ trong cửa sổ ngữ cảnh và đẩy xa K từ nhiễu](assets/figures/03/word2vec-skipgram.light.svg#only-light){ loading=lazy }
+  ![Skip-gram với negative sampling: từ trung tâm được kéo gần các từ trong cửa sổ ngữ cảnh và đẩy xa K từ nhiễu](assets/figures/03/word2vec-skipgram.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.2 — Skip-gram với negative sampling: từ trung tâm được kéo gần các từ trong cửa sổ ngữ cảnh và đẩy xa K từ nhiễu.</figcaption>
+</figure>
+<!-- /fig -->
 
 Một kết quả lý thuyết đẹp (Levy & Goldberg, NeurIPS 2014): ở điểm tối ưu, $\mathbf{u}_w^\top\mathbf{v}_c \approx \mathrm{PMI}(w,c) - \log K$, với $\mathrm{PMI}(w,c)=\log\frac{p(w,c)}{p(w)p(c)}$. — word2vec ngầm phân rã ma trận PMI.
 
@@ -64,6 +80,14 @@ Sentence-BERT (Reimers & Gurevych, 2019) là bước ngoặt: fine-tune BERT d�
 ### 2.1 Vấn đề
 
 Ta cần hàm điểm $f(q,d)$ vừa **chính xác** (nhìn kỹ tương tác giữa từng từ của $q$ và $d$) vừa **rẻ** (không thể chạy mạng lớn cho từng chunk trong vài trăm nghìn chunk). Ba kiến trúc là ba điểm khác nhau trên đường cong trade-off này.
+
+<!-- fig:scoring-architectures -->
+<figure markdown="span">
+  ![Ba cách chấm điểm f(q, d)](assets/figures/03/scoring-architectures.light.svg#only-light){ loading=lazy }
+  ![Ba cách chấm điểm f(q, d)](assets/figures/03/scoring-architectures.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.3 — Ba cách chấm điểm f(q, d). Bi-encoder và ColBERT tính trước được phía tài liệu; cross-encoder phải chạy lại cho từng cặp.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 2.2 Bi-encoder (dual encoder)
 
@@ -110,6 +134,14 @@ Với mỗi token câu hỏi, tìm token khớp nhất trong tài liệu rồi c
 - $f(q,d^{(2)}) = 0.5 + 0.6 = 1.1$.
 
 $d^{(1)}$ khớp mạnh *từng* khái niệm; $d^{(2)}$ "hơi giống mọi thứ". Mean-pool rồi lấy cosine có thể không phân biệt được hai tài liệu này.
+
+<!-- fig:colbert-maxsim -->
+<figure markdown="span">
+  ![MaxSim trên ví dụ của mục 2](assets/figures/03/colbert-maxsim.light.svg#only-light){ loading=lazy }
+  ![MaxSim trên ví dụ của mục 2](assets/figures/03/colbert-maxsim.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.4 — MaxSim trên ví dụ của mục 2.4: d⁽¹⁾ có token khớp mạnh cho cả hai khái niệm nên điểm cao hơn d⁽²⁾.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Chi phí lưu trữ cho Zendesk** (300.000 chunk — mục 7.1, 200 token/chunk, 128 chiều, fp16):
 
@@ -177,6 +209,14 @@ Cách tính một ô, ví dụ $\tau=0.1$: logit $= (8.2, 7.5, 4.0, 3.0)$; trừ
 
 Đây là trực giác cốt lõi: **$\tau$ điều khiển mức độ tập trung vào hard negative.** Các model embedding thường dùng $\tau$ khoảng 0.01–0.05. Hệ quả: model card multilingual-e5 lưu ý do $\tau=0.01$, cosine giữa văn bản bất kỳ thường nằm khoảng 0.7–1.0 — quan trọng là *thứ hạng*, không phải giá trị tuyệt đối (mục 5.4).
 
+<!-- fig:infonce-temperature -->
+<figure markdown="span">
+  ![Trái: phân phối softmax của bảng ở mục 3](assets/figures/03/infonce-temperature.light.svg#only-light){ loading=lazy }
+  ![Trái: phân phối softmax của bảng ở mục 3](assets/figures/03/infonce-temperature.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.5 — Trái: phân phối softmax của bảng ở mục 3.3. Phải: khi τ giảm, p(d⁺) tăng và gần như toàn bộ lực đẩy dồn vào hard negative d₂.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 3.4 Dẫn xuất gradient: hard negative nhận trọng số bao nhiêu?
 
 Xét loss của một query, $\ell = -\log p_{+}$ với $p_j = \mathrm{softmax}(s_j/\tau)_j$. Đạo hàm của cross-entropy theo logit $z_j = s_j/\tau$ là $p_j - \mathbb{1}[j=+]$. Theo quy tắc chuỗi:
@@ -193,6 +233,14 @@ $$
 $$
 
 Gradient descent kéo $\mathbf{z}_q$ về phía $\mathbf{z}_{d^+}$ và đẩy ra khỏi trung bình có trọng số của các ứng viên, với trọng số chính là $p_j$. Với $\tau=0.05$ ở ví dụ trên, $d_2$ chiếm 0.198 trong khi $d_3,d_4$ gần 0: **chỉ negative "khó" mới thực sự tạo ra gradient.** Hệ quả: negative ngẫu nhiên nhanh chóng trở nên "quá dễ"; cần **hard negative mining** — dùng BM25 hoặc model hiện tại lấy top-$k$ tài liệu *không phải* đáp án và thêm vào batch.
+
+<!-- fig:infonce-gradient -->
+<figure markdown="span">
+  ![Hình học của gradient (τ = 0](assets/figures/03/infonce-gradient.light.svg#only-light){ loading=lazy }
+  ![Hình học của gradient (τ = 0](assets/figures/03/infonce-gradient.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.6 — Hình học của gradient (τ = 0.05, góc dựng từ các cosine 0.82 / 0.75 / 0.40 / 0.30): z_q bị kéo về d⁺ và đẩy khỏi trọng tâm có trọng số, mà trọng tâm đó gần như chỉ gồm d⁺ và d₂.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 3.5 Hard negatives và cái bẫy false negative
 
@@ -231,6 +279,14 @@ Bước "≈" dùng $\mathbb{E}_{d_j\sim p(d)}\big[r(q,d_j)\big]=1$ (xấp xỉ 
 - Cận dưới bị chặn bởi $\log B$: với $B=32$, cận tối đa là $\log 32\approx 3.47$ nats; $B=256$: $5.55$; $B=4096$: $8.32$. → thêm lý do cho batch lớn.
 - Embedding chỉ giữ những gì *giúp phân biệt* đáp án đúng với ứng viên khác trong dữ liệu huấn luyện. Nếu dữ liệu không bao giờ đòi phân biệt "phiên bản 4.1" với "4.2", embedding sẽ không giữ thông tin đó → số phiên bản, tên gói dịch vụ nên giao cho **metadata filter** và **BM25**.
 
+<!-- fig:infonce-mi-bound -->
+<figure markdown="span">
+  ![Cận dưới thông tin tương hỗ từ InfoNCE không thể vượt log B — một lý do định lượng cho batch lớn](assets/figures/03/infonce-mi-bound.light.svg#only-light){ loading=lazy }
+  ![Cận dưới thông tin tương hỗ từ InfoNCE không thể vượt log B — một lý do định lượng cho batch lớn](assets/figures/03/infonce-mi-bound.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.7 — Cận dưới thông tin tương hỗ từ InfoNCE không thể vượt log B — một lý do định lượng cho batch lớn.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 3.7 Alignment và uniformity
 
 Wang & Isola (2020) phân tách mục tiêu tương phản trên mặt cầu đơn vị thành hai tính chất có thể đo được:
@@ -241,6 +297,14 @@ $$
 $$
 
 Alignment thấp nghĩa là cặp dương nằm gần nhau; uniformity thấp (âm hơn) nghĩa là các điểm trải đều trên mặt cầu. Tử số của InfoNCE thúc đẩy alignment, mẫu số (log-sum-exp trên negative) thúc đẩy uniformity; chỉ có alignment thì model "sụp đổ" (mọi vector như nhau). Hai đại lượng này tiện để chẩn đoán model trên dữ liệu của bạn — và uniformity chính là mặt đối lập của anisotropy (mục 6).
+
+<!-- fig:alignment-uniformity -->
+<figure markdown="span">
+  ![Alignment và uniformity trên đường tròn đơn vị (dữ liệu mô phỏng)](assets/figures/03/alignment-uniformity.light.svg#only-light){ loading=lazy }
+  ![Alignment và uniformity trên đường tròn đơn vị (dữ liệu mô phỏng)](assets/figures/03/alignment-uniformity.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.8 — Alignment và uniformity trên đường tròn đơn vị (dữ liệu mô phỏng). Chỉ tối ưu alignment dẫn tới sụp đổ; InfoNCE cần cả hai.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 3.8 Code minh họa: InfoNCE với in-batch negatives
 
@@ -300,6 +364,14 @@ $$
 $$
 
 **Vì sao last-token cho decoder-only?** Với causal mask (Module 01), token ở vị trí $t$ chỉ attend được tới $1..t$. Chỉ token cuối "đã nhìn thấy" toàn bộ văn bản; mean pooling sẽ trộn các token đầu vốn chỉ thấy vài từ. Một số model sửa kiến trúc (bỏ causal mask, thêm attention pooling) nên dùng cách khác — luôn đọc model card.
+
+<!-- fig:pooling -->
+<figure markdown="span">
+  ![Ba kiểu pooling trên cùng ma trận H](assets/figures/03/pooling.light.svg#only-light){ loading=lazy }
+  ![Ba kiểu pooling trên cùng ma trận H](assets/figures/03/pooling.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.9 — Ba kiểu pooling trên cùng ma trận H. Mean pooling phải nhân attention mask để loại padding.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Cái bẫy padding side.** Pad bên phải thì vị trí cuối là padding; pad bên trái thì là token thật. Khi tự viết pipeline (vLLM, ONNX…), embed cùng một câu đơn lẻ và trong batch với câu dài hơn — hai vector phải gần như giống hệt (cos > 0.999).
 
@@ -381,6 +453,14 @@ Với vector chưa chuẩn hóa, dot product thưởng cho vector "dài". Lấy 
 
 Có model huấn luyện với dot không chuẩn hóa (độ dài vector mang thông tin), có model huấn luyện với cosine. **Quy tắc vàng:** dùng đúng độ đo mà model được huấn luyện; nếu model card nói "normalize embeddings", hãy chuẩn hóa L2 rồi dùng dot product (nhanh nhất) — tương đương cosine.
 
+<!-- fig:similarity-metrics -->
+<figure markdown="span">
+  ![Trái: trên mặt cầu đơn vị, L2² là hàm giảm tuyến tính của cosine nên ba độ đo cho cùng thứ hạng (điểm cam là ví dụ mục 5](assets/figures/03/similarity-metrics.light.svg#only-light){ loading=lazy }
+  ![Trái: trên mặt cầu đơn vị, L2² là hàm giảm tuyến tính của cosine nên ba độ đo cho cùng thứ hạng (điểm cam là ví dụ mục 5](assets/figures/03/similarity-metrics.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.10 — Trái: trên mặt cầu đơn vị, L2² là hàm giảm tuyến tính của cosine nên ba độ đo cho cùng thứ hạng (điểm cam là ví dụ mục 5.2). Phải: khi chưa chuẩn hóa, dot product thưởng cho vector dài.</figcaption>
+</figure>
+<!-- /fig -->
+
 Chi tiết chọn metric khi tạo index (pgvector/Qdrant) ở Module 05.
 
 ### 5.4 Điểm tuyệt đối không phải xác suất
@@ -414,6 +494,14 @@ $$
 nên cosine giữa hai văn bản ngẫu nhiên xấp xỉ $\frac{\|\boldsymbol{\mu}\|^2}{\|\boldsymbol{\mu}\|^2+\mathbb{E}\|\boldsymbol{\epsilon}\|^2}$. Thành phần chung càng lớn, cosine của *mọi cặp* càng tiến về 1.
 
 **Ví dụ số (mô phỏng).** Sinh 2.000 vector 64 chiều, mỗi tọa độ $= 2.0 + 0.3\cdot\mathcal{N}(0,1)$. Theo công thức: $\|\boldsymbol\mu\|^2 = 64\cdot 4 = 256$, $\mathbb{E}\|\boldsymbol\epsilon\|^2 = 64\cdot 0.09=5.76$ → cosine kỳ vọng $\approx 256/261.76\approx 0.978$. Chạy thật cho trung bình $0.978$. Sau khi trừ trung bình (centering) và chuẩn hóa lại, giá trị về $\approx 0.00$.
+
+<!-- fig:anisotropy -->
+<figure markdown="span">
+  ![Anisotropy: vector dồn vào một hình nón hẹp nên cosine giữa hai văn bản bất kỳ ≈ 0](assets/figures/03/anisotropy.light.svg#only-light){ loading=lazy }
+  ![Anisotropy: vector dồn vào một hình nón hẹp nên cosine giữa hai văn bản bất kỳ ≈ 0](assets/figures/03/anisotropy.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.11 — Anisotropy: vector dồn vào một hình nón hẹp nên cosine giữa hai văn bản bất kỳ ≈ 0.978; trừ trung bình (centering) đưa phân phối về quanh 0. Số liệu bên phải là mô phỏng đúng như mục 6.1.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Biện pháp:**
 
@@ -455,6 +543,14 @@ Cuối cùng, **reranker** (Module 06) xử lý phần lớn hub còn sót vì c
 
 **Ví dụ số CSLS.** Query $q$ có hai ứng viên: $d_A$ (đoạn kết chung "liên hệ CS") với $\cos=0.71$, $r_Q(d_A)=0.68$; $d_B$ (bài "lỗi SSO với Azure AD") với $\cos=0.69$, $r_Q(d_B)=0.40$. Xếp theo cosine: $d_A$ thắng. Theo CSLS (bỏ hằng số $r_D(q)$): $d_A$: $1.42-0.68=0.74$; $d_B$: $1.38-0.40=0.98$ → $d_B$ thắng, đúng như mong muốn.
 
+<!-- fig:hubness -->
+<figure markdown="span">
+  ![Trái: mô phỏng hubness — ở 100 chiều, phân phối N₁₀ lệch phải mạnh, vài điểm lọt top-10 của hơn 150 điểm khác; centering làm giảm rõ rệt](assets/figures/03/hubness.light.svg#only-light){ loading=lazy }
+  ![Trái: mô phỏng hubness — ở 100 chiều, phân phối N₁₀ lệch phải mạnh, vài điểm lọt top-10 của hơn 150 điểm khác; centering làm giảm rõ rệt](assets/figures/03/hubness.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.12 — Trái: mô phỏng hubness — ở 100 chiều, phân phối N₁₀ lệch phải mạnh, vài điểm lọt top-10 của hơn 150 điểm khác; centering làm giảm rõ rệt. Phải: ví dụ CSLS của mục 6.2 đảo lại thứ hạng giữa hub và tài liệu đúng.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 6.3 Code: đo anisotropy và hubness trên kho của bạn
 
 ```python
@@ -495,6 +591,14 @@ def hubness(E_docs, E_queries, k=10):
 
 (Cách tính: $300{,}000 \times 1024 \times 4 / 2^{30} \approx 1.14$ GiB; chưa tính overhead của đồ thị HNSW — Module 05.)
 
+<!-- fig:index-memory -->
+<figure markdown="span">
+  ![Bộ nhớ vector thô cho ~300K chunk theo bảng mục 7](assets/figures/03/index-memory.light.svg#only-light){ loading=lazy }
+  ![Bộ nhớ vector thô cho ~300K chunk theo bảng mục 7](assets/figures/03/index-memory.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.13 — Bộ nhớ vector thô cho ~300K chunk theo bảng mục 7.1 (trục log).</figcaption>
+</figure>
+<!-- /fig -->
+
 300K vector 1024 chiều vẫn vừa RAM một máy chủ thường; nén đáng quan tâm khi kho lớn dần (~1.500 ticket/ngày), khi tách index theo tenant, hoặc khi muốn dùng model 4096 chiều.
 
 ### 7.2 Matryoshka Representation Learning (MRL)
@@ -510,6 +614,14 @@ $$
 với $c_m\ge 0$ là trọng số (thường bằng nhau). Vì mỗi tiền tố đều phải tự giải được bài toán truy hồi, gradient buộc model sắp xếp thông tin theo mức quan trọng giảm dần. Bài báo báo cáo, với phân loại ImageNet-1K, embedding nhỏ hơn tới 14 lần mà độ chính xác không giảm, và tăng tốc truy hồi tương ứng.
 
 **Ví dụ số: vì sao không thể tùy tiện cắt chiều model không có MRL.** Hai vector 4 chiều $\mathbf{u}=(0.7,0.5,0.4,0.3)$, $\mathbf{v}=(0.6,0.6,-0.3,0.4)$. Cosine đầy đủ: $\frac{0.42+0.30-0.12+0.12}{\|\mathbf{u}\|\|\mathbf{v}\|}=\frac{0.72}{0.995\cdot 0.985}\approx 0.735$. Cắt còn 2 chiều: $\cos\big((0.7,0.5),(0.6,0.6)\big)\approx 0.986$. Nếu model không được huấn luyện MRL, thông tin phân biệt có thể nằm ở bất kỳ chiều nào (ở đây chiều 3 mang dấu ngược nhau), và cắt chiều làm hai văn bản khác nghĩa trông như gần giống hệt.
+
+<!-- fig:matryoshka -->
+<figure markdown="span">
+  ![Trái: loss Matryoshka cộng InfoNCE trên từng tiền tố lồng nhau](assets/figures/03/matryoshka.light.svg#only-light){ loading=lazy }
+  ![Trái: loss Matryoshka cộng InfoNCE trên từng tiền tố lồng nhau](assets/figures/03/matryoshka.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.14 — Trái: loss Matryoshka cộng InfoNCE trên từng tiền tố lồng nhau. Phải: ví dụ 4 chiều — với model không có MRL, cắt chiều biến hai vector khác nghĩa thành gần như trùng nhau.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Thực hành:**
 
@@ -534,6 +646,14 @@ $$
 - $-0.21 \to 38-128=-90$; giải lượng tử $\approx -0.2106$.
 
 Trong dải, sai số tối đa chỉ $\Delta/2\approx 0.0012$; ngoài dải thì bị cắt. **Bài học:** tập hiệu chuẩn phải đại diện cho cả ba ngôn ngữ và mọi loại nguồn; nếu chỉ hiệu chuẩn trên bài HC tiếng Anh, vector của email tiếng Nhật có thể rơi ra ngoài dải ở nhiều chiều.
+
+<!-- fig:int8-quantization -->
+<figure markdown="span">
+  ![Hàm lượng tử int8 với dải hiệu chuẩn −0](assets/figures/03/int8-quantization.light.svg#only-light){ loading=lazy }
+  ![Hàm lượng tử int8 với dải hiệu chuẩn −0](assets/figures/03/int8-quantization.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.15 — Hàm lượng tử int8 với dải hiệu chuẩn [−0.30, 0.30] và bốn tọa độ của ví dụ; 0.34 nằm ngoài dải nên bị cắt về 127.</figcaption>
+</figure>
+<!-- /fig -->
 
 Tiết kiệm: 4 lần bộ nhớ. Blog Hugging Face về embedding quantization (Shakir, Aarsen & Lee, 3/2024) báo cáo int8 kèm rescoring giữ khoảng 99% chất lượng truy hồi so với float32 trong thử nghiệm của họ, tăng tốc trung bình khoảng 3.7 lần.
 
@@ -564,6 +684,14 @@ Binary quantization lấy dấu theo *các trục tọa độ* chứ không ph�
 
 Sai lệch lớn: với $d=8$ phương sai ước lượng rất cao, và hai bit khác nhau rơi đúng vào các chiều gần 0 ($-0.05$ vs $0.03$; $0.02$ vs $-0.01$) — những chiều mang ít thông tin. Với $d=1024$ ước lượng tốt hơn nhiều nhưng thứ hạng ở top vẫn nhiễu → cần **rescoring**.
 
+<!-- fig:binary-hamming -->
+<figure markdown="span">
+  ![Trái: vì sao xác suất một siêu phẳng ngẫu nhiên tách x và y bằng θ/π](assets/figures/03/binary-hamming.light.svg#only-light){ loading=lazy }
+  ![Trái: vì sao xác suất một siêu phẳng ngẫu nhiên tách x và y bằng θ/π](assets/figures/03/binary-hamming.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.16 — Trái: vì sao xác suất một siêu phẳng ngẫu nhiên tách x và y bằng θ/π. Phải: mô phỏng ước lượng cos(π·H/d) — 8 bit rất nhiễu, 1024 bit bám sát đường chéo.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 7.5 Binary + rescoring: quy trình hai pha
 
 1. **Pha 1 (thô):** query → vector float32 $\mathbf{q}$ và binary $\mathbf{b}_q$. Tìm top-$k\rho$ theo Hamming trên index binary ($\rho$ là hệ số rescore, ví dụ 4).
@@ -571,11 +699,33 @@ Sai lệch lớn: với $d=8$ phương sai ước lượng rất cao, và hai bi
 
 Blog Hugging Face (3/2024) báo cáo binary + rescoring giữ khoảng 96% chất lượng, tăng tốc trung bình khoảng 25 lần so với float32, và khuyến nghị hệ số rescore cỡ 4–5. Đó là số trên benchmark tiếng Anh — **phải đo lại trên dữ liệu đa ngữ của bạn**. jina-embeddings-v5-text (2026) tuyên bố bền với binary và truncation.
 
+<!-- fig:binary-rescore -->
+```mermaid
+flowchart LR
+    Q[Email / query] --> E[Embed float32 q]
+    E --> B[Lấy dấu → b_q nhị phân]
+    B --> P1["Pha 1: Hamming trên index binary<br/>top-k·ρ (ρ ≈ 4)"]
+    P1 --> P2["Pha 2: tính lại qᵀd̃<br/>q float32, d̃ int8/float32 từ đĩa"]
+    E --> P2
+    P2 --> K[Top-k cuối]
+```
+
+<p class="fig-caption">Hình 3.17 — Quy trình binary + rescoring hai pha: pha thô rẻ trên bit, pha tinh chính xác trên ít ứng viên.</p>
+<!-- /fig -->
+
 Trong code, `sentence_transformers.quantization.quantize_embeddings(emb, precision="int8" | "ubinary", calibration_embeddings=...)` làm sẵn cả hai phép lượng tử; FAISS `IndexBinaryFlat` tính Hamming hiệu quả cho pha 1.
 
 ### 7.6 Trade-off tổng hợp
 
 Tóm lại: MRL 1024→256 và int8 tiết kiệm 4× mỗi thứ với rủi ro thấp (nếu model hỗ trợ MRL và tập hiệu chuẩn đại diện); binary tiết kiệm 32× ở index nhưng cần rescoring và không nên dùng khi $d$ nhỏ; kết hợp MRL-256 + binary cho 128× nhưng chỉ đáng khi kho rất lớn.
+
+<!-- fig:compression-tradeoff -->
+<figure markdown="span">
+  ![Các mức nén cho ~300K chunk 1024 chiều và điều kiện để dùng an toàn](assets/figures/03/compression-tradeoff.light.svg#only-light){ loading=lazy }
+  ![Các mức nén cho ~300K chunk 1024 chiều và điều kiện để dùng an toàn](assets/figures/03/compression-tradeoff.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.18 — Các mức nén cho ~300K chunk 1024 chiều và điều kiện để dùng an toàn.</figcaption>
+</figure>
+<!-- /fig -->
 
 > **Liên hệ Zendesk.** Với ~300K chunk, mình khuyên **chưa cần nén mạnh**: 1024 chiều float32 (~1.2 GB) hoặc int8 là đủ. Nén đáng giá khi dùng model 4096 chiều, tách index theo tenant, hoặc mở rộng sang ticket nhiều năm. Lưu `embedding_model`, `embedding_dim`, `quantization` trong metadata (Module 04).
 
@@ -598,6 +748,14 @@ Dữ liệu tương phản của model đa ngữ chứa cặp câu–bản dịc
 **Nhưng không gian không hoàn toàn trung lập.** Hầu hết model đa ngữ vẫn có **thiên lệch ngôn ngữ (language bias)**: một chunk *cùng ngôn ngữ* với query thường được cộng thêm một chút điểm, kể cả khi nội dung kém liên quan hơn. Có thể mô hình hóa đơn giản như sau: embedding $\mathbf{z} = \mathbf{s} + \mathbf{l}_{\text{lang}} + \boldsymbol\epsilon$, với $\mathbf{s}$ là phần ngữ nghĩa, $\mathbf{l}_{\text{lang}}$ là một thành phần đặc trưng ngôn ngữ (tương tự $\boldsymbol\mu$ ở mục 6.1 nhưng riêng cho từng ngôn ngữ). Tích vô hướng giữa query và chunk cùng ngôn ngữ nhận thêm $\|\mathbf{l}\|^2$ mà chunk khác ngôn ngữ không có.
 
 **Ví dụ số (giả định).** Email tiếng Việt hỏi cách xuất hóa đơn: $d_{\text{vi}}$ (bài tiếng Việt về *đổi email đăng nhập*, sai chủ đề) có $\cos=0.62$; $d_{\text{en}}$ ("Export invoices as PDF", đúng) có $\cos=0.60$. Phần ngữ nghĩa của $d_{\text{en}}$ cao hơn, nhưng "thưởng cùng ngôn ngữ" (~0.05) đẩy $d_{\text{vi}}$ lên trên.
+
+<!-- fig:language-bias -->
+<figure markdown="span">
+  ![Ví dụ giả định của mục 8](assets/figures/03/language-bias.light.svg#only-light){ loading=lazy }
+  ![Ví dụ giả định của mục 8](assets/figures/03/language-bias.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.19 — Ví dụ giả định của mục 8.2: «thưởng» cùng ngôn ngữ đủ để bài sai chủ đề vượt bài đúng.</figcaption>
+</figure>
+<!-- /fig -->
 
 **Biện pháp:**
 
@@ -680,6 +838,14 @@ Model card Qwen3-Embedding cho biết bỏ instruction phía query có thể gi�
 
 Tài liệu được embed **một lần** cho mọi tác vụ; nếu gắn instruction vào tài liệu thì đổi tác vụ là phải re-embed cả kho. Instruction phía query cho phép **một index phục vụ nhiều tác vụ**.
 
+<!-- fig:instruction-prefix -->
+<figure markdown="span">
+  ![Cùng một câu, ba instruction khác nhau cho ba vector phục vụ ba tác vụ; phía tài liệu giữ nguyên](assets/figures/03/instruction-prefix.light.svg#only-light){ loading=lazy }
+  ![Cùng một câu, ba instruction khác nhau cho ba vector phục vụ ba tác vụ; phía tài liệu giữ nguyên](assets/figures/03/instruction-prefix.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.20 — Cùng một câu, ba instruction khác nhau cho ba vector phục vụ ba tác vụ; phía tài liệu giữ nguyên.</figcaption>
+</figure>
+<!-- /fig -->
+
 **Instruction cho Zendesk (ví dụ, định dạng Qwen3/Harrier):**
 
 ```python
@@ -714,6 +880,14 @@ $$
 
 **Điểm hay:** vector của "không đăng nhập được" có thể có trọng số khác 0 cho cả "login", "sign", "mật khẩu" (**mở rộng từ — expansion**) dù văn bản không chứa các từ đó. Vừa khớp chính xác, vừa có đồng nghĩa, lại diễn giải được.
 
+<!-- fig:splade-expansion -->
+<figure markdown="span">
+  ![Minh họa vector SPLADE (trọng số giả định): ngoài từ có trong văn bản, model gán trọng số cho từ liên quan như «login», «sign»](assets/figures/03/splade-expansion.light.svg#only-light){ loading=lazy }
+  ![Minh họa vector SPLADE (trọng số giả định): ngoài từ có trong văn bản, model gán trọng số cho từ liên quan như «login», «sign»](assets/figures/03/splade-expansion.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.21 — Minh họa vector SPLADE (trọng số giả định): ngoài từ có trong văn bản, model gán trọng số cho từ liên quan như «login», «sign».</figcaption>
+</figure>
+<!-- /fig -->
+
 **Giới hạn:** checkpoint SPLADE phổ biến chủ yếu cho tiếng Anh. BGE-M3 có chế độ sparse đa ngữ tương tự — cách dễ nhất để thử cho Việt/Nhật. BM25 và hybrid ở Module 05.
 
 ---
@@ -746,6 +920,14 @@ $$
 $$
 
 với $\text{rank}_i$ là vị trí của tài liệu liên quan đầu tiên. Với embedding ở tầng 1, ưu tiên **Recall@20–50** (vì reranker phía sau sẽ sắp xếp lại); với hệ thống không có reranker, nhìn nDCG@10. Công thức nDCG và các chỉ số khác ở Module 10.
+
+<!-- fig:recall-mrr -->
+<figure markdown="span">
+  ![Tính Recall@k và MRR trên một danh sách xếp hạng](assets/figures/03/recall-mrr.light.svg#only-light){ loading=lazy }
+  ![Tính Recall@k và MRR trên một danh sách xếp hạng](assets/figures/03/recall-mrr.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 3.22 — Tính Recall@k và MRR trên một danh sách xếp hạng.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 11.3 Quy trình thí nghiệm
 

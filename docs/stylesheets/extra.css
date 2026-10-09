@@ -65,3 +65,27 @@
 .md-typeset .grid.cards > ul > li {
   border-radius: 8px;
 }
+
+/* Hình minh họa (SVG có bản sáng/tối riêng) */
+.md-typeset figure {
+  margin: 1.4em auto;
+  max-width: 100%;
+}
+.md-typeset figure img {
+  max-width: 100%;
+  height: auto;
+}
+.md-typeset figcaption,
+.md-typeset p.fig-caption {
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--md-default-fg-color--light);
+  max-width: 44rem;
+  margin: 0.5em auto 0;
+  text-align: center;
+  font-style: normal;
+}
+.md-typeset p.fig-caption {
+  margin-top: -0.4em;
+  margin-bottom: 1.4em;
+}
