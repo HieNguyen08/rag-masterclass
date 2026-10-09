@@ -1064,6 +1064,8 @@ Raw ticket/comment; chunk và vector trực tiếp; Q/A và cụm dẫn xuất (
 
 ## Bài tập thực hành
 
+> Lab có sẵn: [Lab 08](labs/lab08_ingestion_dedup_pii.md) cài MinHash/LSH và che PII bằng thư viện chuẩn, chạy dưới 1 giây.
+
 **Bài 1 — Bộ làm sạch email ba ngôn ngữ (CPU, không cần GPU).**
 Tự soạn 30 email giả (10 vi, 10 en, 10 ja) có quoted reply kiểu Gmail/Outlook, chữ ký, disclaimer, một vài inline reply và 3 auto-reply. Gán nhãn "nội dung mới" bằng tay. Hoàn thiện `strip_email` ở mục 4.5 (thêm mẫu tiếng Nhật, phát hiện auto-reply, học boilerplate theo tần suất). Đo: tỷ lệ email cắt đúng hoàn toàn, tỷ lệ cắt mất nội dung thật. Ghi lại các mẫu thất bại.
 

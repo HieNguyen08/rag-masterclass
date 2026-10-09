@@ -17,6 +17,10 @@ pydantic==2.13.5
 httpx==0.28.1                         # FastAPI TestClient cần httpx
 openai==3.24.0                        # client cho API tương thích OpenAI (Ollama / vLLM)
 
+# --- Lab mở rộng ---
+langgraph>=1.0,<2                     # lab06 (không có thì lab tự dùng bộ điều phối tối giản)
+datasets>=3                           # lab07 --st-finetune
+
 # --- Không bắt buộc ---
 # matplotlib==3.11.2                  # lab05: vẽ reliability diagram ra PNG
 # underthesea==9.5.0                  # lab01 bài tập mở rộng: tách từ tiếng Việt thật

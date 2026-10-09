@@ -908,6 +908,8 @@ Trên golden set không dùng để train: non-inferiority ở mọi tầng inte
 
 ## Bài tập thực hành
 
+> Lab có sẵn: [Lab 07](labs/lab07_finetune_embedding.md) huấn luyện adapter InfoNCE bằng numpy (không cần GPU) và có chế độ fine-tune e5 bằng sentence-transformers.
+
 1. **Fine-tune embedding đa ngữ nhỏ (GPU 6 GB).** Từ `labs/data` (40 bài Help Center, 60 email) sinh thêm ~500 câu hỏi vi/en/ja theo mục 2.2 (cần LLM local hoặc API). Fine-tune `intfloat/multilingual-e5-small` với `CachedMultipleNegativesRankingLoss` + `MatryoshkaLoss`; báo cáo Recall@5, MRR@10, nDCG@10 trước/sau theo ngôn ngữ kèm bootstrap CI (Module 10), có và không lọc false negative.
 2. **Kiểm chứng LoRA (CPU).** Viết `count_lora_params(config, r, targets)` từ `config.json`, đối chiếu bảng 7.2 và `model.print_trainable_parameters()` của PEFT.
 3. **QLoRA RAFT mini (GPU 6 GB).** Dựng 1.000 mẫu RAFT theo bảng 5.3 từ dữ liệu lab (distractor lấy từ retriever của Lab 01). QLoRA Qwen3-1.7B, `max_length` 2.048. Đo $\text{AnsRate}_{\mathcal{A}}$, $\text{AbsRate}_{\mathcal{U}}$, tỷ lệ JSON hợp lệ, và faithfulness (judge Lab 05) trên 100 mẫu giữ lại. Lặp lại với tỷ lệ mẫu loại B = 0%, 20%, 40% và vẽ đánh đổi. Ghi `torch.cuda.max_memory_allocated()` để so với ước lượng mục 7.4.

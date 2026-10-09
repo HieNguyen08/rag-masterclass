@@ -183,3 +183,65 @@ def detect_lang(text: str) -> str:
     if len(words & _VI_NO_ACCENT_HINTS) >= 3:
         return "vi"
     return "en"
+
+
+# ---------------------------------------------------------------------------
+# BM25 tối giản (chỉ numpy) — cho các lab 06–09 chạy được khi chưa cài rank_bm25
+# ---------------------------------------------------------------------------
+class SimpleBM25:
+    """BM25 Okapi (Module 05, mục 2): idf = ln(1 + (N - df + 0.5) / (df + 0.5))."""
+
+    def __init__(self, ids: list[str], texts: list[str], k1: float = 1.2, b: float = 0.75):
+        import math
+        from collections import Counter
+
+        self.ids, self.k1, self.b = ids, k1, b
+        self.docs = [Counter(tokenize(t)) for t in texts]
+        self.len = [sum(d.values()) for d in self.docs]
+        self.avgdl = sum(self.len) / max(1, len(self.len))
+        df: Counter = Counter()
+        for d in self.docs:
+            df.update(d.keys())
+        n = len(self.docs)
+        self.idf = {t: math.log(1 + (n - c + 0.5) / (c + 0.5)) for t, c in df.items()}
+
+    def scores(self, query: str) -> list[float]:
+        q = tokenize(query)
+        out = []
+        for d, dl in zip(self.docs, self.len):
+            s = 0.0
+            for t in q:
+                f = d.get(t, 0)
+                if f:
+                    s += self.idf[t] * f * (self.k1 + 1) / (f + self.k1 * (1 - self.b + self.b * dl / self.avgdl))
+            out.append(s)
+        return out
+
+    def search(self, query: str, k: int = 10) -> list[tuple[str, float]]:
+        sc = self.scores(query)
+        order = sorted(range(len(sc)), key=lambda i: -sc[i])[:k]
+        return [(self.ids[i], sc[i]) for i in order]
+
+
+def rrf(runs: list[list[str]], k: int = 60) -> list[str]:
+    """Reciprocal Rank Fusion (Module 05, mục 4): score(d) = Σ 1/(k + rank)."""
+    from collections import defaultdict
+
+    score: dict[str, float] = defaultdict(float)
+    for run in runs:
+        for r, d in enumerate(run, 1):
+            score[d] += 1.0 / (k + r)
+    return sorted(score, key=lambda d: -score[d])
+
+
+def recall_at_k(ranked: list[str], relevant: list[str], k: int) -> float:
+    rel = set(relevant)
+    return len(rel & set(ranked[:k])) / len(rel) if rel else 0.0
+
+
+def mrr_at_k(ranked: list[str], relevant: list[str], k: int) -> float:
+    rel = set(relevant)
+    for i, d in enumerate(ranked[:k], 1):
+        if d in rel:
+            return 1.0 / i
+    return 0.0

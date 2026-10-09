@@ -65,7 +65,7 @@ Một ticket nội bộ chỉ có hai dòng mô tả:
 | | [12 · Capstone](12-capstone-thiet-ke-he-thong-zendesk.md) | Thiết kế end-to-end, LangGraph, webhook Zendesk, chính sách escalation, roadmap | 55' |
 | **V · Chuyên đề mở rộng** | [13 · RAG đa phương thức](13-rag-da-phuong-thuc.md) | Ảnh chụp màn hình, PDF, bảng: OCR/VLM, ColPali, modality gap, đính kèm Zendesk an toàn | 45' |
 | | [14 · RAG trên dữ liệu có cấu trúc](14-rag-du-lieu-co-cau-truc.md) | Tool tham số hóa, lớp metric, text-to-SQL, execution accuracy, prompt-to-SQL injection, RLS | 40' |
-| **Thực hành** | [Labs 01–05](labs/index.md) | Code chạy được trên dữ liệu mẫu | 60–90' |
+| **Thực hành** | [Labs 01–09](labs/index.md) | Code chạy được trên dữ liệu mẫu (06–09 không cần GPU) | 2–2,5 giờ |
 
 ```mermaid
 flowchart LR

@@ -124,4 +124,8 @@ nav:
       - "Lab 03 · Reranker": labs/lab03_reranker.md
       - "Lab 04 · Mini RAG API": labs/lab04_mini_rag_api.md
       - "Lab 05 · Đánh giá & escalation": labs/lab05_eval_escalation.md
+      - "Lab 06 · Agentic RAG với LangGraph": labs/lab06_agentic_langgraph.md
+      - "Lab 07 · Fine-tune embedding": labs/lab07_finetune_embedding.md
+      - "Lab 08 · Làm sạch, MinHash, PII": labs/lab08_ingestion_dedup_pii.md
+      - "Lab 09 · Xử lý query": labs/lab09_query_rewriting.md
       - "Dữ liệu mẫu": labs/data/README_data.md

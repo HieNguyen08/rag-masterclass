@@ -870,6 +870,8 @@ Cắt theo lợi ích/chi phí thấp nhất trước: LLM listwise rerank, HyDE
 
 ## Bài tập thực hành
 
+> Lab có sẵn: [Lab 09](labs/lab09_query_rewriting.md) đo từng phép biến đổi query (ngưng tụ, tách câu hỏi, PRF, HyDE) trên email có nhãn — kể cả các trường hợp kỹ thuật làm *hại*.
+
 **Bài 1 — Phân tích email đa ngôn ngữ** *(GPU 6GB với model nhỏ quantized qua Ollama/vLLM, hoặc API)*
 Viết 20 email giả lập (vi/en/ja, có email hỏi 2–3 việc, có yêu cầu gặp người, có mã lỗi). Cài bước phân tích theo schema `EmailAnalysis` ở mục 2.2 với structured output (model 3–4B lượng tử hóa 4-bit vừa 6GB). Gán nhãn tay các câu hỏi con; đo: tỷ lệ email trích đủ câu hỏi, độ chính xác `wants_human`, tỷ lệ định danh giữ nguyên văn. So sánh với một model lớn qua API nếu có.
 

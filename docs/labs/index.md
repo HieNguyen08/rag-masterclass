@@ -1,6 +1,6 @@
 # Labs — Thực hành RAG cho bài toán AI tư vấn khách hàng qua Zendesk
 
-> Thời lượng: ~60–90 phút cho cả 5 lab (không tính thời gian tải model) · Phần cứng mục tiêu: Windows + WSL2 + Docker, GPU RTX 4050 **6 GB VRAM** · Mọi lab đều có chế độ chạy được không cần GPU.
+> Thời lượng: ~60–90 phút cho 5 lab cốt lõi, thêm ~65 phút cho 4 lab mở rộng (không tính thời gian tải model) · Phần cứng mục tiêu: Windows + WSL2 + Docker, GPU RTX 4050 **6 GB VRAM** · Mọi lab đều có chế độ chạy được không cần GPU.
 
 Phần lab biến lý thuyết của các module thành code chạy được trên một bộ dữ liệu **hư cấu** của doanh nghiệp SaaS B2B giả định tên **Mekong Cloud** (phần mềm bán hàng, kho, hóa đơn điện tử, có API và tích hợp Zendesk). Dữ liệu gồm 40 bài Help Center (Việt/Anh/Nhật) và 60 email khách hàng có nhãn, được sinh bằng một script cố định, không gọi API.
 
@@ -15,8 +15,12 @@ Mục tiêu cuối cùng: tự tay dựng một service `/draft-reply` nhận em
 | 03 | [lab03_reranker.md](lab03_reranker.md) | Cross-encoder đa ngữ (bge-reranker-v2-m3 / mMiniLM), đo cải thiện + bootstrap CI | 06, 10 | Khuyến nghị | 10' |
 | 04 | [lab04_mini_rag_api.md](lab04_mini_rag_api.md) | FastAPI `/draft-reply` + `/healthz`, Ollama/vLLM, citation, abstention, rule + LLM phát hiện "muốn gặp người"/nhạy cảm/injection | 07, 08, 11, 12 | Có (hoặc chế độ `mock`) | 20' |
 | 05 | [lab05_eval_escalation.md](lab05_eval_escalation.md) | LLM-as-judge + Cohen's kappa, ECE, reliability bins, Platt scaling, chọn ngưỡng theo chi phí | 10 | Không bắt buộc | 15' |
+| 06 | [lab06_agentic_langgraph.md](lab06_agentic_langgraph.md) | Đồ thị LangGraph: định tuyến, tool chỉ đọc theo tenant, CRAG-lite, verify, SEND/DRAFT/ESCALATE, `interrupt` + resume | 08, 10, 14 | Không (LLM giả lập) | 20' |
+| 07 | [lab07_finetune_embedding.md](lab07_finetune_embedding.md) | Dữ liệu tổng hợp, hard negative, InfoNCE tự viết gradient (numpy), fine-tune e5 bằng sentence-transformers | 03, 09, 10 | Không cho bản numpy; có cho `--st-finetune` | 15' |
+| 08 | [lab08_ingestion_dedup_pii.md](lab08_ingestion_dedup_pii.md) | Làm sạch email, MinHash + LSH tự cài, che PII nhất quán (Luhn, số điện thoại Việt/Nhật) | 04 | Không | 15' |
+| 09 | [lab09_query_rewriting.md](lab09_query_rewriting.md) | Ngưng tụ hội thoại, tách câu hỏi + RRF, PRF, HyDE — đo từng bước, kể cả kết quả âm | 06 | Không (HyDE cần LLM) | 15' |
 
-Thứ tự khuyến nghị: **01 → 02 → 03 → 04 → 05**. Lab 03 dùng lại retriever của lab01 và metric của lab02; lab04 dùng lại cả ba; lab05 đọc output của lab04 (hoặc dùng điểm giả lập).
+Thứ tự khuyến nghị: **01 → 02 → 03 → 04 → 05**, rồi các lab mở rộng theo module bạn đang học: 08 sau Module 04, 09 sau Module 06, 06 sau Module 08, 07 sau Module 09. Lab 03 dùng lại retriever của lab01 và metric của lab02; lab04 dùng lại cả ba; lab05 đọc output của lab04 (hoặc dùng điểm giả lập).
 
 ```mermaid
 flowchart LR
@@ -31,7 +35,13 @@ flowchart LR
     L3 --> L4[Lab04 /draft-reply API]
     L4 -->|lab04_predictions.jsonl| L5[Lab05 Judge + ECE + ngưỡng]
     JS --> L5
+    L1 --> L7[Lab07 Fine-tune embedding]
+    L1 --> L9[Lab09 Query rewriting]
+    EM --> L8[Lab08 Làm sạch + MinHash + PII]
+    L4 --> L6[Lab06 LangGraph agentic]
 ```
+
+Lab 06–09 chỉ cần thư viện chuẩn + numpy ở chế độ mặc định (dùng `SimpleBM25` trong `common.py`), nên chạy được ngay cả khi chưa cài `rank_bm25`, `torch` hay `sentence-transformers`.
 
 ## 2. Cài đặt môi trường
 
@@ -149,6 +159,10 @@ LLM_MODE=mock USE_DENSE=0 RERANKER_MODEL=none python lab04_mini_rag_api.py --sel
 LLM_MODE=mock USE_DENSE=0 RERANKER_MODEL=none python lab04_mini_rag_api.py --eval
 python lab05_eval_escalation.py all
 python lab05_eval_escalation.py calibrate --pred data/lab04_predictions.jsonl
+python lab06_agentic_langgraph.py            # tự dùng bộ điều phối tối giản nếu chưa cài langgraph
+python lab07_finetune_embedding.py
+python lab08_ingestion_dedup_pii.py
+python lab09_query_rewriting.py
 ```
 
 ## 4. Cấu trúc thư mục
@@ -157,7 +171,7 @@ python lab05_eval_escalation.py calibrate --pred data/lab04_predictions.jsonl
 labs/
 ├── README.md
 ├── requirements.txt
-├── common.py                     # đọc dữ liệu, làm sạch email, tokenize, detect_lang
+├── common.py                     # đọc dữ liệu, làm sạch email, tokenize, detect_lang, SimpleBM25, rrf, metric
 ├── data/
 │   ├── generate_data.py          # sinh dữ liệu hư cấu (cố định)
 │   ├── README_data.md            # schema
@@ -168,7 +182,11 @@ labs/
 ├── lab02_chunking_metrics.{md,py}
 ├── lab03_reranker.{md,py}
 ├── lab04_mini_rag_api.{md,py}
-└── lab05_eval_escalation.{md,py}
+├── lab05_eval_escalation.{md,py}
+├── lab06_agentic_langgraph.{md,py}
+├── lab07_finetune_embedding.{md,py}
+├── lab08_ingestion_dedup_pii.{md,py}
+└── lab09_query_rewriting.{md,py}
 ```
 
 ## 5. Bộ dữ liệu
