@@ -274,11 +274,13 @@ $$
 $$
 
 Bước 2 — áp causal mask (gạch phần trên đường chéo) rồi softmax từng hàng:
+
 - Hàng 1: chỉ có $j=1$ → $\alpha_{1\cdot} = (1, 0, 0)$.
 - Hàng 2: $\mathrm{softmax}(0, 0.707) = (e^0, e^{0.707})/(1 + 2.028) = (0.330, 0.670)$.
 - Hàng 3: $\mathrm{softmax}(0.707, 0.707, 1.414)$: $e^{0.707} = 2.028$, $e^{1.414} = 4.113$, tổng $8.169$ → $(0.248, 0.248, 0.503)$.
 
 Bước 3 — nhân với $V$:
+
 - $\mathbf{o}_1 = (1, 0)$
 - $\mathbf{o}_2 = 0.330\,(1,0) + 0.670\,(0,2) = (0.33, 1.34)$
 - $\mathbf{o}_3 = 0.248\,(1,0) + 0.248\,(0,2) + 0.503\,(1,1) = (0.752, 1.0)$
@@ -526,6 +528,7 @@ $$
 <!-- /fig -->
 
 **Vì sao RoPE thắng thế.**
+
 - Tính tương đối *chính xác* (không phải học xấp xỉ), không thêm tham số.
 - Các cặp tần số thấp quay chậm → mang thông tin vị trí xa; tần số cao quay nhanh → phân biệt vị trí gần. Với $d = 128$, $b = 10^4$: cặp đầu có chu kỳ $2\pi \approx 6.3$ token; cặp cuối có chu kỳ ≈ 54.000 token.
 - Có tính "suy giảm theo khoảng cách" (long-term decay) ở mức trung bình: khi khoảng cách tăng, các số hạng ở các tần số khác nhau lệch pha nhau và có xu hướng triệt tiêu.
@@ -646,6 +649,7 @@ $$
 Với $\alpha \approx \beta$, cả hai số mũ ≈ 0,5: **khi ngân sách tính toán tăng, tăng $N$ và $D$ cùng tỉ lệ**. Quy tắc ngón tay cái phổ biến rút ra từ Chinchilla: khoảng **20 token huấn luyện trên mỗi tham số**. Chinchilla 70B huấn luyện trên 1,4T token đã thắng Gopher 280B dùng cùng ngân sách.
 
 **Ví dụ số.** Model 7B:
+
 - Theo Chinchilla, $D^* \approx 20 \times 7\cdot10^9 = 1{,}4\cdot10^{11}$ token; $C \approx 6 \cdot 7\cdot10^9 \cdot 1{,}4\cdot10^{11} \approx 5{,}9 \cdot 10^{21}$ FLOPs.
 - Loss dự đoán: $1.69 + 406.4/(7\cdot10^9)^{0.34} + 410.7/(1.4\cdot10^{11})^{0.28} \approx 1.69 + 0.183 + 0.311 = 2.18$.
 - Nếu huấn luyện 7B đó trên 2T token (vượt xa điểm Chinchilla): $\hat L \approx 2.02$ — tốt hơn, dù không "tối ưu tính toán".
@@ -713,6 +717,7 @@ S_p = \arg\min_{S} |S| \ \ \text{sao cho}\ \sum_{t \in S} p(t) \ge p, \qquad \ti
 $$
 
 **Ví dụ.** Phân phối đã sắp xếp $(0.50, 0.20, 0.15, 0.10, 0.05)$ cho 5 token, tổng tích lũy $(0.50, 0.70, 0.85, 0.95, 1.00)$.
+
 - $p = 0.9$: cần 4 token (0,85 < 0,9 ≤ 0,95). Phân phối mới: chia cho 0,95 → $(0.526, 0.211, 0.158, 0.105, 0)$.
 - $p = 0.7$: 2 token → $(0.714, 0.286, 0, 0, 0)$.
 - Nếu phân phối là $(0.96, 0.02, \dots)$ thì với $p = 0.9$ chỉ còn 1 token — tự động thích nghi.
@@ -955,34 +960,41 @@ trong đó $\mathrm{TopK}$ đặt các logit ngoài $k$ lớn nhất thành $-\i
 ## Tóm tắt (cheat-sheet)
 
 **Tokenization**
+
 - BPE: lặp gộp cặp phổ biến nhất; Unigram: tỉa từ vựng theo likelihood, tách bằng Viterbi. Byte-level BPE không có OOV.
 - Premium token theo ngôn ngữ: $\mathbb{E}[T(x_{vi})]/\mathbb{E}[T(x_{en})]$; đo trên dữ liệu của bạn. Chuẩn hóa NFC.
 
 **Kiến trúc**
+
 - $\mathrm{Attn} = \mathrm{softmax}(QK^\top/\sqrt{d_k} + M)V$; chia $\sqrt{d_k}$ vì $\mathrm{Var}(\mathbf q\cdot\mathbf k) = d_k$ → giữ softmax không bão hòa.
 - Causal mask: $M_{ij} = -\infty$ nếu $j > i$ ⇒ phân rã $p(t_{1:n}) = \prod p(t_i|t_{<i})$ ⇒ cơ sở của KV cache và prefix caching.
 - Một lớp ≈ $4d^2$ (attention) + $3d\,d_{ff}$ (SwiGLU). Pre-norm RMSNorm: $\boldsymbol\gamma\odot\mathbf x/\mathrm{RMS}(\mathbf x)$.
 - GQA: chia sẻ K/V giữa các nhóm đầu → KV cache nhỏ hơn.
 
 **Vị trí**
+
 - RoPE: quay $\mathbf q, \mathbf k$ theo $m\theta_i$, $\theta_i = b^{-2i/d}$ ⇒ $\tilde{\mathbf q}_m^\top\tilde{\mathbf k}_n = \mathbf q^\top R((n-m)\theta)\mathbf k$.
 - PI: $m \to m/s$. NTK: $b \to b\,s^{d/(d-2)}$. YaRN: nội suy theo nhóm tần số + nhiệt độ attention.
 
 **Huấn luyện**
+
 - $\mathcal L = -\frac1n\sum\log p(t_i|t_{<i})$; $\partial\ell/\partial\mathbf z = \mathbf p - \mathbf y$; $\mathrm{PPL} = e^{\mathcal L}$.
 - $C \approx 6ND$. Chinchilla: $\hat L = E + A/N^\alpha + B/D^\beta$, tối ưu ≈ 20 token/tham số; thực tế over-train model nhỏ để rẻ khi suy luận.
 
 **Decoding**
+
 - $p_T \propto \exp(z/T)$; $T\to0$ greedy. Top-k cố định; top-p chọn tập nhỏ nhất có tổng ≥ $p$.
 - Phân loại/JSON: $T=0$. Email: $T$ thấp. Self-consistency: $T\approx0.7$. Luôn log tham số + seed. Logprob → tín hiệu cho Module 10 (cần hiệu chuẩn).
 
 **Post-training**
+
 - SFT: CE trên token câu trả lời, đúng chat template.
 - RM Bradley–Terry: $P(y_w\succ y_l) = \sigma(r_w - r_l)$. RLHF: $\max \mathbb E[r] - \beta\,\mathrm{KL}(\pi\|\pi_{\text{ref}})$ bằng PPO.
 - DPO: $-\log\sigma\big(\beta\log\frac{\pi_\theta(y_w)}{\pi_{\text{ref}}(y_w)} - \beta\log\frac{\pi_\theta(y_l)}{\pi_{\text{ref}}(y_l)}\big)$.
 - Post-training dạy hành vi, không nạp tri thức mới một cách tin cậy.
 
 **Khác**
+
 - ICL: demonstrations định vị tác vụ và định dạng; chọn ví dụ động bằng retrieval.
 - KV cache: prefill (tính toán) vs decode (băng thông) — chi tiết Module 11.
 - MoE: tính toán ∝ tham số kích hoạt, bộ nhớ ∝ tham số tổng.
@@ -1079,6 +1091,7 @@ Chạy `vllm serve Qwen/Qwen2.5-1.5B-Instruct --max-model-len 4096 --gpu-memory-
 ## Tài liệu tham khảo
 
 **Tokenization**
+
 - Sennrich, R., Haddow, B., Birch, A. (2016). *Neural Machine Translation of Rare Words with Subword Units*. ACL 2016. arXiv:1508.07909.
 - Kudo, T. (2018). *Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates*. ACL 2018. arXiv:1804.10959.
 - Kudo, T., Richardson, J. (2018). *SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing*. EMNLP 2018 (demo). arXiv:1808.06226.
@@ -1086,6 +1099,7 @@ Chạy `vllm serve Qwen/Qwen2.5-1.5B-Instruct --max-model-len 4096 --gpu-memory-
 - Bài đo cộng đồng (tham khảo bậc độ lớn, không phải nghiên cứu có bình duyệt): *Chi phí token tiếng Việt thực tế*, Viblo, 09/2026: https://viblo.asia/p/chi-phi-token-tieng-viet-thuc-te-khong-phai-dat-gap-45-lan-y0VGwyn7VPA
 
 **Kiến trúc Transformer**
+
 - Vaswani, A. et al. (2017). *Attention Is All You Need*. NeurIPS 2017. arXiv:1706.03762.
 - Ba, J. L., Kiros, J. R., Hinton, G. E. (2016). *Layer Normalization*. arXiv:1607.06450.
 - Zhang, B., Sennrich, R. (2019). *Root Mean Square Layer Normalization*. NeurIPS 2019. arXiv:1910.07467.
@@ -1094,19 +1108,23 @@ Chạy `vllm serve Qwen/Qwen2.5-1.5B-Instruct --max-model-len 4096 --gpu-memory-
 - Ainslie, J. et al. (2023). *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*. EMNLP 2023. arXiv:2305.13245.
 
 **Vị trí và context dài**
+
 - Su, J. et al. (2021). *RoFormer: Enhanced Transformer with Rotary Position Embedding*. arXiv:2104.09864.
 - Chen, S., Wong, S., Chen, L., Tian, Y. (2023). *Extending Context Window of Large Language Models via Positional Interpolation*. arXiv:2306.15595.
 - Peng, B., Quesnelle, J., Fan, H., Shippole, E. (2023). *YaRN: Efficient Context Window Extension of Large Language Models*. ICLR 2024. arXiv:2309.00071.
 
 **Huấn luyện và scaling**
+
 - Kaplan, J. et al. (2020). *Scaling Laws for Neural Language Models*. arXiv:2001.08361.
 - Hoffmann, J. et al. (2022). *Training Compute-Optimal Large Language Models* (Chinchilla). NeurIPS 2022. arXiv:2203.15556.
 - Grattafiori, A. et al. / Llama Team, Meta (2024). *The Llama 3 Herd of Models*. arXiv:2407.21783.
 
 **Decoding**
+
 - Holtzman, A., Buys, J., Du, L., Forbes, M., Choi, Y. (2020). *The Curious Case of Neural Text Degeneration*. ICLR 2020. arXiv:1904.09751.
 
 **Post-training và ICL**
+
 - Brown, T. et al. (2020). *Language Models are Few-Shot Learners*. NeurIPS 2020. arXiv:2005.14165.
 - Christiano, P. et al. (2017). *Deep Reinforcement Learning from Human Preferences*. NeurIPS 2017. arXiv:1706.03741.
 - Schulman, J. et al. (2017). *Proximal Policy Optimization Algorithms*. arXiv:1707.06347.
@@ -1115,10 +1133,12 @@ Chạy `vllm serve Qwen/Qwen2.5-1.5B-Instruct --max-model-len 4096 --gpu-memory-
 - Min, S. et al. (2022). *Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?*. EMNLP 2022. arXiv:2202.12837.
 
 **Mixture of Experts**
+
 - Shazeer, N. et al. (2017). *Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer*. ICLR 2017. arXiv:1701.06538.
 - Jiang, A. Q. et al. (2024). *Mixtral of Experts*. arXiv:2401.04088.
 - DeepSeek-AI (2024). *DeepSeek-V3 Technical Report*. arXiv:2412.19437.
 
 **Tài liệu chính thức**
+
 - vLLM — Sampling parameters & OpenAI-compatible server: https://docs.vllm.ai/
 - Hugging Face Transformers — Chat templates: https://huggingface.co/docs/transformers/chat_templating

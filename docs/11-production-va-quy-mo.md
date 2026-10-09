@@ -34,6 +34,7 @@ $$
 $$
 
 Trong đó:
+
 - $N_{\text{ticket}}$: ticket mới/ngày (1.500).
 - $r$: số lượt pipeline chạy mỗi ticket; 3–4 lượt trao đổi ≈ 2 tin nhắn từ khách → $r \approx 2$.
 - $j$: các bước gọi LLM trong một lượt chạy (phân loại, viết lại query, sinh draft, kiểm chứng…).
@@ -192,6 +193,7 @@ vLLM (Kwon et al., 2023, arXiv:2309.06180) giải quyết cả hai bằng PagedA
 ### 2.2. Toán: bộ nhớ KV cache
 
 Với mỗi token đã xử lý, mỗi layer lưu một vector Key và một vector Value cho mỗi KV head. Ký hiệu:
+
 - $n_{\text{layers}}$: số layer decoder;
 - $n_{\text{kv}}$: số KV head (với GQA nhỏ hơn số query head);
 - $d_{\text{head}}$: chiều mỗi head;
@@ -256,6 +258,7 @@ Cấp phát trước vùng nhớ liền mạch bằng `max_seq_len` cho mỗi re
 PagedAttention mượn ý tưởng bộ nhớ ảo của hệ điều hành: KV cache được chia thành **block** cố định (ví dụ 16 token/block), mỗi sequence có một **block table** ánh xạ vị trí logic → block vật lý không cần liền kề. Lãng phí chỉ còn trung bình nửa block cuối mỗi sequence.
 
 Ví dụ số: 20 sequence, độ dài thực tế trung bình 3.000 token, `max_seq_len` 8.192.
+
 - Cấp phát liền mạch: dùng $20 \times 8.192 = 163.840$ slot, hữu ích $60.000$ → hiệu dụng 37%.
 - PagedAttention (block 16): $\approx 20 \times (3.000 + 8) = 60.160$ slot → hiệu dụng >99%.
 
@@ -360,6 +363,7 @@ Ngân sách là bảng phân bổ thời gian cho từng bước, dùng để (i
 | **Tổng (không tính chờ queue)** | **~13 s** | **~33 s** | |
 
 Nhận xét:
+
 1. **Sinh draft chiếm >60% thời gian** — tối ưu ở đây có lợi nhất.
 2. p95 tổng không phải tổng các p95, nhưng tổng p95 là chặn trên an toàn để đặt timeout tổng (ví dụ 60 s/lượt).
 
@@ -456,6 +460,7 @@ Với ~158.000 chunk (ước lượng: ~8.000 từ Help Center, ~300 macro, ~150
 ### 4.3. Semantic cache: phân tích bằng chi phí kỳ vọng
 
 Ý tưởng: nếu query mới có cosine similarity với một query đã trả lời $\geq \theta$, trả lại câu trả lời cũ. Gọi:
+
 - $h(\theta)$: tỷ lệ trúng cache tại ngưỡng $\theta$ (giảm khi $\theta$ tăng);
 - $e(\theta)$: xác suất câu trả lời từ cache **sai** cho query mới khi trúng (giảm khi $\theta$ tăng);
 - $c_{\text{run}}$: chi phí một lượt pipeline (~0,016 USD);
@@ -836,6 +841,7 @@ Mở rộng `cost_model.py` (mục 1.7) để: nhận bảng giá từ file YAML
 ## Tài liệu tham khảo
 
 Paper:
+
 - Kwon, W., Li, Z., et al. (2023). *Efficient Memory Management for Large Language Model Serving with PagedAttention*. SOSP 2023. arXiv:2309.06180.
 - Ainslie, J., Lee-Thorp, J., et al. (2023). *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*. EMNLP 2023. arXiv:2305.13245.
 - Leviathan, Y., Kalman, M., Matias, Y. (2022). *Fast Inference from Transformers via Speculative Decoding*. ICML 2023. arXiv:2211.17192.
@@ -847,6 +853,7 @@ Paper:
 - Hines, K., Lopez, G., et al. (2024). *Defending Against Indirect Prompt Injection Attacks With Spotlighting*. arXiv:2403.14720.
 
 Tài liệu chính thức (tra cứu 06/10/2026):
+
 - vLLM — Automatic Prefix Caching: https://docs.vllm.ai/en/latest/features/automatic_prefix_caching.html
 - vLLM — Speculative Decoding: https://docs.vllm.ai/en/latest/features/speculative_decoding/
 - vLLM — Engine Arguments: https://docs.vllm.ai/en/latest/configuration/engine_args/
@@ -862,6 +869,7 @@ Tài liệu chính thức (tra cứu 06/10/2026):
 - Bảng giá: https://platform.claude.com/docs/en/about-claude/pricing ; https://openai.com/api/pricing/ ; https://ai.google.dev/gemini-api/docs/pricing
 
 Pháp lý (bản phân tích thứ cấp — cần đối chiếu văn bản gốc với pháp chế):
+
 - Bộ Công an — Luật Bảo vệ dữ liệu cá nhân có hiệu lực từ 01/01/2026: https://bocongan.gov.vn/chinh-sach-phap-luat/bai-viet/luat-bao-ve-du-lieu-ca-nhan-chinh-thuc-co-hieu-luc-thi-hanh-tu-ngay-01-01-2026-1767186124
 - LuatVietnam — Luật BVDLCN mới nhất và văn bản hướng dẫn: https://luatvietnam.vn/linh-vuc-khac/luat-bao-ve-du-lieu-ca-nhan-moi-nhat-va-van-ban-huong-dan-883-106497-article.html
 - Vietnam Briefing — Decree 356/2025: https://www.vietnam-briefing.com/news/vietnam-personal-data-protection-regulation-decree-356.html/

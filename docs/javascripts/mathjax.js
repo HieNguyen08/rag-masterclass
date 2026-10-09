@@ -1,5 +1,8 @@
 window.MathJax = {
+  // Nạp sẵn extension boldsymbol: để autoload lười thì \boldsymbol hiện thành chữ đỏ
+  loader: { load: ["[tex]/boldsymbol"] },
   tex: {
+    packages: { "[+]": ["boldsymbol"] },
     inlineMath: [["\\(", "\\)"]],
     displayMath: [["\\[", "\\]"]],
     processEscapes: true,

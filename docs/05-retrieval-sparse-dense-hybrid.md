@@ -499,6 +499,7 @@ $M = 16$ → ~132 byte/điểm (cộng overhead cài đặt, ước lượng ×1
 **Vấn đề:** HNSW cần toàn bộ đồ thị + vector trong RAM. Một tỷ vector 768-d fp32 ≈ 3 TB RAM — không kinh tế.
 
 **Ý tưởng (Subramanya et al., NeurIPS 2019):**
+
 1. Đồ thị **một tầng** (thuật toán xây Vamana) với đường kính nhỏ nhờ quy tắc cắt tỉa có tham số $\alpha > 1$ — chủ động giữ lại một số cạnh dài, để mỗi truy vấn chỉ cần ít bước nhảy (mỗi bước là một lần đọc SSD).
 2. **Vector đầy đủ + danh sách láng giềng nằm trên SSD**, xếp cạnh nhau để một lần đọc block lấy được cả hai.
 3. **Vector nén PQ nằm trong RAM** để định hướng việc duyệt đồ thị; chỉ đọc vector đầy đủ từ SSD để rescoring.
@@ -807,6 +808,7 @@ Tiêu chí theo thứ tự: hybrid gốc; filter đúng ở selectivity thấp; 
 | **Vespa** | HNSW, multi-vector | BM25 + ranking phong phú | rank profile nhiều pha, có RRF | filter tích hợp sâu |
 
 **Khuyến nghị:**
+
 - **Giai đoạn 1–2, < 1 triệu chunk:** **Postgres + pgvector + extension BM25**. Ticket, metadata, ACL, trạng thái ingestion đã ở Postgres; một transaction cập nhật cả chunk lẫn vector; RLS cho tenant; hiệu năng thừa cho < 1 QPS.
 - **Filter phức tạp, nhiều tenant lớn, multi-stage trong một lời gọi:** **Qdrant**.
 - **Đã có cụm Elasticsearch/OpenSearch** và đội vận hành quen: dùng luôn, tận dụng analyzer tiếng Nhật.
@@ -959,6 +961,7 @@ Chạy Postgres có pgvector (và `pg_textsearch` nếu cài được; nếu kh�
 ## Tài liệu tham khảo
 
 **Sparse retrieval**
+
 - Robertson, S., Zaragoza, H. (2009). *The Probabilistic Relevance Framework: BM25 and Beyond*. Foundations and Trends in Information Retrieval 3(4). https://www.emerald.com/ftinr/article/4/1-2/1/1326508/The-Probabilistic-Relevance-Framework-BM25-and
 - Apache Lucene — `BM25Similarity` (mặc định $k_1 = 1{,}2$, $b = 0{,}75$; công thức IDF). https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html
 - Thakur, N. et al. (2021). *BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models*. arXiv:2104.08663. https://arxiv.org/abs/2104.08663
@@ -967,6 +970,7 @@ Chạy Postgres có pgvector (và `pg_textsearch` nếu cài được; nếu kh�
 - `pg_textsearch` (BM25 cho PostgreSQL). https://github.com/timescale/pg_textsearch
 
 **ANN**
+
 - Malkov, Y., Yashunin, D. (2016/2018). *Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs*. arXiv:1603.09320. https://arxiv.org/abs/1603.09320
 - Jégou, H., Douze, M., Schmid, C. (2011). *Product Quantization for Nearest Neighbor Search*. IEEE TPAMI. https://inria.hal.science/inria-00514462
 - Douze, M. et al. (2024). *The Faiss library*. arXiv:2401.08281. https://arxiv.org/abs/2401.08281
@@ -975,14 +979,17 @@ Chạy Postgres có pgvector (và `pg_textsearch` nếu cài được; nếu kh�
 - Aumüller, M., Bernhardsson, E., Faithfull, A. (2018). *ANN-Benchmarks: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms*. arXiv:1807.05614. https://arxiv.org/abs/1807.05614
 
 **Hybrid & fusion**
+
 - Cormack, G., Clarke, C., Büttcher, S. (2009). *Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods*. SIGIR 2009. https://dblp.org/rec/conf/sigir/CormackCB09.html
 - Bruch, S., Gai, S., Ingber, A. (2022). *An Analysis of Fusion Functions for Hybrid Retrieval*. arXiv:2210.11934. https://arxiv.org/abs/2210.11934
 
 **Filtering**
+
 - Patel, L. et al. (2024). *ACORN: Performant and Predicate-Agnostic Search Over Vector Embeddings and Structured Data*. arXiv:2403.04871. https://arxiv.org/abs/2403.04871
 - Gollapudi, S. et al. (2023). *Filtered-DiskANN: Graph Algorithms for Approximate Nearest Neighbor Search with Filters*. WWW 2023. https://dl.acm.org/doi/fullHtml/10.1145/3543507.3583552
 
 **Tài liệu chính thức (truy cập 10/2026)**
+
 - pgvector (HNSW, IVFFlat, iterative index scans, giới hạn chiều). https://github.com/pgvector/pgvector
 - Qdrant — Hybrid Queries (RRF, DBSF, weighted RRF). https://qdrant.tech/documentation/search/hybrid-queries/ ; Indexing (payload index, `is_tenant`, filterable HNSW, tokenizer). https://qdrant.tech/documentation/manage-data/indexing/ ; Qdrant 1.16 (ACORN, tiered multitenancy). https://qdrant.tech/blog/qdrant-1.16.x/
 - Milvus — Full Text Search (BM25). https://milvus.io/docs/v2.5.x/full_text_search_with_milvus.md ; Multilingual full-text search 2.6. https://milvus.io/blog/how-milvus-26-powers-hybrid-multilingual-search-at-scale.md

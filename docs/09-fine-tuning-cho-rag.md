@@ -918,14 +918,17 @@ Trên golden set không dùng để train: non-inferiority ở mọi tầng inte
 Đã kiểm tra tên, tác giả, năm, arXiv ID qua tìm kiếm web (10/2026).
 
 **Fine-tune vs RAG** (các paper về dữ liệu tổng hợp, InfoNCE, hard negative, Matryoshka đã dẫn trong mục 2–3)
+
 - Ovadia, O. et al. (2023). *Fine-Tuning or Retrieval? Comparing Knowledge Injection in LLMs*. arXiv:2312.05934.
 - Gekhman, Z. et al. (2024). *Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?* arXiv:2405.05904.
 
 **Embedding & reranker**
+
 - Moreira, G. et al. (2024). *NV-Retriever: Improving text embedding models with effective hard-negative mining*. arXiv:2407.15831.
 - Hofstätter, S. et al. (2020). *Improving Efficient Neural Ranking Models with Cross-Architecture Knowledge Distillation* (Margin-MSE). arXiv:2010.02666.
 
 **Generator, sở thích, abstention**
+
 - Zhang, T., Patil, S. G. et al. (2024). *RAFT: Adapting Language Model to Domain Specific RAG*. arXiv:2403.10131.
 - Zhang, H. et al. (2023). *R-Tuning: Instructing Large Language Models to Say 'I Don't Know'*. arXiv:2311.09677 (NAACL 2024).
 - Joren, H. et al. (2024). *Sufficient Context: A New Lens on Retrieval Augmented Generation Systems*. arXiv:2411.06037 (ICLR 2025).
@@ -934,6 +937,7 @@ Trên golden set không dùng để train: non-inferiority ở mọi tầng inte
 - Ethayarajh, K. et al. (2024). *KTO: Model Alignment as Prospect Theoretic Optimization*. arXiv:2402.01306.
 
 **PEFT**
+
 - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685.
 - Dettmers, T. et al. (2023). *QLoRA: Efficient Finetuning of Quantized LLMs*. arXiv:2305.14314.
 - Kalajdzievski, D. (2023). *A Rank Stabilization Scaling Factor for Fine-Tuning with LoRA*. arXiv:2312.03732.
@@ -941,6 +945,7 @@ Trên golden set không dùng để train: non-inferiority ở mọi tầng inte
 - Biderman, D. et al. (2024). *LoRA Learns Less and Forgets Less*. arXiv:2405.09673.
 
 **Distillation & governance**
+
 - Kim, Y., Rush, A. M. (2016). *Sequence-Level Knowledge Distillation*. arXiv:1606.07947.
 - Gu, Y. et al. (2023). *MiniLLM: Knowledge Distillation of Large Language Models*. arXiv:2306.08543.
 - Agarwal, R. et al. (2023). *On-Policy Distillation of Language Models: Learning from Self-Generated Mistakes* (GKD). arXiv:2306.13649.

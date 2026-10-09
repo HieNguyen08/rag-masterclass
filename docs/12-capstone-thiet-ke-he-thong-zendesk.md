@@ -350,6 +350,7 @@ class TicketState(TypedDict, total=False):
 ```
 
 Ba lựa chọn đáng giải thích:
+
 - **Không lưu PII thô trong state.** State được checkpoint xuống Postgres và có thể hiển thị trong công cụ debug; chỉ lưu khóa tham chiếu tới bảng ánh xạ PII (mã hóa, TTL ngắn).
 - **`reasons` dùng reducer `operator.add`** để mỗi node thêm lý do mà không ghi đè node khác — internal note cuối cùng liệt kê đủ "vì sao AI quyết định như vậy".
 - **`Verification.p_correct` là xác suất đã hiệu chuẩn** (temperature scaling / Platt trên tập dev — Module 10), để ngưỡng ở policy gate có ý nghĩa xác suất thật.
@@ -495,6 +496,7 @@ def build(conn_string: str):
 ```
 
 Các điểm cần nắm khi dùng `interrupt()` (theo tài liệu LangGraph):
+
 - **Bắt buộc có checkpointer** và `thread_id`; production dùng checkpointer bền vững (Postgres), không dùng `InMemorySaver`.
 - **Node chứa `interrupt()` chạy lại từ đầu khi resume** — mọi side effect trước `interrupt()` sẽ lặp lại. Vì vậy `human_review` không gọi Zendesk; việc gửi nằm ở node sau.
 - Không bọc `interrupt()` trong `try/except` trống, không gọi nó có điều kiện thay đổi giữa các lần chạy.
@@ -582,6 +584,7 @@ async def zendesk_webhook(
 ```
 
 Ghi chú vận hành:
+
 - Endpoint trả **202** trong vài chục mili-giây; Zendesk timeout 12 s nên còn rất nhiều dư địa, kể cả khi Redis chậm.
 - Lỗi 5xx của bạn sẽ khiến Zendesk thử lại theo chính sách retry của nó; nếu tỷ lệ lỗi cao kéo dài, circuit breaker của Zendesk có thể tạm ngừng gửi. Hãy có **job đối soát** (reconciliation) chạy mỗi 10–15 phút: lấy các ticket cập nhật gần đây qua API, tìm ticket có comment khách mới mà chưa có job — để không bỏ sót sự kiện khi webhook gián đoạn.
 - Ở bước debounce, worker khi lấy job sẽ kiểm tra "comment khách mới nhất" của ticket: nếu job này không ứng với comment mới nhất và comment mới hơn đã có job, bỏ qua job cũ.
@@ -736,6 +739,7 @@ Module 10 đã xây nền tảng: các tín hiệu confidence, hiệu chuẩn x�
 ### 8.2. Ngưỡng học được: chọn bằng chi phí
 
 Với ticket đã qua các quy tắc cứng, quyết định SEND hay không dựa trên $\hat p$ = xác suất đã hiệu chuẩn rằng câu trả lời đúng và chấp nhận được (Module 10). Gọi:
+
 - $C_w$: chi phí kỳ vọng khi **gửi** một câu trả lời sai (agent xử lý hậu quả, CSAT, rủi ro mất khách);
 - $C_h$: chi phí khi **không gửi** mà chuyển người (thời gian agent, FRT chậm hơn).
 
@@ -843,6 +847,7 @@ Chính sách này nên được **version hóa** (lưu `policy_version` vào m�
 | **3. Agentic có tool** (tùy chọn) | Tool đọc trạng thái tài khoản/đơn hàng qua API nội bộ (chỉ đọc) | Intent điều tra tài khoản | Đánh giá riêng cho tool use; quyền chỉ đọc; audit đầy đủ |
 
 Nguyên tắc rollout:
+
 - **Mỗi lần chỉ thay đổi một biến** (intent, ngôn ngữ, model, prompt) để quy kết được nguyên nhân khi số liệu xấu đi.
 - **Kill switch** một cú bấm (feature flag) và **rollback tiêu chí tự động**: nếu risk đo trên mẫu review hằng ngày vượt 2× ngưỡng, hoặc CSAT tuần giảm > 0,3, hệ thống tự lui về giai đoạn trước.
 - **Kích thước mẫu**: để ước lượng risk 2% với sai số ±1% (CI 95%) cần cỡ $n \approx \frac{1{,}96^2 \times 0{,}02 \times 0{,}98}{0{,}01^2} \approx 753$ câu trả lời đã gửi được review — tức với 10% lưu lượng (~40 lượt SEND/ngày, giả định) mất khoảng 3 tuần. Đây là lý do mỗi giai đoạn cần "≥ 2 tuần" và review có lấy mẫu chủ động (Module 10).
@@ -1068,6 +1073,7 @@ Phân tầng CSAT theo intent, ngôn ngữ, phiên bản pipeline/policy, thời
 ## Tài liệu tham khảo
 
 Tài liệu chính thức Zendesk (tra cứu 06/10/2026):
+
 - Tickets API (Update Ticket, `additional_tags`, `remove_tags`, `safe_update`, `updated_stamp`): https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/
 - Ticket Comments (internal note `public: false`, `html_body`, giới hạn): https://developer.zendesk.com/api-reference/ticketing/tickets/ticket_comments/
 - Creating and updating tickets (va chạm cập nhật, 409): https://developer.zendesk.com/documentation/ticketing/managing-tickets/creating-and-updating-tickets/
@@ -1082,15 +1088,18 @@ Tài liệu chính thức Zendesk (tra cứu 06/10/2026):
 - Rate limits: https://developer.zendesk.com/api-reference/introduction/rate-limits/
 
 Framework và công cụ:
+
 - LangGraph — Interrupts (human-in-the-loop): https://docs.langchain.com/oss/python/langgraph/interrupts
 - `langgraph` 1.2.x, `langgraph-checkpoint-postgres` 3.1.x trên PyPI: https://pypi.org/project/langgraph/ , https://pypi.org/project/langgraph-checkpoint-postgres/
 - Slack — Sending messages using incoming webhooks: https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/
 - vLLM documentation: https://docs.vllm.ai/
 
 Paper (đã dùng ở các module trước, liên quan trực tiếp tới thiết kế):
+
 - Hines, K., Lopez, G., et al. (2024). *Defending Against Indirect Prompt Injection Attacks With Spotlighting*. arXiv:2403.14720.
 - Chen, L., Zaharia, M., Zou, J. (2023). *FrugalGPT*. arXiv:2305.05176.
 - Kwon, W., Li, Z., et al. (2023). *Efficient Memory Management for Large Language Model Serving with PagedAttention*. arXiv:2309.06180.
 
 Pháp lý (xem Module 11, mục 7 để biết chi tiết và nguồn):
+
 - Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định 356/2025/NĐ-CP (hiệu lực 01/01/2026, thay Nghị định 13/2023/NĐ-CP): https://bocongan.gov.vn/chinh-sach-phap-luat/bai-viet/luat-bao-ve-du-lieu-ca-nhan-chinh-thuc-co-hieu-luc-thi-hanh-tu-ngay-01-01-2026-1767186124

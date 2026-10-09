@@ -313,6 +313,7 @@ Query2doc (Wang, Yang, Wei; arXiv 2303.07678, EMNLP 2023) sinh pseudo-document b
 Khác với tách câu hỏi trong email (các câu hỏi độc lập), **decomposition** dành cho một câu hỏi cần **nhiều bước suy luận** trên nhiều tài liệu: "Gói Business có hỗ trợ SSO với Azure AD không, và nếu nâng lên Enterprise giữa kỳ thì SSO có kích hoạt ngay không?" → (1) Gói nào hỗ trợ SSO/Azure AD? (2) Khi nâng gói giữa kỳ, tính năng mới có hiệu lực khi nào?
 
 Có hai dạng:
+
 - **Song song**: các câu con độc lập → retrieval song song, hợp nhất. Rẻ, dễ.
 - **Tuần tự (multi-hop)**: câu con sau phụ thuộc kết quả câu trước ("phiên bản nào sửa lỗi X?" → "phiên bản đó yêu cầu cấu hình gì?"). Self-ask (Press et al., arXiv 2210.03350) cho LLM tự hỏi câu tiếp theo, tự trả lời bằng retrieval, lặp lại. Đây đã là vòng lặp kiểu agent — thuộc Module 08 (IRCoT/ReAct); ở đây chỉ cần biết ranh giới.
 
@@ -564,6 +565,7 @@ Câu hỏi: "Tài khoản bị khóa sau khi đổi email, làm sao mở lại?"
 **$\lambda = 1$:** chọn d1, d2, d3 — ba bản gần trùng.
 
 **$\lambda = 0{,}7$:**
+
 - Bước 1 ($S = \emptyset$): điểm $= 0{,}7 \cdot \mathrm{rel}$ → d1 (0,630).
 - Bước 2: d2: $0{,}7(0{,}88) - 0{,}3(0{,}95) = 0{,}616 - 0{,}285 = 0{,}331$; d3: $0{,}595 - 0{,}276 = 0{,}319$; d4: $0{,}49 - 0{,}3(0{,}40) = 0{,}370$; d5: $0{,}385 - 0{,}045 = 0{,}340$ → **d4**.
 - Bước 3 ($S = \{d_1, d_4\}$): d2: $0{,}616 - 0{,}3\max(0{,}95; 0{,}45) = 0{,}331$; d3: $0{,}319$; d5: $0{,}385 - 0{,}3 \max(0{,}15; 0{,}20) = 0{,}325$ → **d2**.
@@ -885,6 +887,7 @@ Lấy 10 bài chính sách có câu phủ định/điều kiện. So sánh nén 
 ## Tài liệu tham khảo
 
 **Xử lý query**
+
 - Ma, X. et al. (2023). *Query Rewriting for Retrieval-Augmented Large Language Models*. arXiv:2305.14283. https://arxiv.org/abs/2305.14283
 - Rackauckas, Z. (2024). *RAG-Fusion: a New Take on Retrieval-Augmented Generation*. arXiv:2402.03367. https://arxiv.org/abs/2402.03367
 - Gao, L., Ma, X., Lin, J., Callan, J. (2022/2023). *Precise Zero-Shot Dense Retrieval without Relevance Labels* (HyDE). arXiv:2212.10496; ACL 2023. https://aclanthology.org/2023.acl-long.99/
@@ -894,6 +897,7 @@ Lấy 10 bài chính sách có câu phủ định/điều kiện. So sánh nén 
 - Cormack, G., Clarke, C., Büttcher, S. (2009). *Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods*. SIGIR 2009. https://dblp.org/rec/conf/sigir/CormackCB09.html
 
 **Reranking**
+
 - Nogueira, R., Cho, K. (2019). *Passage Re-ranking with BERT*. arXiv:1901.04085. https://arxiv.org/abs/1901.04085
 - Nogueira, R., Jiang, Z., Pradeep, R., Lin, J. (2020). *Document Ranking with a Pretrained Sequence-to-Sequence Model* (monoT5). arXiv:2003.06713. https://arxiv.org/abs/2003.06713
 - Pradeep, R., Nogueira, R., Lin, J. (2021). *The Expando-Mono-Duo Design Pattern for Text Ranking with Pretrained Sequence-to-Sequence Models*. arXiv:2101.05667. https://huggingface.co/papers/2101.05667
@@ -907,6 +911,7 @@ Lấy 10 bài chính sách có câu phủ định/điều kiện. So sánh nén 
 - Wang, F. et al. (2025). *jina-reranker-v3: Last but Not Late Interaction for Listwise Document Reranking*. arXiv:2509.25085. https://arxiv.org/abs/2509.25085
 
 **Đa dạng hóa & nén context**
+
 - Carbonell, J., Goldstein, J. (1998). *The Use of MMR, Diversity-Based Reranking for Reordering Documents and Producing Summaries*. SIGIR 1998. https://dblp.org/rec/conf/sigir/CarbonellG98.html
 - Liu, N. F. et al. (2023). *Lost in the Middle: How Language Models Use Long Contexts*. arXiv:2307.03172. https://arxiv.org/abs/2307.03172
 - Li, Y. et al. (2023). *Compressing Context to Enhance Inference Efficiency of Large Language Models* (Selective Context). arXiv:2310.06201. https://arxiv.org/abs/2310.06201
@@ -916,6 +921,7 @@ Lấy 10 bài chính sách có câu phủ định/điều kiện. So sánh nén 
 - Chirkova, N. et al. (2025). *Provence: efficient and robust context pruning for retrieval-augmented generation*. arXiv:2501.16214. https://arxiv.org/abs/2501.16214
 
 **Model card & tài liệu chính thức (truy cập 10/2026)**
+
 - BAAI/bge-reranker-v2-m3. https://huggingface.co/BAAI/bge-reranker-v2-m3
 - Qwen/Qwen3-Reranker-0.6B. https://huggingface.co/Qwen/Qwen3-Reranker-0.6B
 - jinaai/jina-reranker-v3 (giấy phép CC BY-NC 4.0). https://huggingface.co/jinaai/jina-reranker-v3

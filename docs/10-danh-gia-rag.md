@@ -597,6 +597,7 @@ Hạ ngưỡng classifier có thể đưa recall lên 0,99 nhưng số ticket b�
 Không có một tín hiệu đơn lẻ nào đủ tốt. Dưới đây là các họ tín hiệu, cùng ưu nhược điểm.
 
 **(a) Tín hiệu retrieval.**
+
 - Điểm reranker của chunk tốt nhất $s_1$; khoảng cách $s_1 - s_2$; số chunk có điểm trên ngưỡng.
 - Tỷ lệ câu hỏi trong email có ít nhất một chunk liên quan.
 
@@ -632,6 +633,7 @@ Ví dụ $N = 5$: nếu cả 5 câu trả lời cùng nghĩa, $\mathrm{SE} = 0$.
 Biến thể rẻ hơn: SelfCheckGPT (Manakul et al., 2023) kiểm tra từng câu của câu trả lời chính có được các mẫu khác ủng hộ không.
 
 **(e) Tín hiệu từ bộ kiểm tra (verifier).**
+
 - Tỷ lệ claim được hỗ trợ (groundedness ratio) từ bước verify của Module 07.
 - Số phần tử trong `unanswered_questions`.
 - Có vi phạm kiểm tra tất định không: số tiền, phần trăm, ngày tháng trong draft không xuất hiện trong context (H7).
@@ -654,6 +656,7 @@ $$
 $$
 
 Vì sao logistic mà không phải mô hình phức tạp hơn?
+
 1. Log-loss là **quy tắc chấm điểm đúng đắn** (proper scoring rule) nên logistic regression có xu hướng cho xác suất tương đối hiệu chuẩn ngay trên phân bố huấn luyện.
 2. Hệ số $w_j$ đọc được: team CS có thể hỏi "vì sao ticket này bị giữ lại?" và ta trả lời bằng các đặc trưng đóng góp nhiều nhất.
 3. Dữ liệu nhãn ban đầu ít (vài nghìn), mô hình đơn giản ít overfit.
@@ -744,6 +747,7 @@ def ece(p, y, n_bins=10):
 ```
 
 **Ba cảnh báo thực tế.**
+
 - **Hiệu chuẩn theo tầng.** Một hệ số $T$ chung có thể làm tiếng Việt hiệu chuẩn tốt nhưng tiếng Nhật vẫn quá tự tin. Hoặc hiệu chuẩn riêng từng tầng có đủ dữ liệu, hoặc đưa ngôn ngữ/intent vào làm đặc trưng của mô hình meta.
 - **Trôi hiệu chuẩn.** Đổi model sinh, đổi prompt, thêm sản phẩm mới, hay phát hành tính năng mới đều làm hiệu chuẩn cũ mất giá trị. Tính lại ECE hằng tuần trên dữ liệu mới nhất và đặt cảnh báo.
 - **Hiệu chuẩn không sửa được xếp hạng kém.** Temperature/Platt là biến đổi đơn điệu: chúng làm con số "thật thà" hơn nhưng không giúp tách ticket đúng khỏi ticket sai. Muốn tách tốt hơn phải thêm tín hiệu tốt hơn (7.3).
@@ -775,6 +779,7 @@ $$
 $$
 
 Với `how_to` ($C_w = 8$):
+
 - SEND tốt hơn DRAFT khi $(1 - p)(8 - 1{,}5) < 0{,}5$, tức $p > 1 - 0{,}5/6{,}5 \approx 0{,}923$.
 - DRAFT tốt hơn ESCALATE khi $0{,}5 + 1{,}5(1 - p) < 1{,}5$, tức $p > 1/3$.
 
@@ -939,11 +944,13 @@ Mỗi vòng (1–2 tuần) làm ba việc: thêm lỗi mới vào golden set, hi
 ### 9.1 Kiến trúc
 
 Eval harness là một chương trình chạy toàn bộ pipeline trên golden set, tính metric theo tầng, so với baseline và trả về đạt/không đạt. Nó nên chạy:
+
 - tự động trên mọi pull request đổi prompt, model, cấu hình retrieval, hoặc mã policy;
 - định kỳ hằng đêm trên phiên bản production để phát hiện trôi (ví dụ nhà cung cấp API đổi model ngầm);
 - thủ công trước mỗi lần mở rộng rollout.
 
 Thành phần:
+
 1. **Dataset có version** (golden set + nhãn), lưu cùng repo hoặc kho dữ liệu, không sửa tại chỗ.
 2. **Runner** gọi đúng pipeline production (cùng code, cùng cấu hình), ghi lại toàn bộ đầu ra và trace.
 3. **Scorers**: metric tất định (Recall@k, nDCG, kiểm tra policy, JSON hợp lệ, ngôn ngữ) và metric dùng judge (faithfulness, must-have, completeness).
@@ -1041,6 +1048,7 @@ if __name__ == "__main__":
 ### 9.4 Chi phí của chính việc đánh giá
 
 Chạy 1.000 test case với pipeline đầy đủ cộng judge cho 6 mục checklist có thể tốn tương đương vài nghìn lượt gọi LLM. Cách giữ chi phí hợp lý:
+
 - **Cache** đầu ra theo khóa (hash của đầu vào + cấu hình): khi chỉ đổi mã policy, không cần sinh lại draft.
 - **Phân lớp**: PR nhỏ chạy tập "smoke" ~150 case phủ mọi tầng; tập đầy đủ chạy hằng đêm và trước khi rollout.
 - **Judge rẻ cho mục dễ**: ngôn ngữ, JSON hợp lệ, vi phạm số tiền kiểm tra bằng code; chỉ dùng judge mạnh cho groundedness và completeness.

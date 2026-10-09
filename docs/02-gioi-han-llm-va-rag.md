@@ -114,6 +114,7 @@ Mình khuyên đặt mục tiêu theo *loại* chứ không theo tổng: "0 câu
 Tham số của LLM được "đóng băng" tại thời điểm dữ liệu huấn luyện được thu thập. Mọi sự kiện sau đó — phiên bản API mới, tính năng vừa ra, giá vừa đổi — model không biết. Tệ hơn, model thường *không biết rằng mình không biết*: hỏi về "phiên bản 5.2" của sản phẩm, model có thể trả lời bằng kiến thức về 4.x với giọng tự tin.
 
 Hai chi tiết thực tế:
+
 - Ngày cutoff công bố thường là ngày *thu thập* dữ liệu; mật độ dữ liệu ở những tháng sát cutoff thường thưa (internet chưa kịp viết về sự kiện), nên tri thức "gần cutoff" kém hơn tri thức cũ.
 - Model thương mại được cập nhật theo lịch của nhà cung cấp, không theo lịch của bạn. Kho tri thức Zendesk (giả định) thay đổi **hằng tuần** — không có cách nào để tham số model theo kịp.
 
@@ -182,6 +183,7 @@ $$
 <!-- /fig -->
 
 **Chi phí tiền.** Giả định (để học, không phải bảng giá thật):
+
 - 1.500 ticket/ngày × ~3,5 lượt ≈ **5.250 lời gọi LLM soạn trả lời/ngày** (chưa tính các lời gọi phân loại, kiểm tra).
 - Giá input giả định **\$1 / 1 triệu token** (giá thật thay đổi theo model; hãy thay số của bạn).
 - Kho Help Center: 800 bài × ~800 token/bài ≈ **640.000 token** (ước lượng; chưa tính macro, chính sách, và tất nhiên không thể chứa 200.000 ticket lịch sử — khoảng $10^8$ token).
@@ -247,6 +249,7 @@ Prompt caching (ví dụ API của Anthropic tính đến 10/2026: đọc cache 
 <!-- /fig -->
 
 **Đọc ma trận cho Zendesk.**
+
 - Tri thức sản phẩm + chính sách + ticket lịch sử → **RAG** là trục chính (lớn, thay đổi, cần trích dẫn và phân quyền).
 - Văn phong email CS đa ngôn ngữ → bắt đầu bằng **few-shot** từ macro; chỉ **fine-tune** (LoRA/DPO) khi số liệu cho thấy tỉ lệ agent sửa văn phong còn cao (Module 09).
 - System prompt + chính sách chung *nhỏ, ổn định* (vài nghìn token) → đặt ở đầu prompt, tận dụng **prompt caching** (một dạng CAG nhỏ).
@@ -284,6 +287,7 @@ p_\eta(z \mid x) = \frac{\exp\big(\mathbf{d}(z)^\top \mathbf{q}(x)\big)}{\sum_{z
 $$
 
 Trong thực tế tổng ở mẫu số chạy trên hàng triệu tài liệu là không khả thi, nên ta xấp xỉ bằng cách chỉ lấy **top-$k$** tài liệu có điểm cao nhất (tìm bằng ANN, Module 05) và chuẩn hóa softmax trên $k$ tài liệu đó.
+
 - **Generator** $p_\theta(y \mid x, z)$: một model seq2seq hoặc decoder-only, sinh $y$ khi được cho $x$ và $z$.
 
 Chú ý ý nghĩa của tích $\mathbf{d}(z)^\top\mathbf{q}(x)$: đúng là phép "tích vô hướng lớn nhất" ta gặp ở LM head (Module 01, mục 2.2) và ở attention, nhưng trên quy mô kho tài liệu. Cách học các encoder này là chủ đề của Module 03.
@@ -319,6 +323,7 @@ gradient chảy về cả generator và encoder query (Lewis et al. giữ cố �
 ### 5.3 Ví dụ tính tay: RAG-Sequence vs RAG-Token
 
 Email: *"Gói Pro cho tối đa bao nhiêu user?"* Retriever trả về $k = 3$ chunk với điểm $\mathbf{d}^\top\mathbf{q} = (2.0, 1.0, 0.5)$:
+
 - $z_1$: bảng giá hiện hành (đúng),
 - $z_2$: bài blog cũ năm 2023 về gói Pro (lỗi thời),
 - $z_3$: bài hướng dẫn mời thành viên (liên quan một phần).
@@ -336,6 +341,7 @@ Email: *"Gói Pro cho tối đa bao nhiêu user?"* Retriever trả về $k = 3$ 
 **RAG-Sequence:** $0.629 \times 0.72 + 0.231 \times 0.05 + 0.140 \times 0.03 = 0.4529 + 0.0116 + 0.0042 = 0.468$.
 
 **RAG-Token:**
+
 - Bước 1: $\sum_z p_\eta(z|x)\,p_\theta(y_1|x,z) = 0.629(0.9) + 0.231(0.5) + 0.140(0.1) = 0.566 + 0.116 + 0.014 = 0.696$.
 - Bước 2: $0.629(0.8) + 0.231(0.1) + 0.140(0.3) = 0.503 + 0.023 + 0.042 = 0.568$.
 - Tích: $0.696 \times 0.568 = 0.395$.
@@ -517,6 +523,7 @@ Survey của Gao et al. (2023/2024) phân loại các hệ thống RAG thành ba
 **Naive RAG.** Đúng ba bước indexing → retrieval → generation như mục 6.1. Vấn đề điển hình: truy xuất kém chính xác/thiếu, sinh thiếu căn cứ, ghép context thừa và lặp.
 
 **Advanced RAG.** Giữ chuỗi tuyến tính nhưng thêm tối ưu:
+
 - *Trước truy xuất (pre-retrieval):* cải thiện index (chunking tốt hơn, metadata, chỉ mục nhiều độ hạt) và cải thiện query (viết lại, mở rộng, chuyển đổi).
 - *Sau truy xuất (post-retrieval):* rerank, nén/lọc context, sắp xếp lại.
 
@@ -548,6 +555,7 @@ Mình khuyên: **bắt đầu ở Advanced RAG có đo lường**, chỉ chuyể
 ### 7.1 Ba bài toán con
 
 **(A) Phân loại (trước khi sinh).** Với mỗi email $x$, dự đoán:
+
 - ngôn ngữ (vi/en/ja/lẫn),
 - intent (đăng nhập, hóa đơn, hoàn tiền, lỗi API, góp ý...),
 - độ nhạy: có liên quan giá/hoàn tiền/pháp lý/bảo mật không,
@@ -618,6 +626,7 @@ flowchart TD
 ## Tóm tắt (cheat-sheet)
 
 **Giới hạn LLM**
+
 - Hallucination: intrinsic (mâu thuẫn nguồn) vs extrinsic (không kiểm chứng được); factuality vs faithfulness (chỉ dẫn, context, tự nhất quán).
 - Nguyên nhân: tri thức đuôi dài, mục tiêu cross-entropy không có "không biết", benchmark nhị phân thưởng việc đoán, decoding/context nhiễu. Fine-tune trên sự kiện mới có thể tăng bịa.
 - Trả lời có lợi khi $p > c/(1+c)$; $c = 0$ ⇒ luôn đoán. Hệ thống CS cần $c$ lớn.
@@ -625,10 +634,12 @@ flowchart TD
 - Context dài: lost in the middle (hình chữ U), độ dài hiệu dụng < độ dài quảng cáo (RULER, context rot); chi phí prefill $\approx 2Nn + 2Ln^2d$.
 
 **Chọn chiến lược**
+
 - RAG cho tri thức lớn/thay đổi/cần trích dẫn/cần ACL; fine-tune cho hành vi/văn phong; long-context cục bộ cho thread/bài đơn; CAG/prompt caching cho phần nhỏ ổn định; tool/API cho dữ liệu khách.
 - Định tuyến theo câu hỏi (Self-Route) tốt hơn chọn một chiến lược cho tất cả.
 
 **Hình thức hóa RAG**
+
 - Retriever $p_\eta(z|x) \propto \exp(\mathbf d(z)^\top\mathbf q(x))$ trên top-$k$.
 - RAG-Sequence: $\sum_z p_\eta(z|x)\prod_i p_\theta(y_i|x,z,y_{<i})$. RAG-Token: $\prod_i\sum_z p_\eta(z|x)p_\theta(y_i|x,z,y_{<i})$.
 - REALM: $\partial\log p(y|x)/\partial f(z) = p(z|x,y) - p(z|x)$ ⇒ học retriever không cần nhãn tài liệu.
@@ -636,6 +647,7 @@ flowchart TD
 - RETRO: kho truy xuất nghìn tỷ token thay cho tham số. Atlas: retrieval tốt + few-shot thắng model lớn hơn ~50 lần.
 
 **Pipeline & điểm hỏng**
+
 - Naive: index → retrieve → generate. $P(\text{đúng}) \approx P(\text{có})\cdot P(\text{top-}k)\cdot P(\text{dùng đúng})$ ⇒ đo từng khâu.
 - 7 FP: missing content, missed top-ranked, not in context, not extracted, wrong format, incorrect specificity, incomplete. Thêm: rò rỉ tenant, prompt injection.
 - Naive → Advanced (pre/post-retrieval) → Modular (đồ thị module, routing, vòng lặp).
@@ -755,6 +767,7 @@ Lập bảng tính (Python hoặc spreadsheet) với tham số đầu vào: số
 ## Tài liệu tham khảo
 
 **Hallucination**
+
 - Maynez, J., Narayan, S., Bohnet, B., McDonald, R. (2020). *On Faithfulness and Factuality in Abstractive Summarization*. ACL 2020. arXiv:2005.00661.
 - Ji, Z. et al. (2023). *Survey of Hallucination in Natural Language Generation*. ACM Computing Surveys. arXiv:2202.03629.
 - Huang, L. et al. (2023). *A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges, and Open Questions*. arXiv:2311.05232.
@@ -764,16 +777,19 @@ Lập bảng tính (Python hoặc spreadsheet) với tham số đầu vào: số
 - Kalai, A. T., Nachum, O., Vempala, S. S., Zhang, E. (2025). *Why Language Models Hallucinate*. arXiv:2509.04664.
 
 **Context dài**
+
 - Liu, N. F. et al. (2024). *Lost in the Middle: How Language Models Use Long Contexts*. TACL 12. arXiv:2307.03172.
 - Hsieh, C.-P. et al. (2024). *RULER: What's the Real Context Size of Your Long-Context Language Models?*. COLM 2024. arXiv:2404.06654.
 - Hong, K., Troynikov, A., Huber, J. (2025). *Context Rot: How Increasing Input Tokens Impacts LLM Performance*. Báo cáo kỹ thuật Chroma, 07/2025. https://www.trychroma.com/research/context-rot
 
 **So sánh chiến lược**
+
 - Ovadia, O., Brief, M., Mishaeli, M., Elisha, O. (2024). *Fine-Tuning or Retrieval? Comparing Knowledge Injection in LLMs*. EMNLP 2024. arXiv:2312.05934.
 - Li, Z. et al. (2024). *Retrieval Augmented Generation or Long-Context LLMs? A Comprehensive Study and Hybrid Approach*. EMNLP 2024 (Industry). arXiv:2407.16833.
 - Chan, B. J. et al. (2024). *Don't Do RAG: When Cache-Augmented Generation is All You Need for Knowledge Tasks*. arXiv:2412.15605.
 
 **Hình thức hóa RAG**
+
 - Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*. NeurIPS 2020. arXiv:2005.11401.
 - Guu, K., Lee, K., Tung, Z., Pasupat, P., Chang, M.-W. (2020). *REALM: Retrieval-Augmented Language Model Pre-Training*. ICML 2020. arXiv:2002.08909.
 - Izacard, G., Grave, E. (2021). *Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering* (Fusion-in-Decoder). EACL 2021. arXiv:2007.01282.
@@ -781,9 +797,11 @@ Lập bảng tính (Python hoặc spreadsheet) với tham số đầu vào: số
 - Izacard, G. et al. (2023). *Atlas: Few-shot Learning with Retrieval Augmented Language Models*. JMLR 24. arXiv:2208.03299.
 
 **Pipeline, điểm hỏng, phân loại**
+
 - Barnett, S., Kurniawan, S., Thudumu, S., Brannelly, Z., Abdelrazek, M. (2024). *Seven Failure Points When Engineering a Retrieval Augmented Generation System*. CAIN 2024. arXiv:2401.05856.
 - Gao, Y. et al. (2023). *Retrieval-Augmented Generation for Large Language Models: A Survey*. arXiv:2312.10997.
 - Gao, Y., Xiong, Y., Wang, M., Wang, H. (2024). *Modular RAG: Transforming RAG Systems into LEGO-like Reconfigurable Frameworks*. arXiv:2407.21059.
 
 **Tài liệu chính thức**
+
 - Anthropic — Prompt caching (giá ghi/đọc cache, TTL; tính đến 10/2026): https://platform.claude.com/docs/en/build-with-claude/prompt-caching
