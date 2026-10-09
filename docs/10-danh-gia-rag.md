@@ -105,6 +105,14 @@ $$
 
 AP phạt cả việc thiếu tài liệu ($F$) lẫn việc tài liệu đúng bị đẩy xuống thấp — hợp với email nhiều câu hỏi hơn MRR.
 
+<!-- fig:retrieval-metrics -->
+<figure markdown="span">
+  ![Ví dụ xuyên suốt mục 2: danh sách top-5, tài liệu F bị bỏ sót, và các metric retrieval tính tay](assets/figures/10/retrieval-metrics.light.svg#only-light){ loading=lazy }
+  ![Ví dụ xuyên suốt mục 2: danh sách top-5, tài liệu F bị bỏ sót, và các metric retrieval tính tay](assets/figures/10/retrieval-metrics.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.1 — Ví dụ xuyên suốt mục 2: danh sách top-5, tài liệu F bị bỏ sót, và các metric retrieval tính tay.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 2.5 nDCG
 
 Khi nhãn có nhiều mức, ta muốn tài liệu "rất liên quan" đứng trên tài liệu "hơi liên quan". Discounted Cumulative Gain:
@@ -128,6 +136,14 @@ $$
 
 Chỉ cần hoán đổi hai tài liệu đầu (để tài liệu mức 3 lên vị trí 1) là nDCG tăng đáng kể — nDCG nhạy với **thứ tự ở đầu danh sách**, nên nó là metric tự nhiên để đánh giá reranker (Module 06).
 
+<!-- fig:ndcg -->
+<figure markdown="span">
+  ![Gain có chiết khấu ở từng vị trí cho thứ tự thực tế và thứ tự lý tưởng của ví dụ nDCG](assets/figures/10/ndcg.light.svg#only-light){ loading=lazy }
+  ![Gain có chiết khấu ở từng vị trí cho thứ tự thực tế và thứ tự lý tưởng của ví dụ nDCG](assets/figures/10/ndcg.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.2 — Gain có chiết khấu ở từng vị trí cho thứ tự thực tế và thứ tự lý tưởng của ví dụ nDCG.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 2.6 Context precision kiểu RAGAS
 
 RAGAS định nghĩa context precision có trọng số theo vị trí, với $v_k \in \{0,1\}$ là nhãn liên quan:
@@ -147,6 +163,14 @@ Khác với AP, mẫu số là **số tài liệu liên quan có trong top-$K$**
 3. **Nhãn tổng hợp.** Chọn một chunk, cho LLM sinh câu hỏi mà chunk đó trả lời (cách làm của Module 09 để tạo dữ liệu fine-tune). Rẻ và có nhãn chắc chắn, nhưng câu hỏi tổng hợp thường "sạch" hơn email thật: ít lỗi chính tả, không lẫn ngôn ngữ, không có chữ ký và quoted reply. Đừng chỉ đánh giá trên dữ liệu tổng hợp.
 
 > **Khuyến nghị thực tế.** Bắt đầu với 300–500 truy vấn thật lấy từ email (đã làm sạch theo Module 04), gán nhãn bằng pooling: LLM gán nhãn trước, người kiểm tra lại toàn bộ nhãn "liên quan" và 10–20% nhãn "không liên quan". Đo Recall@k với $k$ là số chunk thực sự đưa vào prompt, và nDCG@10 cho reranker. Ghi lại tách theo ngôn ngữ (vi/en/ja) — rất thường gặp trường hợp recall trung bình tốt nhưng tiếng Nhật kém hẳn.
+
+<!-- fig:pooling-labels -->
+<figure markdown="span">
+  ![Gán nhãn bằng pooling: tài liệu liên quan mà không retriever nào lấy được thì không bao giờ có nhãn](assets/figures/10/pooling-labels.light.svg#only-light){ loading=lazy }
+  ![Gán nhãn bằng pooling: tài liệu liên quan mà không retriever nào lấy được thì không bao giờ có nhãn](assets/figures/10/pooling-labels.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.3 — Gán nhãn bằng pooling: tài liệu liên quan mà không retriever nào lấy được thì không bao giờ có nhãn.</figcaption>
+</figure>
+<!-- /fig -->
 
 ## 3. Đánh giá generation
 
@@ -196,6 +220,14 @@ $$
 
 > **Cách đọc kết hợp.** Context recall thấp → sửa retrieval (Module 05–06). Context recall cao mà faithfulness thấp → model bịa, sửa prompt/model (Module 07). Faithfulness cao mà correctness thấp → context sai hoặc lỗi thời, sửa dữ liệu (Module 04). Ba metric này cùng nhau cho ta **chẩn đoán vị trí lỗi**, giá trị hơn nhiều so với một điểm tổng.
 
+<!-- fig:ragas-diagnosis -->
+<figure markdown="span">
+  ![Đọc kết hợp context recall, faithfulness và correctness để tìm vị trí lỗi](assets/figures/10/ragas-diagnosis.light.svg#only-light){ loading=lazy }
+  ![Đọc kết hợp context recall, faithfulness và correctness để tìm vị trí lỗi](assets/figures/10/ragas-diagnosis.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.4 — Đọc kết hợp context recall, faithfulness và correctness để tìm vị trí lỗi.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 3.3 Citation precision và citation recall
 
 Theo hướng của ALCE (Gao et al., 2023), với mỗi câu $s$ trong câu trả lời có tập trích dẫn $C_s$:
@@ -229,6 +261,14 @@ với $f(\cdot) \in \{0,1\}$ là phán quyết của judge và $y_i$ là nhãn n
 Ví dụ: judge cho tỷ lệ đạt 0,88 trên 5.000 draft; trên 300 draft có nhãn, judge cho 0,89 còn người cho 0,84, nên độ lệch là $+0{,}05$. Ước lượng hiệu chỉnh: $\hat\theta = 0{,}88 - 0{,}05 = 0{,}83$.
 
 Phương sai xấp xỉ là $\mathrm{Var}(f)/N + \mathrm{Var}(f - y)/n$. Khi judge tương quan tốt với người, $f - y$ hầu như bằng 0 nên số hạng thứ hai nhỏ, và khoảng tin cậy hẹp hơn đáng kể so với chỉ dùng 300 nhãn người. Khi judge tệ, phương pháp vẫn **không lệch** — chỉ là không được lợi về độ hẹp.
+
+<!-- fig:ppi -->
+<figure markdown="span">
+  ![Ví dụ PPI của mục 3](assets/figures/10/ppi.light.svg#only-light){ loading=lazy }
+  ![Ví dụ PPI của mục 3](assets/figures/10/ppi.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.5 — Ví dụ PPI của mục 3.5: ước lượng của judge được trừ đi độ lệch đo trên tập có nhãn người.</figcaption>
+</figure>
+<!-- /fig -->
 
 ## 4. LLM-as-a-judge
 
@@ -303,6 +343,14 @@ Mức 0,57 thường được xếp vào loại "vừa phải". Quan trọng hơ
 
 Với judge này, dùng nó làm **cổng an toàn trước khi gửi** là không đủ; dùng để **theo dõi xu hướng** thì vẫn được, miễn là hiệu chỉnh.
 
+<!-- fig:judge-kappa -->
+<figure markdown="span">
+  ![Ma trận đồng thuận người–judge của mục 4](assets/figures/10/judge-kappa.light.svg#only-light){ loading=lazy }
+  ![Ma trận đồng thuận người–judge của mục 4](assets/figures/10/judge-kappa.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.6 — Ma trận đồng thuận người–judge của mục 4.3 và các chỉ số rút ra.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 4.4 Hiệu chỉnh tỷ lệ lỗi quan sát (Rogan–Gladen)
 
 Trên production, judge báo 12% draft FAIL. Tỷ lệ lỗi thật $\pi$ là bao nhiêu? Tỷ lệ FAIL quan sát là
@@ -312,6 +360,14 @@ p_{\mathrm{obs}} = \mathrm{Se}\cdot \pi + (1 - \mathrm{Sp})(1 - \pi) \;\Longrigh
 $$
 
 Thay số: $\pi = (0{,}12 + 0{,}933 - 1)/(0{,}60 + 0{,}933 - 1) = 0{,}053/0{,}533 \approx 0{,}099$. Tức là khoảng 10% draft thật sự lỗi. Công thức này chỉ đúng khi Se và Sp ổn định giữa tập hiệu chuẩn và production — một giả định cần kiểm tra lại mỗi khi đổi judge, đổi prompt judge, hoặc khi phân bố intent thay đổi.
+
+<!-- fig:rogan-gladen -->
+<figure markdown="span">
+  ![Hiệu chỉnh Rogan–Gladen: từ tỷ lệ FAIL judge báo suy ra tỷ lệ lỗi thật](assets/figures/10/rogan-gladen.light.svg#only-light){ loading=lazy }
+  ![Hiệu chỉnh Rogan–Gladen: từ tỷ lệ FAIL judge báo suy ra tỷ lệ lỗi thật](assets/figures/10/rogan-gladen.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.7 — Hiệu chỉnh Rogan–Gladen: từ tỷ lệ FAIL judge báo suy ra tỷ lệ lỗi thật.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 4.5 Danh sách kiểm tra khi dùng judge
 
@@ -339,6 +395,14 @@ Golden set là "bài thi chuẩn" mà mọi phiên bản hệ thống phải là
 | Đa ngôn ngữ khó | Tiếng Nhật kính ngữ, email trộn Việt–Anh, có ảnh chụp lỗi | 10% |
 
 Mỗi nhóm lại phân tầng theo ngôn ngữ (vi/en/ja). Với 3 ngôn ngữ × 7 nhóm = 21 tầng, mục tiêu tối thiểu 30–50 mẫu/tầng → khoảng 800–1.000 mẫu cho phiên bản đầu. Con số này đến từ mục 6: dưới ~30 mẫu, khoảng tin cậy của một tỷ lệ quá rộng để ra quyết định.
+
+<!-- fig:golden-composition -->
+<figure markdown="span">
+  ![Thành phần gợi ý của golden set theo bảng mục 5](assets/figures/10/golden-composition.light.svg#only-light){ loading=lazy }
+  ![Thành phần gợi ý của golden set theo bảng mục 5](assets/figures/10/golden-composition.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.8 — Thành phần gợi ý của golden set theo bảng mục 5.1.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 5.2 Schema một test case
 
@@ -401,6 +465,14 @@ $$
 
 Với $p \approx 0{,}9$ và $E = 0{,}03$: $n \approx 3{,}8416 \times 0{,}09 / 0{,}0009 \approx 385$. Muốn $E = 0{,}03$ **cho từng ngôn ngữ** thì cần ~385 mẫu mỗi ngôn ngữ. Đây là lý do golden set ~1.000 mẫu là mức tối thiểu chứ không phải xa xỉ.
 
+<!-- fig:wilson-intervals -->
+<figure markdown="span">
+  ![Trái: khoảng Wilson 95% cho 89% và 91% trên 200 mẫu](assets/figures/10/wilson-intervals.light.svg#only-light){ loading=lazy }
+  ![Trái: khoảng Wilson 95% cho 89% và 91% trên 200 mẫu](assets/figures/10/wilson-intervals.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.9 — Trái: khoảng Wilson 95% cho 89% và 91% trên 200 mẫu. Phải: cỡ mẫu cần cho sai số ±E.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 6.3 So sánh hai phiên bản trên cùng tập: McNemar
 
 Khi hai hệ thống A, B chạy trên **cùng** 300 test case, các kết quả là cặp, không độc lập. Chỉ các case mà hai hệ thống bất đồng mới mang thông tin:
@@ -417,6 +489,14 @@ $$
 $$
 
 với 1 bậc tự do cho $p \approx 0{,}046$. Kiểm định nhị thức chính xác ($X \sim \mathrm{Bin}(25; 0{,}5)$, xét $X \le 7$, hai phía) cho $p \approx 0{,}043$. Kết luận: A tốt hơn B có ý nghĩa ở mức 5%, dù chênh lệch tổng chỉ $11/300 \approx 3{,}7$ điểm phần trăm. Kiểm định cặp nhạy hơn nhiều so với so sánh hai tỷ lệ độc lập vì nó loại bỏ phương sai do "độ khó của từng câu".
+
+<!-- fig:mcnemar -->
+<figure markdown="span">
+  ![Kiểm định McNemar chỉ dùng các test case mà hai phiên bản bất đồng](assets/figures/10/mcnemar.light.svg#only-light){ loading=lazy }
+  ![Kiểm định McNemar chỉ dùng các test case mà hai phiên bản bất đồng](assets/figures/10/mcnemar.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.10 — Kiểm định McNemar chỉ dùng các test case mà hai phiên bản bất đồng.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 6.4 Bootstrap cặp cho metric bất kỳ
 
@@ -452,6 +532,14 @@ $$
 Với $n = 150$: $r_{\max} = 1 - 0{,}05^{1/150} \approx 0{,}0198$. Vậy 150 ticket không lỗi cho phép khẳng định (95%) tỷ lệ lỗi dưới khoảng 2%. Muốn khẳng định dưới 1% cần ~300 ticket không lỗi.
 
 Nếu có lỗi, dùng cận trên Clopper–Pearson hoặc Wilson. Ví dụ 2 lỗi trên 300 ticket ($\hat r \approx 0{,}67\%$) cho cận trên 95% khoảng **2,4%** — tức là **chưa** đạt ràng buộc 2%, dù tỷ lệ quan sát thấp hơn nhiều. Tỷ lệ quan sát thấp chưa đủ; cái cần vượt qua là **cận trên**.
+
+<!-- fig:rule-of-three -->
+<figure markdown="span">
+  ![Cận trên của tỷ lệ lỗi theo số ticket kiểm tra: khi không thấy lỗi nào (quy tắc số 3) và khi thấy 2 lỗi](assets/figures/10/rule-of-three.light.svg#only-light){ loading=lazy }
+  ![Cận trên của tỷ lệ lỗi theo số ticket kiểm tra: khi không thấy lỗi nào (quy tắc số 3) và khi thấy 2 lỗi](assets/figures/10/rule-of-three.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.11 — Cận trên của tỷ lệ lỗi theo số ticket kiểm tra: khi không thấy lỗi nào (quy tắc số 3) và khi thấy 2 lỗi.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 6.6 Bẫy khi gộp nhiều tầng
 
@@ -533,6 +621,14 @@ $$
 
 Ví dụ $N = 5$: nếu cả 5 câu trả lời cùng nghĩa, $\mathrm{SE} = 0$. Nếu chia thành ba cụm kích thước 3, 1, 1: $\mathrm{SE} = -(0{,}6\ln 0{,}6 + 2 \times 0{,}2\ln 0{,}2) \approx 0{,}307 + 0{,}644 = 0{,}950$ nats (tối đa $\ln 5 \approx 1{,}609$). Entropy cao nghĩa là model "nghĩ ra" nhiều đáp án khác nhau — dấu hiệu đang đoán. Đây là một trong những tín hiệu phát hiện bịa đặt mạnh nhất, nhưng **tốn gấp $N$ lần chi phí sinh**. Với email (không cần trả lời tức thời, xem Module 11) chi phí này có thể chấp nhận cho các intent rủi ro trung bình; với $N = 3$–5 và model nhỏ cho bước so cụm.
 
+<!-- fig:semantic-entropy -->
+<figure markdown="span">
+  ![Entropy ngữ nghĩa của hai ví dụ trong mục 7](assets/figures/10/semantic-entropy.light.svg#only-light){ loading=lazy }
+  ![Entropy ngữ nghĩa của hai ví dụ trong mục 7](assets/figures/10/semantic-entropy.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.12 — Entropy ngữ nghĩa của hai ví dụ trong mục 7.3(d): mỗi màu là một cụm cùng nghĩa.</figcaption>
+</figure>
+<!-- /fig -->
+
 Biến thể rẻ hơn: SelfCheckGPT (Manakul et al., 2023) kiểm tra từng câu của câu trả lời chính có được các mẫu khác ủng hộ không.
 
 **(e) Tín hiệu từ bộ kiểm tra (verifier).**
@@ -565,6 +661,14 @@ Vì sao logistic mà không phải mô hình phức tạp hơn?
 **Nhãn $y$ lấy từ đâu?** Ở giai đoạn 1 (AI chỉ viết draft), mỗi ticket cho ta một nhãn gần như miễn phí: agent gửi draft **gần như nguyên văn** (khoảng cách chỉnh sửa nhỏ, mục 8.1) → $y = 1$; agent viết lại hoặc bỏ draft → $y = 0$. Nhãn này **nhiễu**: agent có thể sửa vì thói quen văn phong, hoặc gửi nguyên văn một draft sai vì vội. Nên lấy mẫu 5–10% để người kiểm tra lại, và loại các chỉnh sửa thuần văn phong (lời chào, chữ ký) trước khi tính khoảng cách.
 
 > **Liên hệ Zendesk.** Mỗi ticket ở giai đoạn 1 lưu lại: đặc trưng $\mathbf{z}(x)$ tại thời điểm sinh draft (ghi vào log/trace, Module 11), draft, và phiên bản cuối agent gửi (đọc lại qua Ticket Comments API). Sau vài tuần với ~1.500 ticket/ngày, ta có hàng chục nghìn cặp — đủ để huấn luyện và hiệu chuẩn mô hình meta theo từng intent.
+
+<!-- fig:meta-model -->
+<figure markdown="span">
+  ![Mô hình meta kết hợp các họ tín hiệu confidence, rồi hiệu chuẩn trên một tập riêng](assets/figures/10/meta-model.light.svg#only-light){ loading=lazy }
+  ![Mô hình meta kết hợp các họ tín hiệu confidence, rồi hiệu chuẩn trên một tập riêng](assets/figures/10/meta-model.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.13 — Mô hình meta kết hợp các họ tín hiệu confidence, rồi hiệu chuẩn trên một tập riêng.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 7.5 Hiệu chuẩn (calibration)
 
@@ -600,6 +704,14 @@ Ngoài ECE nên theo dõi **Brier score** $\frac{1}{n}\sum_i(\hat p_i - y_i)^2$:
 1. **Temperature scaling** (Guo et al., 2017). Với logit $u = \log\frac{\hat p}{1 - \hat p}$, đặt $\hat p_T = \sigma(u / T)$, chọn $T > 0$ cực tiểu log-loss trên tập hiệu chuẩn. $T > 1$ làm "mềm" xác suất, sửa quá tự tin; chỉ có một tham số nên không thay đổi thứ hạng. Ví dụ $\hat p = 0{,}95$ → $u = \ln 19 \approx 2{,}944$; với $T = 1{,}8$: $u/T \approx 1{,}636$ → $\hat p_T \approx 0{,}837$.
 2. **Platt scaling.** $\hat p' = \sigma(a u + b)$ với hai tham số; xử lý được cả lệch (bias) chứ không chỉ độ "nhọn". Ví dụ $a = 0{,}6$, $b = -0{,}2$: $0{,}6 \times 2{,}944 - 0{,}2 \approx 1{,}566$ → $\hat p' \approx 0{,}827$.
 3. **Isotonic regression.** Học một hàm đơn điệu không tham số từ $\hat p$ sang xác suất; linh hoạt nhất nhưng cần nhiều dữ liệu hơn (vài nghìn mẫu trở lên) và dễ overfit ở vùng ít mẫu.
+
+<!-- fig:reliability -->
+<figure markdown="span">
+  ![Trái: reliability diagram của bảng mục 7](assets/figures/10/reliability.light.svg#only-light){ loading=lazy }
+  ![Trái: reliability diagram của bảng mục 7](assets/figures/10/reliability.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.14 — Trái: reliability diagram của bảng mục 7.5 (vạch đỏ là độ lệch). Phải: temperature và Platt scaling với các tham số của ví dụ.</figcaption>
+</figure>
+<!-- /fig -->
 
 ```python
 import numpy as np
@@ -668,6 +780,14 @@ Với `how_to` ($C_w = 8$):
 
 Vậy vùng quyết định là: $p < 0{,}33$ → ESCALATE (draft gần như vô ích), $0{,}33 \le p \le 0{,}923$ → DRAFT, $p > 0{,}923$ → SEND. Bài học: **khi có lựa chọn DRAFT rẻ, ngưỡng tự gửi tăng lên** (từ 0,8125 lên 0,923), vì so sánh giờ đây là với một phương án thay thế rẻ hơn nhiều so với "chuyển người từ đầu".
 
+<!-- fig:three-action-cost -->
+<figure markdown="span">
+  ![Trái: chi phí kỳ vọng của ba hành động cho howto và hai ngưỡng 0,333 / 0,923](assets/figures/10/three-action-cost.light.svg#only-light){ loading=lazy }
+  ![Trái: chi phí kỳ vọng của ba hành động cho howto và hai ngưỡng 0,333 / 0,923](assets/figures/10/three-action-cost.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.15 — Trái: chi phí kỳ vọng của ba hành động cho how_to và hai ngưỡng 0,333 / 0,923. Phải: ngưỡng SEND theo intent của bảng mục 7.6.</figcaption>
+</figure>
+<!-- /fig -->
+
 ```mermaid
 flowchart LR
     P["p̂ đã hiệu chuẩn"] --> A{"p̂ < 0,33?"}
@@ -711,6 +831,14 @@ Cách làm này là phiên bản đơn giản của các phương pháp có bả
 
 Hệ quả quan trọng: ở intent có ít ticket, cận trên luôn rộng, nên coverage hợp lệ gần như bằng 0 dù model tốt. Điều đó **đúng về mặt quản trị rủi ro**: chưa có đủ bằng chứng thì chưa được tự động hóa. Để mở khóa, phải tích lũy thêm dữ liệu ở giai đoạn DRAFT.
 
+<!-- fig:risk-coverage -->
+<figure markdown="span">
+  ![Trái: đường risk–coverage của ví dụ 10 ticket](assets/figures/10/risk-coverage.light.svg#only-light){ loading=lazy }
+  ![Trái: đường risk–coverage của ví dụ 10 ticket](assets/figures/10/risk-coverage.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.16 — Trái: đường risk–coverage của ví dụ 10 ticket. Phải: quy trình chọn ngưỡng theo ràng buộc rủi ro.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 7.8 Giám sát quyết định trên production
 
 Sau khi bật tự gửi, theo dõi hằng ngày theo từng intent × ngôn ngữ:
@@ -746,6 +874,14 @@ Nên chia thành các mức để báo cáo và làm nhãn:
 
 Khoảng cách chuỗi không phân biệt được "sửa một con số chính sách" (nghiêm trọng) và "đổi 'Kính gửi' thành 'Chào'" (vô hại). Cách bổ sung: cho judge phân loại **loại chỉnh sửa** (sửa sự thật, thêm thông tin thiếu, bỏ thông tin sai, chỉnh văn phong), và ưu tiên các chỉnh sửa loại "sửa sự thật" khi thêm vào golden set.
 
+<!-- fig:ned-levels -->
+<figure markdown="span">
+  ![Các mức NED dùng làm nhãn cho mô hình confidence, kèm ví dụ của mục 8](assets/figures/10/ned-levels.light.svg#only-light){ loading=lazy }
+  ![Các mức NED dùng làm nhãn cho mô hình confidence, kèm ví dụ của mục 8](assets/figures/10/ned-levels.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.17 — Các mức NED dùng làm nhãn cho mô hình confidence, kèm ví dụ của mục 8.1.</figcaption>
+</figure>
+<!-- /fig -->
+
 ### 8.2 KPI chăm sóc khách hàng
 
 | KPI | Định nghĩa | Kỳ vọng khi AI hoạt động tốt |
@@ -775,6 +911,14 @@ $$
 Muốn phát hiện CSAT giảm từ 0,85 xuống 0,82 ($\delta = 0{,}03$): $(1{,}96 + 0{,}84)^2 = 7{,}84$; $0{,}85 \times 0{,}15 + 0{,}82 \times 0{,}18 = 0{,}2751$; vậy $n \approx 7{,}84 \times 0{,}2751 / 0{,}0009 \approx 2.400$ **phản hồi CSAT** mỗi nhóm. Nếu chỉ khoảng 20% khách trả lời khảo sát, cần ~12.000 ticket mỗi nhóm, tức ~24.000 ticket — khoảng 16 ngày với toàn bộ 1.500 ticket/ngày, và lâu hơn nhiều nếu chỉ một intent tham gia.
 
 Kết luận thực tế: **CSAT là thước đo chậm và nhiễu**. Dùng nó làm guardrail dài hạn và kiểm định **không thua kém** (non-inferiority: chứng minh CSAT không giảm quá một biên cho trước), còn các quyết định hằng tuần dựa vào thước đo nhanh hơn: tỷ lệ reopen, mẫu kiểm tra của người, NED.
+
+<!-- fig:ab-sample-size -->
+<figure markdown="span">
+  ![Cỡ mẫu cần để phát hiện CSAT giảm δ (α = 5% hai phía, power 80%); điểm đánh dấu là ví dụ δ = 0,03](assets/figures/10/ab-sample-size.light.svg#only-light){ loading=lazy }
+  ![Cỡ mẫu cần để phát hiện CSAT giảm δ (α = 5% hai phía, power 80%); điểm đánh dấu là ví dụ δ = 0,03](assets/figures/10/ab-sample-size.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.18 — Cỡ mẫu cần để phát hiện CSAT giảm δ (α = 5% hai phía, power 80%); điểm đánh dấu là ví dụ δ = 0,03.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 8.4 Vòng phản hồi
 
@@ -818,6 +962,14 @@ Thành phần:
 | Chi phí/độ trễ | Token trung bình hoặc p95 thời gian tăng > 20% | Giữ ngân sách (Module 11) |
 
 Nguyên tắc: gate an toàn dùng **ngưỡng tuyệt đối**; gate chất lượng dùng **so sánh có kiểm định** với baseline để không chặn merge vì nhiễu.
+
+<!-- fig:eval-gates -->
+<figure markdown="span">
+  ![Hai loại gate trong CI theo bảng mục 9](assets/figures/10/eval-gates.light.svg#only-light){ loading=lazy }
+  ![Hai loại gate trong CI theo bảng mục 9](assets/figures/10/eval-gates.dark.svg#only-dark){ loading=lazy }
+  <figcaption>Hình 10.19 — Hai loại gate trong CI theo bảng mục 9.2.</figcaption>
+</figure>
+<!-- /fig -->
 
 ### 9.3 Khung mã
 
